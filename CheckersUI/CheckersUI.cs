@@ -3,16 +3,22 @@ using System.Drawing;
 using System.ComponentModel;
 using System.Windows.Forms;
 
+internal class ResFinder
+{}
+
 namespace Uberware.Gaming.Checkers.UI
 {
-	[Designer(typeof(CheckersDesigner))]
+  [ToolboxItem(true)]
+  [ToolboxBitmap(typeof(ResFinder), "Uberware.Gaming.Checkers.UI.Images.ToolboxBitmap.png")]
+  [Designer(typeof(CheckersDesigner))]
   public class CheckersUI : System.Windows.Forms.UserControl
-	{
+  {
     
-    public static readonly int SquareSize = 32;
-    public static readonly int BoardSize = SquareSize*CheckersGame.SquareCount;
+    public static readonly Size SquareSize = new Size(32, 32);
+    public static readonly Size BoardPixelSize = new Size(SquareSize.Width*CheckersGame.BoardSize.Width, SquareSize.Height*CheckersGame.BoardSize.Height);
     
-    #region Class Variables
+    public event EventHandler GameStarted;
+    public event EventHandler GameStopped;
     
     private CheckersGame game = new CheckersGame();
     private BorderStyle borderStyle = BorderStyle.Fixed3D;
@@ -20,18 +26,14 @@ namespace Uberware.Gaming.Checkers.UI
     private Color boardBackColor = Color.DarkSeaGreen;
     private Color boardForeColor = Color.OldLace;
     private Color boardGridColor = Color.Gray;
-    
-    /// <summary> Required designer variable. </summary>
-		private System.ComponentModel.Container components = null;
-    
-    #endregion
+    private bool usePieceImages = true;
     
     #region Class Construction
     
-		public CheckersUI ()
-		{
-			// This call is required by the Windows.Forms Form Designer.
-			InitializeComponent();
+    public CheckersUI ()
+    {
+      // This call is required by the Windows.Forms Form Designer.
+      InitializeComponent();
       SetStyle(ControlStyles.UserPaint, true);
       SetStyle(ControlStyles.DoubleBuffer, true);
       SetStyle(ControlStyles.FixedWidth, false);
@@ -41,26 +43,13 @@ namespace Uberware.Gaming.Checkers.UI
     }
     
 		#region Component Designer generated code
-    
-    /// <summary> Clean up any resources being used. </summary>
-    protected override void Dispose( bool disposing )
-    {
-      if( disposing )
-      {
-        if(components != null)
-        {
-          components.Dispose();
-        }
-      }
-      base.Dispose( disposing );
-    }
 		
     /// <summary> 
-		/// Required method for Designer support - do not modify 
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+    /// Required method for Designer support - do not modify 
+    /// the contents of this method with the code editor.
+    /// </summary>
+    private void InitializeComponent()
+    {
       // 
       // CheckersUI
       // 
@@ -76,17 +65,6 @@ namespace Uberware.Gaming.Checkers.UI
     #endregion
     
     #region Class Properties
-    
-    public event EventHandler GameStarted
-    {
-      add { game.Started += value; }
-      remove { game.Started -= value; }
-    }
-    public event EventHandler GameStopped
-    {
-      add { game.Started += value; }
-      remove { game.Started -= value; }
-    }
     
     [DefaultValue(BorderStyle.Fixed3D)]
     public BorderStyle BorderStyle
@@ -140,13 +118,20 @@ namespace Uberware.Gaming.Checkers.UI
       set { boardGridColor = value; this.Refresh(); }
     }
     
+    [DefaultValue(true)]
+    public bool UsePieceImages
+    {
+      get { return usePieceImages; }
+      set { usePieceImages = value; this.Refresh(); }
+    }
+    
     #endregion
     
     
     protected override void SetBoundsCore (int x, int y, int width, int height, BoundsSpecified specified)
     {
       int borderSize = (( borderStyle == BorderStyle.Fixed3D )?( 2 ):( (( borderStyle == BorderStyle.FixedSingle )?( 1 ):( 0 )) ));
-      base.SetBoundsCore(x, y, BoardSize+2+(borderSize*2)+(boardMargin*2), BoardSize+2+(borderSize*2)+(boardMargin*2), specified);
+      base.SetBoundsCore(x, y, BoardPixelSize.Width+2+(borderSize*2)+(boardMargin*2), BoardPixelSize.Height+2+(borderSize*2)+(boardMargin*2), specified);
     }
     
     private void CheckersUI_Paint (object sender, System.Windows.Forms.PaintEventArgs e)
@@ -184,27 +169,42 @@ namespace Uberware.Gaming.Checkers.UI
         borderSize = 1;
       }
       
-      e.Graphics.DrawRectangle(penGridColor, boardMargin+borderSize, boardMargin+borderSize, BoardSize+1, BoardSize+1);
-      e.Graphics.FillRectangle(brushBackColor, boardMargin+borderSize+1, boardMargin+borderSize+1, BoardSize, BoardSize);
+      e.Graphics.DrawRectangle(penGridColor, boardMargin+borderSize, boardMargin+borderSize, BoardPixelSize.Width+1, BoardPixelSize.Height+1);
+      e.Graphics.FillRectangle(brushBackColor, boardMargin+borderSize+1, boardMargin+borderSize+1, BoardPixelSize.Width, BoardPixelSize.Height);
       
-      for (int y = 0; y < CheckersGame.SquareCount; y++)
+      for (int y = 0; y < CheckersGame.BoardSize.Height; y++)
       {
-        for (int x = 0; x < CheckersGame.SquareCount; x++)
+        for (int x = 0; x < CheckersGame.BoardSize.Width; x++)
         {
           if ((x % 2) == (y % 2)) continue;
-          e.Graphics.FillRectangle(brushForeColor, x*SquareSize + boardMargin+borderSize+1, y*SquareSize + boardMargin+borderSize+1, SquareSize, SquareSize);
-          CheckersPiece piece = game.GetPiece(new Point(x, y));
+          e.Graphics.FillRectangle(brushForeColor, x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, SquareSize.Width, SquareSize.Height);
+          CheckersPiece piece = game.Board[x, y];
           if (piece != null)
           {
             if (piece.Player == 1)
             {
+              if (usePieceImages)
+              {}
+              else
+              {
+                e.Graphics.FillEllipse(Brushes.DarkRed, x*SquareSize.Width + boardMargin+borderSize+2, y*SquareSize.Height + boardMargin+borderSize+2, SquareSize.Width-3, SquareSize.Height-3);
+                e.Graphics.DrawEllipse(Pens.Black, x*SquareSize.Width + boardMargin+borderSize+2, y*SquareSize.Height + boardMargin+borderSize+2, SquareSize.Width-3, SquareSize.Height-3);
+              }
               // !!!!!
-              e.Graphics.FillEllipse(Brushes.DarkRed, x*SquareSize + boardMargin+borderSize+1, y*SquareSize + boardMargin+borderSize+1, SquareSize-1, SquareSize-1);
+              //e.Graphics.FillEllipse(Brushes.LightGray, x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, SquareSize.Width-1, SquareSize.Height-1);
             }
             else if (piece.Player == 2)
             {
+              if (usePieceImages)
+              {}
+              else
+              {
+                e.Graphics.FillEllipse(Brushes.DarkGray, x*SquareSize.Width + boardMargin+borderSize+2, y*SquareSize.Height + boardMargin+borderSize+2, SquareSize.Width-3, SquareSize.Height-3);
+                e.Graphics.DrawEllipse(Pens.Black, x*SquareSize.Width + boardMargin+borderSize+2, y*SquareSize.Height + boardMargin+borderSize+2, SquareSize.Width-3, SquareSize.Height-3);
+              }
               // !!!!!
-              e.Graphics.FillEllipse(Brushes.DarkRed, x*SquareSize + boardMargin+borderSize+1, y*SquareSize + boardMargin+borderSize+1, SquareSize-1, SquareSize-1);
+              //
+              //e.Graphics.DrawImageUnscaled(imlPieces.Images[0], x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1);
             }
           }
         }
@@ -216,10 +216,18 @@ namespace Uberware.Gaming.Checkers.UI
     }
     
     public void Play ()
-    { game.Play(); }
+    {
+      game.Play();
+      Refresh();
+      if (GameStarted != null) GameStarted(this, EventArgs.Empty);
+    }
     
     public void Stop ()
-    { game.Stop(); }
+    {
+      game.Stop();
+      Refresh();
+      if (GameStopped != null) GameStopped(this, EventArgs.Empty);
+    }
     
   }
 }

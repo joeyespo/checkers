@@ -30,5 +30,8 @@ namespace Uberware.Gaming.Checkers
       set { InnerList[index] = value; }
     }
     
+    public CheckersPiece [] ToArray ()
+    { return (CheckersPiece [])InnerList.ToArray(typeof(CheckersPiece)); }
+    
   }
 }

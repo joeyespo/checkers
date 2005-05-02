@@ -1,21 +1,33 @@
 Microsoft Visual Studio Solution File, Format Version 7.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checkers", "Checkers\Checkers.csproj", "{48223EB6-9BC8-4FB6-8B25-E46CFFA67860}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Checkers", "Checkers\Checkers.csproj", "{B7585220-DD42-48B2-B68E-DBB2AC645642}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckersLib", "CheckersLib\CheckersLib.csproj", "{EF66778A-5067-49AA-91AC-70D048F482F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckersUI", "CheckersUI\CheckersUI.csproj", "{66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}"
 EndProject
 Global
-	GlobalSection(SolutionConfiguration) = preSolution
-		ConfigName.0 = Debug
-		ConfigName.1 = Release
-	EndGlobalSection
-	GlobalSection(ProjectDependencies) = postSolution
-	EndGlobalSection
-	GlobalSection(ProjectConfiguration) = postSolution
-		{48223EB6-9BC8-4FB6-8B25-E46CFFA67860}.Debug.ActiveCfg = Debug|.NET
-		{48223EB6-9BC8-4FB6-8B25-E46CFFA67860}.Debug.Build.0 = Debug|.NET
-		{48223EB6-9BC8-4FB6-8B25-E46CFFA67860}.Release.ActiveCfg = Release|.NET
-		{48223EB6-9BC8-4FB6-8B25-E46CFFA67860}.Release.Build.0 = Release|.NET
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-	EndGlobalSection
-	GlobalSection(ExtensibilityAddIns) = postSolution
-	EndGlobalSection
+    GlobalSection(SolutionConfiguration) = preSolution
+        ConfigName.0 = Debug
+        ConfigName.1 = Release
+    EndGlobalSection
+    GlobalSection(ProjectDependencies) = postSolution
+    EndGlobalSection
+    GlobalSection(ProjectConfiguration) = postSolution
+        {B7585220-DD42-48B2-B68E-DBB2AC645642}.Debug.ActiveCfg = Debug|.NET
+        {B7585220-DD42-48B2-B68E-DBB2AC645642}.Debug.Build.0 = Debug|.NET
+        {B7585220-DD42-48B2-B68E-DBB2AC645642}.Release.ActiveCfg = Release|.NET
+        {B7585220-DD42-48B2-B68E-DBB2AC645642}.Release.Build.0 = Release|.NET
+        {EF66778A-5067-49AA-91AC-70D048F482F8}.Debug.ActiveCfg = Debug|.NET
+        {EF66778A-5067-49AA-91AC-70D048F482F8}.Debug.Build.0 = Debug|.NET
+        {EF66778A-5067-49AA-91AC-70D048F482F8}.Release.ActiveCfg = Release|.NET
+        {EF66778A-5067-49AA-91AC-70D048F482F8}.Release.Build.0 = Release|.NET
+        {66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}.Debug.ActiveCfg = Debug|.NET
+        {66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}.Debug.Build.0 = Debug|.NET
+        {66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}.Release.ActiveCfg = Release|.NET
+        {66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}.Release.Build.0 = Release|.NET
+    EndGlobalSection
+    GlobalSection(ExtensibilityGlobals) = postSolution
+    EndGlobalSection
+    GlobalSection(ExtensibilityAddIns) = postSolution
+    EndGlobalSection
 EndGlobal

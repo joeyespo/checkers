@@ -3,20 +3,20 @@
         ProjectType = "Local"
         ProductVersion = "7.0.9466"
         SchemaVersion = "1.0"
-        ProjectGuid = "{B7585220-DD42-48B2-B68E-DBB2AC645642}"
+        ProjectGuid = "{EF66778A-5067-49AA-91AC-70D048F482F8}"
     >
         <Build>
             <Settings
-                ApplicationIcon = "App.ico"
+                ApplicationIcon = ""
                 AssemblyKeyContainerName = ""
-                AssemblyName = "Checkers"
+                AssemblyName = "Uberware.Gaming.Checkers"
                 AssemblyOriginatorKeyFile = ""
                 DefaultClientScript = "JScript"
                 DefaultHTMLPageLayout = "Grid"
                 DefaultTargetSchema = "IE50"
                 DelaySign = "false"
-                OutputType = "WinExe"
-                RootNamespace = "Checkers"
+                OutputType = "Library"
+                RootNamespace = "Uberware.Gaming.Checkers"
                 StartupObject = ""
             >
                 <Config
@@ -72,63 +72,29 @@
                     AssemblyName = "System.Drawing"
                     HintPath = "..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Drawing.dll"
                 />
-                <Reference
-                    Name = "System.Windows.Forms"
-                    AssemblyName = "System.Windows.Forms"
-                    HintPath = "..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Windows.Forms.dll"
-                />
-                <Reference
-                    Name = "System.Design"
-                    AssemblyName = "System.Design"
-                    HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Design.dll"
-                />
-                <Reference
-                    Name = "System.XML"
-                    AssemblyName = "System.Xml"
-                    HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.XML.dll"
-                />
-                <Reference
-                    Name = "CheckersUI"
-                    Project = "{66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
-                <Reference
-                    Name = "CheckersLib"
-                    Project = "{EF66778A-5067-49AA-91AC-70D048F482F8}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
             </References>
         </Build>
         <Files>
             <Include>
-                <File
-                    RelPath = "App.ico"
-                    BuildAction = "Content"
-                />
                 <File
                     RelPath = "AssemblyInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmAbout.cs"
-                    SubType = "Form"
+                    RelPath = "CheckersGame.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmAbout.resx"
-                    DependentUpon = "frmAbout.cs"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "frmMain.cs"
-                    SubType = "Form"
+                    RelPath = "CheckersPiece.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmMain.resx"
-                    DependentUpon = "frmMain.cs"
-                    BuildAction = "EmbeddedResource"
+                    RelPath = "CheckersPieceCollection.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
                 />
             </Include>
         </Files>

@@ -3,20 +3,20 @@
         ProjectType = "Local"
         ProductVersion = "7.0.9466"
         SchemaVersion = "1.0"
-        ProjectGuid = "{B7585220-DD42-48B2-B68E-DBB2AC645642}"
+        ProjectGuid = "{66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}"
     >
         <Build>
             <Settings
-                ApplicationIcon = "App.ico"
+                ApplicationIcon = ""
                 AssemblyKeyContainerName = ""
-                AssemblyName = "Checkers"
+                AssemblyName = "Uberware.Gaming.Checkers.UI"
                 AssemblyOriginatorKeyFile = ""
                 DefaultClientScript = "JScript"
                 DefaultHTMLPageLayout = "Grid"
                 DefaultTargetSchema = "IE50"
                 DelaySign = "false"
-                OutputType = "WinExe"
-                RootNamespace = "Checkers"
+                OutputType = "Library"
+                RootNamespace = "Uberware.Gaming.Checkers.UI"
                 StartupObject = ""
             >
                 <Config
@@ -78,6 +78,11 @@
                     HintPath = "..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Windows.Forms.dll"
                 />
                 <Reference
+                    Name = "CheckersLib"
+                    Project = "{EF66778A-5067-49AA-91AC-70D048F482F8}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
+                <Reference
                     Name = "System.Design"
                     AssemblyName = "System.Design"
                     HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Design.dll"
@@ -87,47 +92,48 @@
                     AssemblyName = "System.Xml"
                     HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.XML.dll"
                 />
-                <Reference
-                    Name = "CheckersUI"
-                    Project = "{66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
-                <Reference
-                    Name = "CheckersLib"
-                    Project = "{EF66778A-5067-49AA-91AC-70D048F482F8}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
             </References>
         </Build>
         <Files>
             <Include>
-                <File
-                    RelPath = "App.ico"
-                    BuildAction = "Content"
-                />
                 <File
                     RelPath = "AssemblyInfo.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmAbout.cs"
-                    SubType = "Form"
+                    RelPath = "CheckersDesigner.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmAbout.resx"
-                    DependentUpon = "frmAbout.cs"
+                    RelPath = "CheckersUI.cs"
+                    SubType = "UserControl"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "CheckersUI.resx"
+                    DependentUpon = "CheckersUI.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "frmMain.cs"
-                    SubType = "Form"
-                    BuildAction = "Compile"
+                    RelPath = "Images\King (Black).png"
+                    BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "frmMain.resx"
-                    DependentUpon = "frmMain.cs"
+                    RelPath = "Images\King (Red).png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Images\Pawn (Black).png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Images\Pawn (Red).png"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "Images\ToolboxBitmap.png"
                     BuildAction = "EmbeddedResource"
                 />
             </Include>

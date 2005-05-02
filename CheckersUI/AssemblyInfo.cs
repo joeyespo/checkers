@@ -6,14 +6,14 @@ using System.Runtime.CompilerServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("Checkers")]
-[assembly: AssemblyDescription("Play checkers against a computer or another player, locally or remotely over a network.")]
+[assembly: AssemblyTitle("Checkers UI")]
+[assembly: AssemblyDescription("The user interface to the Checkers Gaming Library for customizable checkers games.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Uber-ware")]
-[assembly: AssemblyProduct("Checkers")]
+[assembly: AssemblyProduct("Checkers UI")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+[assembly: AssemblyCulture("")]		
 
 //
 // Version information for an assembly consists of the following four values:

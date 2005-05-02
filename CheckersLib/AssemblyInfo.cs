@@ -6,11 +6,11 @@ using System.Runtime.CompilerServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 //
-[assembly: AssemblyTitle("Checkers")]
-[assembly: AssemblyDescription("Play checkers against a computer or another player, locally or remotely over a network.")]
+[assembly: AssemblyTitle("Checkers Gaming Library")]
+[assembly: AssemblyDescription("Everything you need to design your own checkers game.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Uber-ware")]
-[assembly: AssemblyProduct("Checkers")]
+[assembly: AssemblyProduct("Checkers Gaming Library")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
