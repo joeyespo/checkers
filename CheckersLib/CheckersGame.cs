@@ -10,6 +10,7 @@ namespace Uberware.Gaming.Checkers
     public static readonly Size BoardSize = new Size(8, 8);
     
     private bool isPlaying;
+    private int firstMove;
     private int turn;
     private int winner;
     private CheckersPieceCollection pieces;
@@ -23,6 +24,7 @@ namespace Uberware.Gaming.Checkers
       this.optionalJumping = optionalJumping;
       pieces = new CheckersPieceCollection();
       board = new CheckersPiece[BoardSize.Width, BoardSize.Height];
+      firstMove = 1;
       Stop();
     }
     
@@ -41,6 +43,12 @@ namespace Uberware.Gaming.Checkers
     
     public CheckersPiece [,] Board
     { get { return board; } }
+    
+    public int FirstMove
+    {
+      get { return firstMove; }
+      set { if ((value < 1) || (value > 2)) throw new ArgumentOutOfRangeException("value", value, "First move must refer to a player number."); firstMove = value; }
+    }
     
     
     /// <summary>Begins the checkers game.</summary>
@@ -70,16 +78,19 @@ namespace Uberware.Gaming.Checkers
           pieces.Add(piece);
         }
       }
+      
+      // Set player's turn
+      turn = firstMove;
     }
     
     /// <summary>Stops a decided game or forces a game-in-progress to stop prematurely with no winner.</summary>
     public void Stop ()
     {
+      isPlaying = false;
       pieces.Clear();
       for (int y = 0; y < BoardSize.Height; y++)
         for (int x = 0; x < BoardSize.Width; x++)
           board[x, y] = null;
-      isPlaying = false;
       winner = 0;
       turn = 0;
     }
@@ -105,8 +116,7 @@ namespace Uberware.Gaming.Checkers
       if (!isPlaying) throw new InvalidOperationException("Operation requires game to be playing.");
       if (piece == null) throw new ArgumentNullException("piece");
       if (!pieces.Contains(piece)) throw new ArgumentException("Argument 'piece' must be a piece in play to the current game.");
-      if (piece.Player == turn) return false;
-      return true;
+      return (piece.Player == turn);
     }
     
     /// <summary>Returns whether or not the checkers piece can be moved to the specified location this turn.</summary>
@@ -116,8 +126,31 @@ namespace Uberware.Gaming.Checkers
     public bool IsValidMove (CheckersPiece piece, Point location)
     {
       if (!isPlaying) throw new InvalidOperationException("Operation requires game to be playing.");
+      // Failsafe .. be sure piece is valid
+      if (piece == null) throw new ArgumentNullException("piece");
+      if (!pieces.Contains(piece)) throw new ArgumentException("Argument 'piece' must be a piece in play to the current game.");
+      // Failsafe .. be sure location is valid
+      if ((location.X < 0) || (location.X >= BoardSize.Width) || (location.Y < 0) || (location.Y >= BoardSize.Height))
+        throw new ArgumentOutOfRangeException("location", location, "Argument 'location' must be within the range of the board.");
+      // Be sure piece can be moved
+      // !!!!! ?? if (!CanMovePiece(piece)) return null;
       // Return whether or not move is valid
-      return (CalculateMove(piece, location) != null);
+      return (CalculateMove(piece, location) != null);  // !!!!!
+    }
+    
+    /// <summary>Returns all pieces belonging to the specified player.</summary>
+    /// <param name="player">The player index to get the list of pieces.</param>
+    /// <returns>A list of pieces that can be moved this turn.</returns>
+    public CheckersPiece [] EnumPlayerPieces (int player)
+    {
+      if (!isPlaying) throw new InvalidOperationException("Operation requires game to be playing.");
+      ArrayList playerPieces = new ArrayList();
+      foreach (CheckersPiece piece in pieces)
+      {
+        if (piece.Player != turn) continue;
+        playerPieces.Add(piece);
+      }
+      return (CheckersPiece [])playerPieces.ToArray(typeof(CheckersPiece));
     }
     
     /// <summary>Returns all movable pieces for this turn.</summary>
@@ -125,20 +158,26 @@ namespace Uberware.Gaming.Checkers
     public CheckersPiece [] EnumMovablePieces ()
     {
       if (!isPlaying) throw new InvalidOperationException("Operation requires game to be playing.");
-      // !!!!!
-      return null;
+      ArrayList movablePieces = new ArrayList();
+      foreach (CheckersPiece piece in pieces)
+      {
+        if (piece.Player != turn) continue;
+        if (EnumMoves(piece).Length == 0) continue;
+        movablePieces.Add(piece);
+      }
+      return (CheckersPiece [])movablePieces.ToArray(typeof(CheckersPiece));
     }
     
     /// <summary>Returns all valid moves relative to the passed piece.</summary>
     /// <param name="piece">The checkers piece whose moves are to be enumerated.</param>
     /// <returns>A list of pieces that can be moved this turn.</returns>
-    public CheckersPiece [] EnumMoves (CheckersPiece piece)
+    public Point [] EnumMoves (CheckersPiece piece)
     {
       if (!isPlaying) throw new InvalidOperationException("Operation requires game to be playing.");
       if (piece == null) throw new ArgumentNullException("piece");
       if (!pieces.Contains(piece)) throw new ArgumentException("Argument 'piece' must be a piece in play to the current game.");
-      // !!!!!
-      return null;
+      CheckersPiece [] jumped;
+      return EnumMoves(piece, out jumped);
     }
     
     /// <summary>Returns whether or not the checkers piece can be moved to the specified location this turn.</summary>
@@ -148,8 +187,16 @@ namespace Uberware.Gaming.Checkers
     public bool MovePiece (CheckersPiece piece, Point location)
     {
       if (!isPlaying) throw new InvalidOperationException("Operation requires game to be playing.");
+      // Failsafe .. be sure piece is valid
+      if (piece == null) throw new ArgumentNullException("piece");
+      if (!pieces.Contains(piece)) throw new ArgumentException("Argument 'piece' must be a piece in play to the current game.");
+      // Failsafe .. be sure location is valid
+      if ((location.X < 0) || (location.X >= BoardSize.Width) || (location.Y < 0) || (location.Y >= BoardSize.Height))
+        throw new ArgumentOutOfRangeException("location", location, "Argument 'location' must be within the range of the board.");
+      // Be sure piece can be moved
+      //if (!CanMovePiece(piece)) return null; !!!!! ??
       // Jump all jumped pieces
-      CheckersPiece [] jumped = CalculateMove(piece, location);
+      CheckersPiece [] jumped = CalculateMove(piece, location); // !!!!!
       if (jumped == null) return false;     // Not a valid move
       foreach (CheckersPiece jumpedPiece in jumped)
       {
@@ -182,6 +229,68 @@ namespace Uberware.Gaming.Checkers
       isPlaying = false;
     }
     
+    private Point [] EnumMoves (CheckersPiece piece)
+    {
+      // Be sure piece can be moved
+      if (!CanMovePiece(piece)) return new Point [0];
+      return EnumMovesCore(board, piece.Location, false);
+    }
+    private Point [] EnumMovesCore (CheckersPiece [,] board, Point curLocation, bool hasJumped)
+    {
+      // !!!!! optionalJumping
+      // Clone the board to avoid algorithm loops
+      board = (CheckersPiece [,])board.Clone();
+      // Check for jumps
+      ArrayList jumpsNW = new ArrayList(), jumpsNE = new ArrayList(), jumpsSW = new ArrayList(), jumpsSE = new ArrayList();
+      Point [] temp;
+      if (InBounds(curLocation.X-1, curLocation.Y-1) && (board[curLocation.X-1, curLocation.Y-1] != null))
+        if (InBounds(curLocation.X-2, curLocation.Y-2) && (board[curLocation.X-2, curLocation.Y-2] == null))
+        {
+          board[curLocation.X-1, curLocation.Y-1] = null;
+          temp = EnumMovesCore(board, new Point(curLocation.X-2, curLocation.Y-2), out subJumped, true);
+        }
+      if (InBounds(curLocation.X+1, curLocation.Y-1) && (board[curLocation.X+1, curLocation.Y-1] != null))
+        if (InBounds(curLocation.X+2, curLocation.Y-2) && (board[curLocation.X+2, curLocation.Y-2] == null))
+        {
+          board[curLocation.X+1, curLocation.Y-1] = null;
+          temp = EnumMovesCore(board, new Point(curLocation.X+2, curLocation.Y-2), out jumped, true);
+          if (temp != null) { jumpsNE.Add(board[curLocation.X+1, curLocation.Y-1]); jumpsNE.AddRange(temp); }
+        }
+      if (InBounds(curLocation.X-1, curLocation.Y+1) && (board[curLocation.X-1, curLocation.Y+1] != null))
+        if (InBounds(curLocation.X-2, curLocation.Y+2) && (board[curLocation.X-2, curLocation.Y+2] == null))
+        {
+          board[curLocation.X-1, curLocation.Y+1] = null;
+          temp = EnumMovesCore(board, new Point(curLocation.X-2, curLocation.Y+2), out jumped, true);
+          if (temp != null) { jumpsSW.Add(board[curLocation.X-1, curLocation.Y+1]); jumpsSW.AddRange(temp); }
+        }
+      if (InBounds(curLocation.X+1, curLocation.Y+1) && (board[curLocation.X+1, curLocation.Y+1] != null))
+        if (InBounds(curLocation.X+2, curLocation.Y+2) && (board[curLocation.X+2, curLocation.Y+2] == null))
+        {
+          board[curLocation.X+1, curLocation.Y+1] = null;
+          temp = EnumMovesCore(board, new Point(curLocation.X+2, curLocation.Y+2), out jumped, true);
+          if (temp != null) { jumpsSE.Add(board[curLocation.X+1, curLocation.Y+1]); jumpsSE.AddRange(temp); }
+        }
+      if ((jumpsNW.Count > 0) && (jumpsNW.Count > jumpsNE.Count) && (jumpsNW.Count > jumpsSW.Count) && (jumpsNW.Count > jumpsSE.Count)) return (CheckersPiece [])jumpsNW.ToArray(typeof(CheckersPiece));
+      if ((jumpsNE.Count > 0) && (jumpsNE.Count > jumpsNW.Count) && (jumpsNE.Count > jumpsSW.Count) && (jumpsNE.Count > jumpsSE.Count)) return (CheckersPiece [])jumpsNE.ToArray(typeof(CheckersPiece));
+      if ((jumpsSW.Count > 0) && (jumpsSW.Count > jumpsNW.Count) && (jumpsSW.Count > jumpsNE.Count) && (jumpsSW.Count > jumpsSE.Count)) return (CheckersPiece [])jumpsSW.ToArray(typeof(CheckersPiece));
+      if ((jumpsSE.Count > 0) && (jumpsSE.Count > jumpsNW.Count) && (jumpsSE.Count > jumpsNE.Count) && (jumpsSE.Count > jumpsSW.Count)) return (CheckersPiece [])jumpsSE.ToArray(typeof(CheckersPiece));
+      // Check for single moves (make sure single move leads to destination square)
+      if (!hasJumped)
+      {
+        if (InBounds(curLocation.X-1, curLocation.Y-1) && (board[curLocation.X-1, curLocation.Y-1] == null))
+          return (( (destLocation.X == curLocation.X-1) && (destLocation.Y == curLocation.Y-1) )?( new CheckersPiece [0] ):( null ));
+        if (InBounds(curLocation.X+1, curLocation.Y-1) && (board[curLocation.X+1, curLocation.Y-1] == null))
+          return (( (destLocation.X == curLocation.X+1) && (destLocation.Y == curLocation.Y-1) )?( new CheckersPiece [0] ):( null ));
+        if (InBounds(curLocation.X-1, curLocation.Y+1) && (board[curLocation.X-1, curLocation.Y+1] == null))
+          return (( (destLocation.X == curLocation.X-1) && (destLocation.Y == curLocation.Y+1) )?( new CheckersPiece [0] ):( null ));
+        if (InBounds(curLocation.X+1, curLocation.Y+1) && (board[curLocation.X+1, curLocation.Y+1] == null))
+          return (( (destLocation.X == curLocation.X+1) && (destLocation.Y == curLocation.Y+1) )?( new CheckersPiece [0] ):( null ));
+      }
+      // No success
+      return null;
+    }
+    
+    /*
     // Failed if returns null
     private CheckersPiece [] CalculateMove (CheckersPiece piece, Point location)
     {
@@ -197,13 +306,12 @@ namespace Uberware.Gaming.Checkers
       // Make sure square is empty
       if (board[location.X, location.Y] != null) return null;
       CalculateMoveProc(board, piece.Location, location);
-      // !!!!!
-      //optionalJumping
       return null;
     }
     // Check from relative location (step)
     private CheckersPiece [] CalculateMoveProc (CheckersPiece [,] board, Point curLocation, Point destLocation)
     {
+      // !!!!! optionalJumping
       board = (CheckersPiece [,])board.Clone();
       // Check for jumps
       ArrayList jumpsNW = new ArrayList(), jumpsNE = new ArrayList(), jumpsSW = new ArrayList(), jumpsSE = new ArrayList();
@@ -248,5 +356,6 @@ namespace Uberware.Gaming.Checkers
       // No success
       return null;
     }
+    */
   }
 }

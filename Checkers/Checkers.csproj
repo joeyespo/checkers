@@ -83,11 +83,6 @@
                     HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Design.dll"
                 />
                 <Reference
-                    Name = "System.XML"
-                    AssemblyName = "System.Xml"
-                    HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.XML.dll"
-                />
-                <Reference
                     Name = "CheckersUI"
                     Project = "{66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
@@ -96,6 +91,16 @@
                     Name = "CheckersLib"
                     Project = "{EF66778A-5067-49AA-91AC-70D048F482F8}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
+                <Reference
+                    Name = "MozBar"
+                    AssemblyName = "MozBar"
+                    HintPath = "MozBar.dll"
+                />
+                <Reference
+                    Name = "System.XML"
+                    AssemblyName = "System.XML"
+                    HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.XML.dll"
                 />
             </References>
         </Build>
@@ -128,6 +133,36 @@
                 <File
                     RelPath = "frmMain.resx"
                     DependentUpon = "frmMain.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmNewGame.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmNewGame.resx"
+                    DependentUpon = "frmNewGame.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmPreferences.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmPreferences.resx"
+                    DependentUpon = "frmPreferences.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmShowGames.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmShowGames.resx"
+                    DependentUpon = "frmShowGames.cs"
                     BuildAction = "EmbeddedResource"
                 />
             </Include>

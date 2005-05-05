@@ -117,22 +117,6 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "Images\King (Black).png"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "Images\King (Red).png"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "Images\Pawn (Black).png"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
-                    RelPath = "Images\Pawn (Red).png"
-                    BuildAction = "EmbeddedResource"
-                />
-                <File
                     RelPath = "Images\ToolboxBitmap.png"
                     BuildAction = "EmbeddedResource"
                 />
