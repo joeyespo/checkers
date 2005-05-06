@@ -270,6 +270,9 @@
         +AEfAf8B/AEAAQMB/wHAAQEC/wQABf8BAAEPAf8BwAEBAv8EAAX/AeABfwX/GgAL
 </value>
   </data>
+  <data name="tabGame.Locked" type="System.Boolean, mscorlib, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </data>
   <data name="picImageSwap1P.Image" type="System.Drawing.Bitmap, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAEEAAAAICAYAAACmoJLhAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
@@ -722,6 +725,9 @@
   <data name="menuImage.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>585, 17</value>
   </data>
+  <data name="mozGameType.Locked" type="System.Boolean, mscorlib, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </data>
   <data name="dlgOpenImage.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>338, 17</value>
   </data>
@@ -736,7 +742,7 @@
         AAEAAAD/////AQAAAAAAAAAMAgAAAFpTeXN0ZW0uV2luZG93cy5Gb3JtcywgVmVyc2lvbj0xLjAuMzMw
         MC4wLCBDdWx0dXJlPW5ldXRyYWwsIFB1YmxpY0tleVRva2VuPWI3N2E1YzU2MTkzNGUwODkFAQAAACZT
         eXN0ZW0uV2luZG93cy5Gb3Jtcy5JbWFnZUxpc3RTdHJlYW1lcgEAAAAERGF0YQcCAgAAAAkDAAAADwMA
-        AAAcBQAAAk1TRnQBSQFMAwEBAAEEAQABBAEAASABAAEgAQAE/wEhAQAI/wFCAU0BNgcAATYDAAEoAwAB
+        AAAcBQAAAk1TRnQBSQFMAwEBAAEEAQABBAEAASABAAEgAQAE/wEhARAI/wFCAU0BNgcAATYDAAEoAwAB
         gAMAASADAAEBAQABIAYAAUD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8AUAABawKUAf8BawKUAf8B
         awKUAf8BawKUAf8BawKUAf8BawKUAf8BawKUAf8BawKUAf//AN0AAZwD/wGcA/8BnAP/AZwD/wGcA/8B
         nAP/AZwD/wGcA/8BnAP/AWsClAH//wDVAAGcA/8BnAP/AZwD/wGcA/8BnAP/AZwD/wGcA/8BnAP/AZwD
@@ -757,7 +763,7 @@
         AAP/AQAE/wwABP8MAAT/DAAE/wwABP8MAAT/DAAE/wwAAf8B8AEPAf8MAAH/AeABBwH/DAAB/wHAAQMB
         /wwAAf8BxwHjAf8MAAH/AcABAwH/DAAB/wHAAQMB/wwAAf8BwAEDAf8MAAH/AY8B4QH/DAAB/wEfAfAB
         /wwAAf4BPgF4AX8MAAH+AjwBfwwAAf4BOAEcAX8MAAH+AgABfwwAAf4CAAH/DAAB/wEIAZEB/wwAAf8B
-        +QGfAf8MAAH/AfgBHwH/DAAB/wH4AT8B/wwABP8MAAT/DAAE/wwABP8MAAT/DAAE/wwABP8MAAs=
+        +QGfAf8MAAH/AfgBHwH/DAAB/wH4AT8B/wwABP8MAAT/DAAE/wwABP8MAAT/DAAE/wwABP8iAAs=
 </value>
   </data>
   <data name="$this.Name">

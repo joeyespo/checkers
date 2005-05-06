@@ -51,6 +51,7 @@ namespace Checkers
     private System.Windows.Forms.PictureBox picTurn;
     private System.Windows.Forms.ImageList imlTurn;
     private System.ComponentModel.IContainer components;
+    private System.Windows.Forms.MenuItem menuGameEnd;
     private System.Windows.Forms.MenuItem menuHelpAbout;
     
     #endregion
@@ -77,6 +78,7 @@ namespace Checkers
       System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmMain));
       this.panGame = new System.Windows.Forms.Panel();
       this.panGameInfo = new System.Windows.Forms.Panel();
+      this.txtTimePassed = new System.Windows.Forms.TextBox();
       this.picTurn = new System.Windows.Forms.PictureBox();
       this.txtJumpsP1 = new System.Windows.Forms.TextBox();
       this.picPawnP1 = new System.Windows.Forms.PictureBox();
@@ -91,7 +93,6 @@ namespace Checkers
       this.lblPiecesP2 = new System.Windows.Forms.Label();
       this.txtJumpsP2 = new System.Windows.Forms.TextBox();
       this.lblTimePassed = new System.Windows.Forms.Label();
-      this.txtTimePassed = new System.Windows.Forms.TextBox();
       this.lblGameType = new System.Windows.Forms.Label();
       this.menuMain = new System.Windows.Forms.MainMenu();
       this.menuGame = new System.Windows.Forms.MenuItem();
@@ -114,6 +115,7 @@ namespace Checkers
       this.txtChat = new System.Windows.Forms.RichTextBox();
       this.CheckersUI = new Uberware.Gaming.Checkers.UI.CheckersUI();
       this.imlTurn = new System.Windows.Forms.ImageList(this.components);
+      this.menuGameEnd = new System.Windows.Forms.MenuItem();
       this.panGame.SuspendLayout();
       this.panGameInfo.SuspendLayout();
       this.panOnline.SuspendLayout();
@@ -157,6 +159,18 @@ namespace Checkers
       this.panGameInfo.Name = "panGameInfo";
       this.panGameInfo.Size = new System.Drawing.Size(120, 256);
       this.panGameInfo.TabIndex = 5;
+      this.panGameInfo.Visible = false;
+      // 
+      // txtTimePassed
+      // 
+      this.txtTimePassed.BorderStyle = System.Windows.Forms.BorderStyle.None;
+      this.txtTimePassed.Location = new System.Drawing.Point(72, 0);
+      this.txtTimePassed.Name = "txtTimePassed";
+      this.txtTimePassed.ReadOnly = true;
+      this.txtTimePassed.Size = new System.Drawing.Size(48, 13);
+      this.txtTimePassed.TabIndex = 2;
+      this.txtTimePassed.Text = "0:00";
+      this.txtTimePassed.WordWrap = false;
       // 
       // picTurn
       // 
@@ -291,17 +305,6 @@ namespace Checkers
       this.lblTimePassed.TabIndex = 3;
       this.lblTimePassed.Text = "Time Passed:";
       // 
-      // txtTimePassed
-      // 
-      this.txtTimePassed.BorderStyle = System.Windows.Forms.BorderStyle.None;
-      this.txtTimePassed.Location = new System.Drawing.Point(72, 0);
-      this.txtTimePassed.Name = "txtTimePassed";
-      this.txtTimePassed.ReadOnly = true;
-      this.txtTimePassed.Size = new System.Drawing.Size(48, 13);
-      this.txtTimePassed.TabIndex = 2;
-      this.txtTimePassed.Text = "0:00";
-      this.txtTimePassed.WordWrap = false;
-      // 
       // lblGameType
       // 
       this.lblGameType.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -324,6 +327,7 @@ namespace Checkers
       this.menuGame.Index = 0;
       this.menuGame.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
                                                                              this.menuGameNew,
+                                                                             this.menuGameEnd,
                                                                              this.menuGameLine01,
                                                                              this.menuGameExit});
       this.menuGame.Text = "&Game";
@@ -337,12 +341,12 @@ namespace Checkers
       // 
       // menuGameLine01
       // 
-      this.menuGameLine01.Index = 1;
+      this.menuGameLine01.Index = 2;
       this.menuGameLine01.Text = "-";
       // 
       // menuGameExit
       // 
-      this.menuGameExit.Index = 2;
+      this.menuGameExit.Index = 3;
       this.menuGameExit.Text = "E&xit";
       this.menuGameExit.Click += new System.EventHandler(this.menuGameExit_Click);
       // 
@@ -471,8 +475,12 @@ namespace Checkers
       // 
       this.CheckersUI.Location = new System.Drawing.Point(4, 4);
       this.CheckersUI.Name = "CheckersUI";
+      this.CheckersUI.OptionalJumping = false;
       this.CheckersUI.Size = new System.Drawing.Size(270, 270);
       this.CheckersUI.TabIndex = 0;
+      this.CheckersUI.GameStopped += new System.EventHandler(this.CheckersUI_GameStopped);
+      this.CheckersUI.GameStarted += new System.EventHandler(this.CheckersUI_GameStarted);
+      this.CheckersUI.TurnChanged += new System.EventHandler(this.CheckersUI_TurnChanged);
       // 
       // imlTurn
       // 
@@ -480,6 +488,13 @@ namespace Checkers
       this.imlTurn.ImageSize = new System.Drawing.Size(64, 32);
       this.imlTurn.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imlTurn.ImageStream")));
       this.imlTurn.TransparentColor = System.Drawing.Color.Transparent;
+      // 
+      // menuGameEnd
+      // 
+      this.menuGameEnd.Enabled = false;
+      this.menuGameEnd.Index = 1;
+      this.menuGameEnd.Text = "&End Game";
+      this.menuGameEnd.Click += new System.EventHandler(this.menuGameEnd_Click);
       // 
       // frmMain
       // 
@@ -526,10 +541,12 @@ namespace Checkers
     private void frmMain_Load (object sender, System.EventArgs e)
     { Size = new Size(MinimumSize.Width + 130, MinimumSize.Height); }
     private void frmMain_Closing (object sender, System.ComponentModel.CancelEventArgs e)
-    { if (!DoClose()) e.Cancel = true; }
+    { if (!DoCloseGame()) e.Cancel = true; }
     
     private void menuGameNew_Click(object sender, System.EventArgs e)
     { DoNewGame(); }
+    private void menuGameEnd_Click (object sender, System.EventArgs e)
+    { DoCloseGame(); }
     private void menuGameExit_Click (object sender, System.EventArgs e)
     { Close(); }
     
@@ -554,12 +571,19 @@ namespace Checkers
     private void menuHelpAbout_Click (object sender, System.EventArgs e)
     { (new frmAbout()).ShowDialog(this); }
     
+    private void CheckersUI_GameStarted (object sender, System.EventArgs e)
+    { DoStarted(); }
+    private void CheckersUI_GameStopped (object sender, System.EventArgs e)
+    { DoStopped(); }
+    private void CheckersUI_TurnChanged(object sender, System.EventArgs e)
+    { DoNextTurn(); }
+    
     
     private void DoNewGame ()
     {
       if (CheckersUI.IsPlaying)
       {
-        if (!DoClose()) return;
+        if (!DoCloseGame()) return;
         // Stop current game (with no winner)
         CheckersUI.Stop();
       }
@@ -567,15 +591,36 @@ namespace Checkers
       // Get new game type
       frmNewGame newGame = new frmNewGame();
       if (newGame.ShowDialog(this) == DialogResult.Cancel) return;
-      
+      int difficulty = newGame.Difficulty;  // !!!!!
+      CheckersUI.FirstMove = newGame.FirstMove;
+      CheckersUI.CustomPawn1 = newGame.ImageSet[0]; CheckersUI.CustomKing1 = newGame.ImageSet[1];
+      CheckersUI.CustomPawn2 = newGame.ImageSet[2]; CheckersUI.CustomKing2 = newGame.ImageSet[3];
       
       // Start a new checkers game
       CheckersUI.Play();
-      // !!!!!
-      DoShowTurn(1);
     }
     
-    private bool DoClose ()
+    private void DoStarted ()
+    {
+      panGameInfo.Visible = true;
+      menuGameEnd.Enabled = true;
+      DoNextTurn();
+    }
+    private void DoStopped ()
+    {
+      panGameInfo.Visible = false;
+      menuGameEnd.Enabled = false;
+    }
+    private void DoNextTurn ()
+    {
+      DoShowTurn(CheckersUI.Turn);
+    }
+    private void DoWinnerDeclared ()
+    {
+      picTurn.Visible = false;    // !!!!! Winner logo
+    }
+    
+    private bool DoCloseGame ()
     {
       if (!CheckersUI.IsPlaying) return true;
       // !!!!! Ask for 'stalemate' in multiplayer mode

@@ -19,6 +19,7 @@ namespace Uberware.Gaming.Checkers.UI
     
     public event EventHandler GameStarted;
     public event EventHandler GameStopped;
+    public event EventHandler TurnChanged;
     
     private Bitmap boardImage;
     
@@ -36,8 +37,9 @@ namespace Uberware.Gaming.Checkers.UI
     private bool player1Active = true;
     private bool player2Active = true;
     private bool highlightSquares = true;
-    private CheckersPiece holding = null;
-    private Point [] validMoves = new Point [0];
+    private Point [] selectedSquares = new Point [0];
+    private Point focussedSquare = Point.Empty;
+    private CheckersMove movePiece = null;
     
     #region Class Construction
     
@@ -105,9 +107,6 @@ namespace Uberware.Gaming.Checkers.UI
       get { return base.BackColor; }
       set { base.BackColor = value; Refresh(); }
     }
-    
-    public bool IsPlaying
-    { get { return game.IsPlaying; } }
     
     [DefaultValue(4)]
     public int BoardMargin
@@ -189,6 +188,40 @@ namespace Uberware.Gaming.Checkers.UI
       set { highlightSquares = true; }      // !!!!! Check to see if piece is being held & highlight it
     }
     
+    [Browsable(false)]
+    public bool IsPlaying
+    { get { return game.IsPlaying; } }
+    
+    [Browsable(false)]
+    public bool OptionalJumping
+    {
+      get { return game.OptionalJumping; }
+      set { game.OptionalJumping = value; }
+    }
+    
+    [Browsable(false)]
+    public int Turn
+    { get { return game.Turn; } }
+    
+    [Browsable(false)]
+    public int Winner
+    { get { return game.Winner; } }
+    
+    [Browsable(false)]
+    public CheckersPiece [] Pieces
+    { get { return game.Pieces; } }
+    
+    [Browsable(false)]
+    public CheckersPiece [,] Board
+    { get { return game.Board; } }
+    
+    [Browsable(false)]
+    public int FirstMove
+    {
+      get { return game.FirstMove; }
+      set { game.FirstMove = value; }
+    }
+    
     #endregion
     
     
@@ -201,32 +234,15 @@ namespace Uberware.Gaming.Checkers.UI
     private void CheckersUI_Paint (object sender, System.Windows.Forms.PaintEventArgs e)
     { if (boardImage != null) e.Graphics.DrawImage(boardImage, 0, 0, boardImage.Width, boardImage.Height); }
     
-    private Point highlightedSquare = Point.Empty;
     private void CheckersUI_MouseMove (object sender, System.Windows.Forms.MouseEventArgs e)
     {
       if (!IsPlaying) return;
-      // Get piece location (hit-test)
-      CheckersPiece piece = PieceAt(new Point(e.X, e.Y));
-      if (holding != null) return;  // !!!!!
-      bool doHighlight = true;
-      if ((game.Turn == 1) && (!player1Active)) doHighlight = false;
-      if ((game.Turn == 2) && (!player2Active)) doHighlight = false;
-      if ((piece == null) || (!game.CanMovePiece(piece))) doHighlight = false;
-      if (!doHighlight)
-      {
-        if (!highlightedSquare.IsEmpty)
-        { highlightedSquare = Point.Empty; Refresh(); }
-        return;
-      }
-      // Highlight board
-      if ((!highlightedSquare.IsEmpty) && (highlightedSquare == piece.Location)) return;
-      highlightedSquare = piece.Location;
-      Refresh();
+      DoHighlightSquare(PointToGame(new Point(e.X, e.Y)), true);
     }
     private void CheckersUI_MouseLeave (object sender, System.EventArgs e)
     {
-      if (highlightedSquare.IsEmpty) return;
-      highlightedSquare = Point.Empty;
+      if (focussedSquare.IsEmpty) return;
+      focussedSquare = Point.Empty;
       Refresh();
     }
     
@@ -234,26 +250,47 @@ namespace Uberware.Gaming.Checkers.UI
     {
       if ((!IsPlaying) || (e.Button != MouseButtons.Left)) return;
       // Get piece location (hit-test)
-      holding = PieceAt(new Point(e.X, e.Y));
-      if ((holding == null) || (!game.CanMovePiece(holding))) return;
-      highlightedSquare = Point.Empty;
+      CheckersPiece piece;
+      Point p = PointToGame(new Point(e.X, e.Y));
+      if ((movePiece == null) || (p != movePiece.CurrentLocation))
+      {
+        movePiece = null;
+        piece = game.PieceAt(p);
+        if ((piece == null) || (!game.CanMovePiece(piece)))
+        { Refresh(); return; }
+        movePiece = game.BeginMove(piece);
+      }
+      else
+      { piece = movePiece.Piece; }
       Capture = true;
-      Cursor = pieceCursors[(holding.Player-1)*2 + (( holding.Rank == CheckersRank.Pawn )?( 0 ):( 1 ))];
-      CheckersPiece [] pieces = game.EnumMovablePieces();
-      validMoves = new Point [pieces.Length];
-      for (int i = 0; i < validMoves.Length; i++)
-        validMoves[i] = pieces[i].Location;
+      Cursor = pieceCursors[(piece.Player-1)*2 + (( piece.Rank == CheckersRank.Pawn )?( 0 ):( 1 ))];
+      selectedSquares = movePiece.EnumMoves();
+      focussedSquare = movePiece.CurrentLocation;
       Refresh();
     }
     
     private void CheckersUI_MouseUp (object sender, System.Windows.Forms.MouseEventArgs e)
     {
-      if ((holding == null) || (e.Button != MouseButtons.Left)) return;
+      // !!!!! Signal to user why the move is invalid; if must-jump
+      // !!!!! (highlight-blink the squares in RED where jump must take place or show a msgbox)
+      if ((movePiece == null) || (e.Button != MouseButtons.Left)) return;
+      Point location = PointToGame(new Point(e.X, e.Y));
       Cursor = Cursors.Arrow;
       Capture = false;
-      holding = null;
-      validMoves = new Point [0];
-      CheckersUI_MouseMove(sender, e);
+      if (!movePiece.Move(location))
+      {
+        // !!!!! Hightligh-blink block ??
+        if ((!game.OptionalJumping) && (movePiece.IsValidMove(location, true)))
+          MessageBox.Show(this, "You must jump your opponent's piece.", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        movePiece = null;
+      }
+      else if (!movePiece.MustMove)
+      {
+        // Move the piece on the gameboard
+        MovePieceCore(movePiece, false);
+      }
+      selectedSquares = new Point [0];
+      DoHighlightSquare(location, false);
       Refresh();
     }
     
@@ -303,9 +340,11 @@ namespace Uberware.Gaming.Checkers.UI
         {
           if ((x % 2) == (y % 2)) continue;
           CheckersPiece piece = game.Board[x, y];
+          if ((piece == null) && (movePiece != null) && (movePiece.CurrentLocation == new Point(x, y)))
+            piece = movePiece.Piece;
           bool validMoveSquare = false;
-          foreach (Point p in validMoves) if ((p.X == x) && (p.Y == y)) { validMoveSquare = true; break; }
-          if ((highlightedSquare.X == x) && (highlightedSquare.Y == y) && ((holding == null) || (piece != holding)))
+          foreach (Point p in selectedSquares) if ((p.X == x) && (p.Y == y)) { validMoveSquare = true; break; }
+          if ((focussedSquare.X == x) && (focussedSquare.Y == y))
           {
             Brush brushForeColorDarken = new SolidBrush(BlendColor(boardForeColor, Color.FromArgb(49, 106, 197), 50));
             Brush brushForeColorHighlight = new SolidBrush(BlendColor(boardForeColor, Color.FromArgb(193, 210, 238), 50));
@@ -315,15 +354,15 @@ namespace Uberware.Gaming.Checkers.UI
           }
           else if (validMoveSquare)
           {
-            Brush brushForeColorDarken = new SolidBrush(BlendColor(boardForeColor, Color.ForestGreen, 50));
-            Brush brushForeColorHighlight = new SolidBrush(BlendColor(boardForeColor, Color.PaleGreen, 50));
+            Brush brushForeColorDarken = new SolidBrush(BlendColor(boardForeColor, Color.FromArgb(152, 180, 226), 50));
+            Brush brushForeColorHighlight = new SolidBrush(BlendColor(boardForeColor, Color.FromArgb(224, 232, 246), 50));
             g.FillRectangle( brushForeColorDarken, x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, SquareSize.Width, SquareSize.Height);
             g.FillRectangle( brushForeColorHighlight, x*SquareSize.Width + boardMargin+borderSize+2, y*SquareSize.Height + boardMargin+borderSize+2, SquareSize.Width-2, SquareSize.Height-2);
             brushForeColorHighlight.Dispose(); brushForeColorDarken.Dispose();
           }
           else
           { g.FillRectangle( brushForeColor, x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, SquareSize.Width, SquareSize.Height); }
-          if ((piece != null) && (piece != holding))
+          if ((piece != null) && ((movePiece == null) || (piece != movePiece.Piece) || ((!Capture) && (movePiece.Piece.Location != new Point(x, y)))))
           {
             if (piece.Player == 1)
             { g.DrawImage(pieceImages[0], x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, 32, 32); }
@@ -353,29 +392,36 @@ namespace Uberware.Gaming.Checkers.UI
       int y = (p.Y-boardMargin-borderSize-1) / SquareSize.Height;
       return new Point(x, y);
     }
+    /// <summary>Returns whether or not piece is in board bounds.</summary>
+    /// <param name="location">The location to test.</param>
+    /// <returns>True if specified location is in bounds.</returns>
+    public bool InBounds (Point location)
+    { return game.InBounds(location); }
+    /// <summary>Returns whether or not piece is in board bounds.</summary>
+    /// <param name="x">The x location to test.</param>
+    /// <param name="y">The y location to test.</param>
+    /// <returns>True if specified location is in bounds.</returns>
+    public bool InBounds (int x, int y)
+    { return game.InBounds(x, y); }
     
-    /// <summary> Returns a CheckersPiece object that occupies a location on the control's Checkers board. </summary>
-    /// <param name="location">The location (in pixels) to retrieve the piece at.</param>
-    /// <returns>The CheckersPiece object that occupies the specified location (or null if out-of-bounds).</returns>
+    /// <summary>Retrieves a piece at a particular location (or null if empty or out of bounds).</summary>
+    public CheckersPiece PieceAt (int x, int y)
+    { return game.PieceAt(x, y); }
+    /// <summary>Retrieves a piece at a particular location (or null if empty or out of bounds).</summary>
     public CheckersPiece PieceAt (Point location)
-    {
-      Point p = PointToGame(location);
-      if ((p.X < 0) || (p.X >= CheckersGame.BoardSize.Width) || (p.Y < 0) || (p.Y >= CheckersGame.BoardSize.Height))
-        //throw new ArgumentOutOfRangeException("location", location, "Location was not a valid location on the board");
-        return null;
-      return game.Board[p.X, p.Y];
-    }
+    { return game.PieceAt(location); }
     
-    /// <summary> Begins a Checkers game. </summary>
+    /// <summary>Begins the checkers game.</summary>
     public void Play ()
     {
+      if (IsPlaying) throw new InvalidOperationException("Game has already started.");
       game.Play();
       CreateImages();
       Refresh();
       if (GameStarted != null) GameStarted(this, EventArgs.Empty);
     }
     
-    /// <summary> Stops a Checkers game. </summary>
+    /// <summary>Stops a decided game or forces a game-in-progress to stop prematurely with no winner.</summary>
     public void Stop ()
     {
       game.Stop();
@@ -383,6 +429,77 @@ namespace Uberware.Gaming.Checkers.UI
       if (GameStopped != null) GameStopped(this, EventArgs.Empty);
     }
     
+    /// <summary>Returns whether or not the checkers piece can be moved this turn.</summary>
+    /// <param name="piece">The checkers piece to test.</param>
+    /// <returns>True when piece can be moved.</returns>
+    public bool CanMovePiece (CheckersPiece piece)
+    { return game.CanMovePiece(piece); }
+    
+    /// <summary>Returns all pieces belonging to the specified player.</summary>
+    /// <param name="player">The player index to get the list of pieces.</param>
+    /// <returns>A list of pieces that belong to the specified player.</returns>
+    public CheckersPiece [] EnumPlayerPieces (int player)
+    { return game.EnumPlayerPieces(player); }
+    
+    /// <summary>Returns a list of movable pieces this turn.</summary>
+    /// <returns>A list of pieces that can be moved this turn.</returns>
+    public CheckersPiece [] EnumMovablePieces ()
+    { return game.EnumMovablePieces(); }
+    
+    /// <summary>Moves a Checkers piece on the board.</summary>
+    /// <param name="move">The movement object to which the piece will move to.</param>
+    /// <returns>True if the piece was moved successfully.</returns>
+    public bool MovePiece (CheckersMove move)
+    {
+      if (!IsPlaying) return false;
+      return MovePieceCore(move, true);
+    }
+    
+    
+    
+    // Moves the piece with optional refreshing
+    private bool MovePieceCore (CheckersMove move, bool refresh)
+    {
+      // move the piece
+      if (!game.MovePiece(movePiece)) return false;
+      if (TurnChanged != null) TurnChanged(this, EventArgs.Empty);
+      movePiece = null;
+      // Update board
+      selectedSquares = new Point [0];
+      if (refresh) Refresh();
+      return true;
+    }
+    
+    private void DoHighlightSquare (Point location)
+    { DoHighlightSquare(location, true); }
+    private void DoHighlightSquare (Point location, bool refresh)
+    {
+      if (!IsPlaying) return;
+      // Get piece location (hit-test)
+      CheckersPiece piece = PieceAt(location);
+      if (movePiece != null)
+      {
+        if (((location.X % 2) != (location.Y % 2)) && ((Capture) || (location == movePiece.CurrentLocation)))
+        { focussedSquare = location; Refresh(); }
+        else if (!focussedSquare.IsEmpty)
+        { focussedSquare = Point.Empty; Refresh(); }
+        return;
+      }
+      bool doHighlight = true;
+      if ((game.Turn == 1) && (!player1Active)) doHighlight = false;
+      if ((game.Turn == 2) && (!player2Active)) doHighlight = false;
+      if ((piece == null) || (!game.CanMovePiece(piece))) doHighlight = false;
+      if (!doHighlight)
+      {
+        if (!focussedSquare.IsEmpty)
+        { focussedSquare = Point.Empty; Refresh(); }
+        return;
+      }
+      // Highlight board
+      if ((!focussedSquare.IsEmpty) && (focussedSquare == piece.Location)) return;
+      focussedSquare = piece.Location;
+      if (refresh) Refresh();
+    }
     
     private void CreateImages ()
     {

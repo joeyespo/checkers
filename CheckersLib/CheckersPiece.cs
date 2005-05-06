@@ -44,7 +44,7 @@ namespace Uberware.Gaming.Checkers
     
     
     internal void Moved (Point location)
-    { location = location; }
+    { this.location = location; }
     
     internal void RemovedFromPlay ()
     {

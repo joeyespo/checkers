@@ -10,8 +10,7 @@ namespace Checkers
   {
     SinglePlayer = 0,
     Multiplayer = 1,
-    Tournament = 2,
-    NetGame = 3,
+    NetGame = 2,
   }
   
   class ImageSetInfo
@@ -28,11 +27,11 @@ namespace Checkers
   
   public class frmNewGame : System.Windows.Forms.Form
   {
-    private GameType gameType;
-    private bool opponentFirstMove;
-    private bool useTournamentImages;
-    private int difficulty;
     private PictureBox selectedPicture;
+    private GameType gameType;
+    private int firstMove;
+    private int difficulty;
+    private Image [] imageSet;
     
     #region Class Variables
 
@@ -111,12 +110,12 @@ namespace Checkers
     private System.Windows.Forms.Label lblImage2P1;
     private System.Windows.Forms.PictureBox picImageSwap2P;
     private System.Windows.Forms.Panel panImageSetNet;
+    private System.Windows.Forms.PictureBox picImageSwapNet;
+    private System.Windows.Forms.ImageList imlKing;
     private System.Windows.Forms.Label lblImageNet2;
     private System.Windows.Forms.PictureBox picImageNet1;
     private System.Windows.Forms.PictureBox picImageNet2;
     private System.Windows.Forms.Label lblImageNet1;
-    private System.Windows.Forms.PictureBox picImageSwapNet;
-    private System.Windows.Forms.ImageList imlKing;
     private System.ComponentModel.IContainer components;
     
     #endregion
@@ -129,6 +128,7 @@ namespace Checkers
       // Required for Windows Form Designer support
       //
       InitializeComponent();
+      imageSet = new Image [4];
     }
     
     #region Windows Form Designer generated code
@@ -1123,10 +1123,10 @@ namespace Checkers
       this.CancelButton = this.btnCancel;
       this.ClientSize = new System.Drawing.Size(606, 387);
       this.Controls.AddRange(new System.Windows.Forms.Control[] {
+                                                                  this.mozGameType,
                                                                   this.btnCancel,
                                                                   this.btnOK,
-                                                                  this.tabGame,
-                                                                  this.mozGameType});
+                                                                  this.tabGame});
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
       this.MaximizeBox = false;
       this.Name = "frmNewGame";
@@ -1159,26 +1159,42 @@ namespace Checkers
     
     public GameType GameType
     { get { return gameType; } }
-    public bool OpponentFirstMove
-    { get { return opponentFirstMove; } }
-    public bool UseTournamentImages
-    { get { return useTournamentImages; } }
+    public int FirstMove
+    { get { return firstMove; } }
     public int Difficulty
     { get { return difficulty; } }
+    public Image [] ImageSet
+    { get { return imageSet; } }
     
     public new DialogResult ShowDialog (IWin32Window owner)
     {
       DialogResult result = base.ShowDialog(owner);
       if (result != DialogResult.Cancel)
       {
-        switch (tabGame.TabIndex)
+        switch (tabGame.SelectedIndex)
         {
           case 0:
             gameType = GameType.SinglePlayer;
-            opponentFirstMove = (cmbFirstMove1P.SelectedIndex == 1);
-            useTournamentImages = (cmbImageSet1P.SelectedIndex == 1);
+            firstMove = (( cmbFirstMove1P.SelectedIndex == 0 )?( 1 ):( 2 ));
             difficulty = (( cmbDifficulty1P.SelectedIndex == -1 )?( 0 ):( cmbDifficulty1P.SelectedIndex ));
+            imageSet[0] = ((ImageSetInfo)picImage1P1.Tag).Pawn; imageSet[1] = ((ImageSetInfo)picImage1P1.Tag).King;
+            imageSet[2] = ((ImageSetInfo)picImage1P2.Tag).Pawn; imageSet[3] = ((ImageSetInfo)picImage1P2.Tag).King;
             break;
+          case 1:
+            gameType = GameType.Multiplayer;
+            firstMove = (( cmbFirstMove2P.SelectedIndex == 0 )?( 1 ):( 2 ));
+            difficulty = 0;
+            imageSet[0] = ((ImageSetInfo)picImage2P1.Tag).Pawn; imageSet[1] = ((ImageSetInfo)picImage2P1.Tag).King;
+            imageSet[2] = ((ImageSetInfo)picImage2P2.Tag).Pawn; imageSet[3] = ((ImageSetInfo)picImage2P2.Tag).King;
+            break;
+          case 2:
+            gameType = GameType.Multiplayer;
+            firstMove = (( cmbFirstMoveNet.SelectedIndex == 0 )?( 1 ):( 2 ));
+            difficulty = 0;
+            imageSet[0] = ((ImageSetInfo)picImageNet1.Tag).Pawn; imageSet[1] = ((ImageSetInfo)picImageNet1.Tag).King;
+            imageSet[2] = ((ImageSetInfo)picImageNet2.Tag).Pawn; imageSet[3] = ((ImageSetInfo)picImageNet2.Tag).King;
+            break;
+          default: throw new InvalidOperationException("New Game Dialog exited in an unrecognized tab; no settings were set.");
         }
       }
       return result;
@@ -1217,17 +1233,22 @@ namespace Checkers
     
     private void menuImageBrowse_Click (object sender, System.EventArgs e)
     {
+      // !!!!! Create a second picturebox below the current to show/choose the king icon
+      // !!!!! (initially holding the default, with a menu item to revert to default)
       if (selectedPicture == null) return;
       // Open pawn image
       dlgOpenImage.Title = "Open Custom Pawn Image";
       if (dlgOpenImage.ShowDialog(this) == DialogResult.Cancel) return;
-      Image pawn = Image.FromFile(dlgOpenImage.FileName);
-      if ((pawn.Width != 32) || (pawn.Height != 32)) pawn = new Bitmap(pawn, 32, 32);
+      string pawnFileName = dlgOpenImage.FileName;
       // Open king image
-      dlgOpenImage.Title = "Open Custom King Image";
+      dlgOpenImage.Title = "Open Custom King Image (NOTE: open same file as the Pawn for default)";
       if (dlgOpenImage.ShowDialog(this) == DialogResult.Cancel) return;
-      Image king = Image.FromFile(dlgOpenImage.FileName);
-      if ((king.Width != 32) || (king.Height != 32)) king = new Bitmap(king, 32, 32);
+      string kingFileName = dlgOpenImage.FileName;
+      // Create piece images
+      Image pawn = new Bitmap(Image.FromFile(pawnFileName), 32, 32);
+      Image king = new Bitmap(Image.FromFile(kingFileName), 32, 32);
+      if (pawnFileName.ToLower() == kingFileName.ToLower())
+        DrawKingIcon(king);
       // Set custom pawn.king images
       UpdateImageSet(selectedPicture, Color.Gray, pawn, king);
       SetCustomImage();
@@ -1361,6 +1382,12 @@ namespace Checkers
       ringColor.Dispose(); fillBrush.Dispose();
       g.Dispose();
       return pieceImage;
+    }
+    private void DrawKingIcon (Image image)
+    {
+      Graphics g = Graphics.FromImage(image);
+      DrawKingIcon(g);
+      g.Dispose();
     }
     private void DrawKingIcon (Graphics g)
     { g.DrawImage(imlKing.Images[0], 0, 0, 32, 32); }
