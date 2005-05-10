@@ -10,7 +10,7 @@ internal class ResFinder
 namespace Uberware.Gaming.Checkers.UI
 {
   [ToolboxItem(true)]
-  [ToolboxBitmap(typeof(ResFinder), "Uberware.Gaming.Checkers.UI.Images.ToolboxBitmap.png")]
+  [ToolboxBitmap(typeof(ResFinder), "Uberware.Gaming.Checkers.UI.ToolboxBitmap.png")]
   [Designer(typeof(CheckersDesigner))]
   public class CheckersUI : System.Windows.Forms.UserControl
   {
@@ -19,24 +19,25 @@ namespace Uberware.Gaming.Checkers.UI
     
     public event EventHandler GameStarted;
     public event EventHandler GameStopped;
+    public event EventHandler PieceMoved;
     public event EventHandler TurnChanged;
+    public event EventHandler WinnerDeclared;
     
     private Bitmap boardImage;
     
-    private CheckersGame game = new CheckersGame();
+    private CheckersGame game = null;
     private BorderStyle borderStyle = BorderStyle.Fixed3D;
     private int boardMargin = 4;
     private Color boardBackColor = Color.DarkSeaGreen;
     private Color boardForeColor = Color.OldLace;
     private Color boardGridColor = Color.Gray;
-    private System.Windows.Forms.ImageList imlPieces;
-    private System.ComponentModel.IContainer components;
     private Image [] customPieceImages = new Image [4];
-    private Image [] pieceImages = new Image [4];
-    private Cursor [] pieceCursors = new Cursor [4];
     private bool player1Active = true;
     private bool player2Active = true;
     private bool highlightSquares = true;
+    
+    private Image [] pieceImages = new Image [4];
+    private Cursor [] pieceCursors = new Cursor [4];
     private Point [] selectedSquares = new Point [0];
     private Point focussedSquare = Point.Empty;
     private CheckersMove movePiece = null;
@@ -54,7 +55,7 @@ namespace Uberware.Gaming.Checkers.UI
       SetStyle(ControlStyles.FixedWidth, true);
       SetStyle(ControlStyles.FixedHeight, true);
       // Initialize the image
-      boardImage = new Bitmap(ClientSize.Width, ClientSize.Height, PixelFormat.Format32bppArgb);
+      CreateBoard();
       Refresh();
     }
     
@@ -66,20 +67,13 @@ namespace Uberware.Gaming.Checkers.UI
     /// </summary>
     private void InitializeComponent()
     {
-      this.components = new System.ComponentModel.Container();
-      this.imlPieces = new System.Windows.Forms.ImageList(this.components);
-      // 
-      // imlPieces
-      // 
-      this.imlPieces.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-      this.imlPieces.ImageSize = new System.Drawing.Size(32, 32);
-      this.imlPieces.TransparentColor = System.Drawing.Color.Transparent;
       // 
       // CheckersUI
       // 
       this.BackColor = System.Drawing.Color.White;
       this.Name = "CheckersUI";
       this.Size = new System.Drawing.Size(360, 276);
+      this.Resize += new System.EventHandler(this.CheckersUI_Resize);
       this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.CheckersUI_MouseUp);
       this.Paint += new System.Windows.Forms.PaintEventHandler(this.CheckersUI_Paint);
       this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.CheckersUI_MouseMove);
@@ -189,38 +183,16 @@ namespace Uberware.Gaming.Checkers.UI
     }
     
     [Browsable(false)]
+    public CheckersGame Game
+    { get { return game; } }
+    
+    [Browsable(false)]
     public bool IsPlaying
-    { get { return game.IsPlaying; } }
-    
-    [Browsable(false)]
-    public bool OptionalJumping
-    {
-      get { return game.OptionalJumping; }
-      set { game.OptionalJumping = value; }
-    }
-    
-    [Browsable(false)]
-    public int Turn
-    { get { return game.Turn; } }
+    { get { return ((game != null) && (game.IsPlaying)); } }
     
     [Browsable(false)]
     public int Winner
-    { get { return game.Winner; } }
-    
-    [Browsable(false)]
-    public CheckersPiece [] Pieces
-    { get { return game.Pieces; } }
-    
-    [Browsable(false)]
-    public CheckersPiece [,] Board
-    { get { return game.Board; } }
-    
-    [Browsable(false)]
-    public int FirstMove
-    {
-      get { return game.FirstMove; }
-      set { game.FirstMove = value; }
-    }
+    { get { return (( game != null )?( game.Winner ):( 0 )); } }
     
     #endregion
     
@@ -231,24 +203,48 @@ namespace Uberware.Gaming.Checkers.UI
       base.SetBoundsCore(x, y, BoardPixelSize.Width+2+(borderSize*2)+(boardMargin*2), BoardPixelSize.Height+2+(borderSize*2)+(boardMargin*2), specified);
     }
     
-    private void CheckersUI_Paint (object sender, System.Windows.Forms.PaintEventArgs e)
-    { if (boardImage != null) e.Graphics.DrawImage(boardImage, 0, 0, boardImage.Width, boardImage.Height); }
+    private void CheckersUI_Resize (object sender, System.EventArgs e)
+    { CreateBoard(); }
     
-    private void CheckersUI_MouseMove (object sender, System.Windows.Forms.MouseEventArgs e)
+    private void CheckersUI_Paint (object sender, System.Windows.Forms.PaintEventArgs e)
     {
-      if (!IsPlaying) return;
-      DoHighlightSquare(PointToGame(new Point(e.X, e.Y)), true);
-    }
-    private void CheckersUI_MouseLeave (object sender, System.EventArgs e)
-    {
-      if (focussedSquare.IsEmpty) return;
-      focussedSquare = Point.Empty;
-      Refresh();
+      // Draw control background and border
+      e.Graphics.Clear(BackColor);
+      int borderSize = 0;
+      if (borderStyle == BorderStyle.Fixed3D)
+      {
+        Pen penLight = new Pen(Color.FromKnownColor(KnownColor.ControlLight)); Pen penLightLight = new Pen(Color.FromKnownColor(KnownColor.ControlLightLight));
+        Pen penDark = new Pen(Color.FromKnownColor(KnownColor.ControlDark)); Pen penDarkDark = new Pen(Color.FromKnownColor(KnownColor.ControlDarkDark));
+        //
+        e.Graphics.DrawLine(penDark, 0, 0, Width-2, 0); e.Graphics.DrawLine(penDarkDark, 0, 1, Width-3, 1);
+        e.Graphics.DrawLine(penDark, 0, 1, 0, Height-2); e.Graphics.DrawLine(penDarkDark, 1, 2, 1, Height-3);
+        e.Graphics.DrawLine(penLightLight, 0, Height-1, Width-1, Height-1); e.Graphics.DrawLine(penLight, 1, Height-2, Width-1, Height-2);
+        e.Graphics.DrawLine(penLightLight, Width-1, 0, Width-1, Height-1); e.Graphics.DrawLine(penLight, Width-2, 1, Width-2, Height-2);
+        //
+        penLight.Dispose(); penLightLight.Dispose();
+        penDark.Dispose(); penDarkDark.Dispose();
+        borderSize = 2;
+      }
+      else if (borderStyle == BorderStyle.FixedSingle)
+      {
+        Pen penFrame = new Pen(Color.FromKnownColor(KnownColor.WindowFrame));
+        
+        e.Graphics.DrawLine(penFrame, 0, 0, Width, 0);
+        e.Graphics.DrawLine(penFrame, 0, 0, 0, Height);
+        e.Graphics.DrawLine(penFrame, 0, Height-1, Width, Height-1);
+        e.Graphics.DrawLine(penFrame, Width-1, 0, Width-1, Height);
+        
+        penFrame.Dispose();
+        borderSize = 1;
+      }
+      e.Graphics.DrawImage(boardImage, boardMargin+borderSize, boardMargin+borderSize, boardImage.Width, boardImage.Height);
     }
     
     private void CheckersUI_MouseDown (object sender, System.Windows.Forms.MouseEventArgs e)
     {
       if ((!IsPlaying) || (e.Button != MouseButtons.Left)) return;
+      // !!!!! Non-dragging moves
+      if (((game.Turn == 1) && (!player1Active)) || ((game.Turn == 2) && (!player2Active))) return;
       // Get piece location (hit-test)
       CheckersPiece piece;
       Point p = PointToGame(new Point(e.X, e.Y));
@@ -268,12 +264,12 @@ namespace Uberware.Gaming.Checkers.UI
       focussedSquare = movePiece.CurrentLocation;
       Refresh();
     }
-    
     private void CheckersUI_MouseUp (object sender, System.Windows.Forms.MouseEventArgs e)
     {
-      // !!!!! Signal to user why the move is invalid; if must-jump
-      // !!!!! (highlight-blink the squares in RED where jump must take place or show a msgbox)
       if ((movePiece == null) || (e.Button != MouseButtons.Left)) return;
+      if (game == null) { movePiece = null; return; }
+      // !!!!! 'Nice' and other messages
+      // !!!!! Option: highlight-blink the squares in RED where jump must take place and show tooltip, or show a msgbox
       Point location = PointToGame(new Point(e.X, e.Y));
       Cursor = Cursors.Arrow;
       Capture = false;
@@ -284,15 +280,40 @@ namespace Uberware.Gaming.Checkers.UI
           MessageBox.Show(this, "You must jump your opponent's piece.", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Information);
         movePiece = null;
       }
+      // !!!!! Event-driven
       else if (!movePiece.MustMove)
       {
         // Move the piece on the gameboard
-        MovePieceCore(movePiece, false);
+        MovePieceCore(movePiece);
+        movePiece = null;
       }
       selectedSquares = new Point [0];
       DoHighlightSquare(location, false);
       Refresh();
     }
+    private void CheckersUI_MouseMove (object sender, System.Windows.Forms.MouseEventArgs e)
+    {
+      if (!IsPlaying) return;
+      DoHighlightSquare(PointToGame(new Point(e.X, e.Y)), true);
+    }
+    private void CheckersUI_MouseLeave (object sender, System.EventArgs e)
+    {
+      if (focussedSquare.IsEmpty) return;
+      focussedSquare = Point.Empty;
+      Refresh();
+    }
+    
+    
+    private void CheckersGame_GameStarted (object sender, System.EventArgs e)
+    { OnGameStarted(); }
+    private void CheckersGame_GameStopped (object sender, System.EventArgs e)
+    { OnGameStopped(); }
+    private void CheckersGame_PieceMoved (object sender, System.EventArgs e)
+    { OnPieceMoved(); }
+    private void CheckersGame_TurnChanged (object sender, System.EventArgs e)
+    { OnTurnChanged(); }
+    private void CheckersGame_WinnerDeclared (object sender, System.EventArgs e)
+    { OnWinnerDeclared(); }
     
     /// <summary> Refreshes the Checkers baord and the control.</summary>
     public override void Refresh ()
@@ -303,79 +324,62 @@ namespace Uberware.Gaming.Checkers.UI
       Brush brushBackColor = new SolidBrush(boardBackColor);
       Brush brushForeColor = new SolidBrush(boardForeColor);
       
-      g.Clear(BackColor);
-      int borderSize = 0;
-      if (borderStyle == BorderStyle.Fixed3D)
-      {
-        Pen penLight = new Pen(Color.FromKnownColor(KnownColor.ControlLight)); Pen penLightLight = new Pen(Color.FromKnownColor(KnownColor.ControlLightLight));
-        Pen penDark = new Pen(Color.FromKnownColor(KnownColor.ControlDark)); Pen penDarkDark = new Pen(Color.FromKnownColor(KnownColor.ControlDarkDark));
-        //
-        g.DrawLine(penDark, 0, 0, Width-2, 0); g.DrawLine(penDarkDark, 0, 1, Width-3, 1);
-        g.DrawLine(penDark, 0, 1, 0, Height-2); g.DrawLine(penDarkDark, 1, 2, 1, Height-3);
-        g.DrawLine(penLightLight, 0, Height-1, Width-1, Height-1); g.DrawLine(penLight, 1, Height-2, Width-1, Height-2);
-        g.DrawLine(penLightLight, Width-1, 0, Width-1, Height-1); g.DrawLine(penLight, Width-2, 1, Width-2, Height-2);
-        //
-        penLight.Dispose(); penLightLight.Dispose();
-        penDark.Dispose(); penDarkDark.Dispose();
-        borderSize = 2;
-      }
-      else if (borderStyle == BorderStyle.FixedSingle)
-      {
-        Pen penFrame = new Pen(Color.FromKnownColor(KnownColor.WindowFrame));
-        
-        g.DrawLine(penFrame, 0, 0, Width, 0);
-        g.DrawLine(penFrame, 0, 0, 0, Height);
-        g.DrawLine(penFrame, 0, Height-1, Width, Height-1);
-        g.DrawLine(penFrame, Width-1, 0, Width-1, Height);
-        
-        penFrame.Dispose();
-        borderSize = 1;
-      }
-      
-      g.DrawRectangle(penGridColor, boardMargin+borderSize, boardMargin+borderSize, BoardPixelSize.Width+1, BoardPixelSize.Height+1);
-      g.FillRectangle(brushBackColor, boardMargin+borderSize+1, boardMargin+borderSize+1, BoardPixelSize.Width, BoardPixelSize.Height);
+      // Draw the board
+      g.DrawRectangle(penGridColor, 0, 0, BoardPixelSize.Width+1, BoardPixelSize.Height+1);
+      g.FillRectangle(brushBackColor, 1, 1, BoardPixelSize.Width, BoardPixelSize.Height);
       for (int y = 0; y < CheckersGame.BoardSize.Height; y++)
       {
         for (int x = 0; x < CheckersGame.BoardSize.Width; x++)
         {
           if ((x % 2) == (y % 2)) continue;
-          CheckersPiece piece = game.Board[x, y];
-          if ((piece == null) && (movePiece != null) && (movePiece.CurrentLocation == new Point(x, y)))
-            piece = movePiece.Piece;
+          // Draw the square
           bool validMoveSquare = false;
           foreach (Point p in selectedSquares) if ((p.X == x) && (p.Y == y)) { validMoveSquare = true; break; }
           if ((focussedSquare.X == x) && (focussedSquare.Y == y))
           {
             Brush brushForeColorDarken = new SolidBrush(BlendColor(boardForeColor, Color.FromArgb(49, 106, 197), 50));
             Brush brushForeColorHighlight = new SolidBrush(BlendColor(boardForeColor, Color.FromArgb(193, 210, 238), 50));
-            g.FillRectangle( brushForeColorDarken, x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, SquareSize.Width, SquareSize.Height);
-            g.FillRectangle( brushForeColorHighlight, x*SquareSize.Width + boardMargin+borderSize+2, y*SquareSize.Height + boardMargin+borderSize+2, SquareSize.Width-2, SquareSize.Height-2);
+            g.FillRectangle( brushForeColorDarken, x*SquareSize.Width + 1, y*SquareSize.Height + 1, SquareSize.Width, SquareSize.Height);
+            g.FillRectangle( brushForeColorHighlight, x*SquareSize.Width + 2, y*SquareSize.Height + 2, SquareSize.Width-2, SquareSize.Height-2);
             brushForeColorHighlight.Dispose(); brushForeColorDarken.Dispose();
           }
           else if (validMoveSquare)
           {
             Brush brushForeColorDarken = new SolidBrush(BlendColor(boardForeColor, Color.FromArgb(152, 180, 226), 50));
             Brush brushForeColorHighlight = new SolidBrush(BlendColor(boardForeColor, Color.FromArgb(224, 232, 246), 50));
-            g.FillRectangle( brushForeColorDarken, x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, SquareSize.Width, SquareSize.Height);
-            g.FillRectangle( brushForeColorHighlight, x*SquareSize.Width + boardMargin+borderSize+2, y*SquareSize.Height + boardMargin+borderSize+2, SquareSize.Width-2, SquareSize.Height-2);
+            g.FillRectangle( brushForeColorDarken, x*SquareSize.Width + 1, y*SquareSize.Height + 1, SquareSize.Width, SquareSize.Height);
+            g.FillRectangle( brushForeColorHighlight, x*SquareSize.Width + 2, y*SquareSize.Height + 2, SquareSize.Width-2, SquareSize.Height-2);
             brushForeColorHighlight.Dispose(); brushForeColorDarken.Dispose();
           }
           else
-          { g.FillRectangle( brushForeColor, x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, SquareSize.Width, SquareSize.Height); }
-          if ((piece != null) && ((movePiece == null) || (piece != movePiece.Piece) || ((!Capture) && (movePiece.Piece.Location != new Point(x, y)))))
+          { g.FillRectangle( brushForeColor, x*SquareSize.Width + 1, y*SquareSize.Height + 1, SquareSize.Width, SquareSize.Height); }
+          
+          // Draw game pieces
+          if (game == null) continue;
+          CheckersPiece piece = game.Board[x, y];
+          if ((piece == null) && (movePiece != null) && (movePiece.CurrentLocation == new Point(x, y)))
+            piece = movePiece.Piece;
+          // Conditions to -not- show the piece image
+          if ((movePiece != null) && (piece == movePiece.Piece) && ((Capture) || (movePiece.Piece.Location == new Point(x, y))))
+            piece = null;
+          // Draw the piece
+          if (piece != null)
           {
+            Image image = null;
             if (piece.Player == 1)
-            { g.DrawImage(pieceImages[0], x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, 32, 32); }
+              image = pieceImages[(( piece.Rank == CheckersRank.Pawn )?( 0 ):( 1 ))];
             else if (piece.Player == 2)
-            { g.DrawImage(pieceImages[2], x*SquareSize.Width + boardMargin+borderSize+1, y*SquareSize.Height + boardMargin+borderSize+1, 32, 32); }
+              image = pieceImages[(( piece.Rank == CheckersRank.Pawn )?( 2 ):( 3 ))];
+            if (image == null) continue;
+            g.DrawImage(image, x*SquareSize.Width + 1, y*SquareSize.Height + 1, 32, 32);
           }
         }
       }
       
+      g.Dispose();
       brushForeColor.Dispose();
       brushBackColor.Dispose();
       penGridColor.Dispose();
-      g.Dispose();
       base.Refresh();
     }
     
@@ -392,59 +396,29 @@ namespace Uberware.Gaming.Checkers.UI
       int y = (p.Y-boardMargin-borderSize-1) / SquareSize.Height;
       return new Point(x, y);
     }
-    /// <summary>Returns whether or not piece is in board bounds.</summary>
-    /// <param name="location">The location to test.</param>
-    /// <returns>True if specified location is in bounds.</returns>
-    public bool InBounds (Point location)
-    { return game.InBounds(location); }
-    /// <summary>Returns whether or not piece is in board bounds.</summary>
-    /// <param name="x">The x location to test.</param>
-    /// <param name="y">The y location to test.</param>
-    /// <returns>True if specified location is in bounds.</returns>
-    public bool InBounds (int x, int y)
-    { return game.InBounds(x, y); }
     
-    /// <summary>Retrieves a piece at a particular location (or null if empty or out of bounds).</summary>
-    public CheckersPiece PieceAt (int x, int y)
-    { return game.PieceAt(x, y); }
-    /// <summary>Retrieves a piece at a particular location (or null if empty or out of bounds).</summary>
-    public CheckersPiece PieceAt (Point location)
-    { return game.PieceAt(location); }
-    
-    /// <summary>Begins the checkers game.</summary>
+    /// <summary>Begins the checkers game with a new CheckersGame object if none is selected.</summary>
     public void Play ()
     {
       if (IsPlaying) throw new InvalidOperationException("Game has already started.");
+      if (game == null) SetGame(new CheckersGame());
       game.Play();
-      CreateImages();
-      Refresh();
-      if (GameStarted != null) GameStarted(this, EventArgs.Empty);
+    }
+    /// <summary>Begins the checkers game.</summary>
+    /// <param name="game">The game to play.</param>
+    public void Play (CheckersGame game)
+    {
+      if (IsPlaying) throw new InvalidOperationException("Game has already started.");
+      SetGame(game);
+      Play();
     }
     
     /// <summary>Stops a decided game or forces a game-in-progress to stop prematurely with no winner.</summary>
     public void Stop ()
     {
+      if (game == null) return;
       game.Stop();
-      Refresh();
-      if (GameStopped != null) GameStopped(this, EventArgs.Empty);
     }
-    
-    /// <summary>Returns whether or not the checkers piece can be moved this turn.</summary>
-    /// <param name="piece">The checkers piece to test.</param>
-    /// <returns>True when piece can be moved.</returns>
-    public bool CanMovePiece (CheckersPiece piece)
-    { return game.CanMovePiece(piece); }
-    
-    /// <summary>Returns all pieces belonging to the specified player.</summary>
-    /// <param name="player">The player index to get the list of pieces.</param>
-    /// <returns>A list of pieces that belong to the specified player.</returns>
-    public CheckersPiece [] EnumPlayerPieces (int player)
-    { return game.EnumPlayerPieces(player); }
-    
-    /// <summary>Returns a list of movable pieces this turn.</summary>
-    /// <returns>A list of pieces that can be moved this turn.</returns>
-    public CheckersPiece [] EnumMovablePieces ()
-    { return game.EnumMovablePieces(); }
     
     /// <summary>Moves a Checkers piece on the board.</summary>
     /// <param name="move">The movement object to which the piece will move to.</param>
@@ -452,21 +426,28 @@ namespace Uberware.Gaming.Checkers.UI
     public bool MovePiece (CheckersMove move)
     {
       if (!IsPlaying) return false;
-      return MovePieceCore(move, true);
+      return MovePieceCore(move);
+    }
+    
+    /// <summary>Moves a Checkers piece on the board using the Checkers agent.</summary>
+    /// <param name="agent">The Checkers agent to calculate the next move.</param>
+    /// <returns>True if the piece was moved successfully.</returns>
+    public bool MovePiece (CheckersAgent agent)
+    {
+      if (!IsPlaying) return false;
+      return MovePieceCore(agent.NextMove(game));
     }
     
     
     
     // Moves the piece with optional refreshing
-    private bool MovePieceCore (CheckersMove move, bool refresh)
+    private bool MovePieceCore (CheckersMove move)
     {
+      // !!!!! Smooth movements (parameter)
       // move the piece
-      if (!game.MovePiece(movePiece)) return false;
-      if (TurnChanged != null) TurnChanged(this, EventArgs.Empty);
-      movePiece = null;
-      // Update board
-      selectedSquares = new Point [0];
-      if (refresh) Refresh();
+      if (!game.MovePiece(move)) return false;
+      if ((game.Winner != 0) && (WinnerDeclared != null))
+      { WinnerDeclared(this, EventArgs.Empty); focussedSquare = Point.Empty; }
       return true;
     }
     
@@ -476,7 +457,7 @@ namespace Uberware.Gaming.Checkers.UI
     {
       if (!IsPlaying) return;
       // Get piece location (hit-test)
-      CheckersPiece piece = PieceAt(location);
+      CheckersPiece piece = game.PieceAt(location);
       if (movePiece != null)
       {
         if (((location.X % 2) != (location.Y % 2)) && ((Capture) || (location == movePiece.CurrentLocation)))
@@ -486,8 +467,7 @@ namespace Uberware.Gaming.Checkers.UI
         return;
       }
       bool doHighlight = true;
-      if ((game.Turn == 1) && (!player1Active)) doHighlight = false;
-      if ((game.Turn == 2) && (!player2Active)) doHighlight = false;
+      if (((game.Turn == 1) && (!player1Active)) || ((game.Turn == 2) && (!player2Active))) doHighlight = false;
       if ((piece == null) || (!game.CanMovePiece(piece))) doHighlight = false;
       if (!doHighlight)
       {
@@ -499,6 +479,12 @@ namespace Uberware.Gaming.Checkers.UI
       if ((!focussedSquare.IsEmpty) && (focussedSquare == piece.Location)) return;
       focussedSquare = piece.Location;
       if (refresh) Refresh();
+    }
+    
+    private void CreateBoard ()
+    {
+      boardImage = new Bitmap(ClientSize.Width, ClientSize.Height, PixelFormat.Format32bppArgb);
+      Refresh();
     }
     
     private void CreateImages ()
@@ -554,6 +540,55 @@ namespace Uberware.Gaming.Checkers.UI
       int g = (int)((color1.G*((100-blendPercent)/100.0)) + (color2.G*(blendPercent/100.0)));
       int b = (int)((color1.B*((100-blendPercent)/100.0)) + (color2.B*(blendPercent/100.0)));
       return Color.FromArgb(r, g, b);
+    }
+    
+    private void OnGameStarted ()
+    {
+      CreateImages();
+      Refresh();
+      if (GameStarted != null) GameStarted(this, EventArgs.Empty);
+    }
+    
+    private void OnGameStopped ()
+    {
+      Refresh();
+      if (GameStopped != null) GameStopped(this, EventArgs.Empty);
+    }
+    
+    private void OnPieceMoved ()
+    {
+      selectedSquares = new Point [0];
+      Refresh();
+      if (PieceMoved != null) PieceMoved(this, EventArgs.Empty);
+    }
+    
+    private void OnTurnChanged ()
+    {
+      if (TurnChanged != null) TurnChanged(this, EventArgs.Empty);
+    }
+    
+    private void OnWinnerDeclared ()
+    {
+      // !!!!! Show winner text
+      // !!!!! Refresh();
+      if (WinnerDeclared != null) WinnerDeclared(this, EventArgs.Empty);
+    }
+    
+    private void SetGame (CheckersGame g)
+    {
+      if (game != null)
+      {
+        if (game.IsPlaying) throw new InvalidOperationException("Game has already started.");
+        game.GameStarted -= new EventHandler(CheckersGame_GameStarted);
+        game.GameStopped -= new EventHandler(CheckersGame_GameStopped);
+        game.TurnChanged -= new EventHandler(CheckersGame_TurnChanged);
+        game.WinnerDeclared -= new EventHandler(CheckersGame_WinnerDeclared);
+      }
+      game = g;
+      game.GameStarted += new EventHandler(CheckersGame_GameStarted);
+      game.GameStopped += new EventHandler(CheckersGame_GameStopped);
+      game.TurnChanged += new EventHandler(CheckersGame_TurnChanged);
+      game.WinnerDeclared += new EventHandler(CheckersGame_WinnerDeclared);
     }
   }
 }

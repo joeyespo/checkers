@@ -1,14 +1,41 @@
 using System;
 using System.Drawing;
-using System.Collections;
-using System.ComponentModel;
 using System.Windows.Forms;
-using System.Data;
+using System.Runtime.InteropServices;
+using Uberware.Gaming.Checkers;
+using Uberware.Gaming.Checkers.Agents;
 
 namespace Checkers
 {
   public class frmMain : System.Windows.Forms.Form
   {
+    private GameType gameType = GameType.None;
+    private CheckersAgent agent = null;
+    private CheckersSettings settings;
+    private DateTime playTime;
+    
+    #region API Imports
+    
+    [DllImport("winmm.dll", EntryPoint="PlaySound", SetLastError=true, CallingConvention=CallingConvention.Winapi)]
+    static extern bool sndPlaySound( string pszSound, IntPtr hMod, SoundFlags sf );
+
+    [Flags]
+    public enum SoundFlags : int
+    {
+      SND_SYNC = 0x0000,  /* play synchronously (default) */
+      SND_ASYNC = 0x0001,  /* play asynchronously */
+      SND_NODEFAULT = 0x0002,  /* silence (!default) if sound not found */
+      SND_MEMORY = 0x0004,  /* pszSound points to a memory file */
+      SND_LOOP = 0x0008,  /* loop the sound until next sndPlaySound */
+      SND_NOSTOP = 0x0010,  /* don't stop any currently playing sound */
+      SND_NOWAIT = 0x00002000, /* don't wait if the driver is busy */
+      SND_ALIAS = 0x00010000, /* name is a registry alias */
+      SND_ALIAS_ID = 0x00110000, /* alias is a predefined ID */
+      SND_FileName = 0x00020000, /* name is file name */
+      SND_RESOURCE = 0x00040004  /* name is resource name or atom */
+    }
+    
+    #endregion
     
     #region Class Variables
     
@@ -38,13 +65,9 @@ namespace Checkers
     private System.Windows.Forms.PictureBox picPawnP1;
     private System.Windows.Forms.Label lblNameP1;
     private System.Windows.Forms.Label lblJumpsP1;
-    private System.Windows.Forms.Label lblPiecesP1;
-    private System.Windows.Forms.TextBox txtPiecesP1;
     private System.Windows.Forms.PictureBox picPawnP2;
     private System.Windows.Forms.Label lblNameP2;
-    private System.Windows.Forms.TextBox txtPiecesP2;
     private System.Windows.Forms.Label lblJumpsP2;
-    private System.Windows.Forms.Label lblPiecesP2;
     private System.Windows.Forms.TextBox txtJumpsP2;
     private System.Windows.Forms.MenuItem menuViewLine01;
     private System.Windows.Forms.MenuItem menuViewPreferences;
@@ -52,6 +75,11 @@ namespace Checkers
     private System.Windows.Forms.ImageList imlTurn;
     private System.ComponentModel.IContainer components;
     private System.Windows.Forms.MenuItem menuGameEnd;
+    private System.Windows.Forms.Label lblRemainingP1;
+    private System.Windows.Forms.TextBox txtRemainingP1;
+    private System.Windows.Forms.TextBox txtRemainingP2;
+    private System.Windows.Forms.Label lblRemainingP2;
+    private System.Windows.Forms.Timer tmrTimePassed;
     private System.Windows.Forms.MenuItem menuHelpAbout;
     
     #endregion
@@ -84,19 +112,20 @@ namespace Checkers
       this.picPawnP1 = new System.Windows.Forms.PictureBox();
       this.lblNameP1 = new System.Windows.Forms.Label();
       this.lblJumpsP1 = new System.Windows.Forms.Label();
-      this.lblPiecesP1 = new System.Windows.Forms.Label();
-      this.txtPiecesP1 = new System.Windows.Forms.TextBox();
+      this.lblRemainingP1 = new System.Windows.Forms.Label();
+      this.txtRemainingP1 = new System.Windows.Forms.TextBox();
       this.picPawnP2 = new System.Windows.Forms.PictureBox();
       this.lblNameP2 = new System.Windows.Forms.Label();
-      this.txtPiecesP2 = new System.Windows.Forms.TextBox();
+      this.txtRemainingP2 = new System.Windows.Forms.TextBox();
       this.lblJumpsP2 = new System.Windows.Forms.Label();
-      this.lblPiecesP2 = new System.Windows.Forms.Label();
+      this.lblRemainingP2 = new System.Windows.Forms.Label();
       this.txtJumpsP2 = new System.Windows.Forms.TextBox();
       this.lblTimePassed = new System.Windows.Forms.Label();
       this.lblGameType = new System.Windows.Forms.Label();
       this.menuMain = new System.Windows.Forms.MainMenu();
       this.menuGame = new System.Windows.Forms.MenuItem();
       this.menuGameNew = new System.Windows.Forms.MenuItem();
+      this.menuGameEnd = new System.Windows.Forms.MenuItem();
       this.menuGameLine01 = new System.Windows.Forms.MenuItem();
       this.menuGameExit = new System.Windows.Forms.MenuItem();
       this.menuView = new System.Windows.Forms.MenuItem();
@@ -115,7 +144,7 @@ namespace Checkers
       this.txtChat = new System.Windows.Forms.RichTextBox();
       this.CheckersUI = new Uberware.Gaming.Checkers.UI.CheckersUI();
       this.imlTurn = new System.Windows.Forms.ImageList(this.components);
-      this.menuGameEnd = new System.Windows.Forms.MenuItem();
+      this.tmrTimePassed = new System.Windows.Forms.Timer(this.components);
       this.panGame.SuspendLayout();
       this.panGameInfo.SuspendLayout();
       this.panOnline.SuspendLayout();
@@ -146,13 +175,13 @@ namespace Checkers
                                                                               this.picPawnP1,
                                                                               this.lblNameP1,
                                                                               this.lblJumpsP1,
-                                                                              this.lblPiecesP1,
-                                                                              this.txtPiecesP1,
+                                                                              this.lblRemainingP1,
+                                                                              this.txtRemainingP1,
                                                                               this.picPawnP2,
                                                                               this.lblNameP2,
-                                                                              this.txtPiecesP2,
+                                                                              this.txtRemainingP2,
                                                                               this.lblJumpsP2,
-                                                                              this.lblPiecesP2,
+                                                                              this.lblRemainingP2,
                                                                               this.txtJumpsP2,
                                                                               this.lblTimePassed});
       this.panGameInfo.Location = new System.Drawing.Point(0, 16);
@@ -221,24 +250,24 @@ namespace Checkers
       this.lblJumpsP1.Text = "Jumps:";
       this.lblJumpsP1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
-      // lblPiecesP1
+      // lblRemainingP1
       // 
-      this.lblPiecesP1.Location = new System.Drawing.Point(0, 84);
-      this.lblPiecesP1.Name = "lblPiecesP1";
-      this.lblPiecesP1.Size = new System.Drawing.Size(68, 16);
-      this.lblPiecesP1.TabIndex = 4;
-      this.lblPiecesP1.Text = "Pieces:";
-      this.lblPiecesP1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+      this.lblRemainingP1.Location = new System.Drawing.Point(0, 84);
+      this.lblRemainingP1.Name = "lblRemainingP1";
+      this.lblRemainingP1.Size = new System.Drawing.Size(68, 16);
+      this.lblRemainingP1.TabIndex = 4;
+      this.lblRemainingP1.Text = "Remaining:";
+      this.lblRemainingP1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
-      // txtPiecesP1
+      // txtRemainingP1
       // 
-      this.txtPiecesP1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-      this.txtPiecesP1.Location = new System.Drawing.Point(72, 84);
-      this.txtPiecesP1.Name = "txtPiecesP1";
-      this.txtPiecesP1.ReadOnly = true;
-      this.txtPiecesP1.Size = new System.Drawing.Size(48, 13);
-      this.txtPiecesP1.TabIndex = 13;
-      this.txtPiecesP1.Text = "0";
+      this.txtRemainingP1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+      this.txtRemainingP1.Location = new System.Drawing.Point(72, 84);
+      this.txtRemainingP1.Name = "txtRemainingP1";
+      this.txtRemainingP1.ReadOnly = true;
+      this.txtRemainingP1.Size = new System.Drawing.Size(48, 13);
+      this.txtRemainingP1.TabIndex = 13;
+      this.txtRemainingP1.Text = "0";
       // 
       // picPawnP2
       // 
@@ -260,15 +289,15 @@ namespace Checkers
       this.lblNameP2.TabIndex = 6;
       this.lblNameP2.Text = "Opponent";
       // 
-      // txtPiecesP2
+      // txtRemainingP2
       // 
-      this.txtPiecesP2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-      this.txtPiecesP2.Location = new System.Drawing.Point(72, 188);
-      this.txtPiecesP2.Name = "txtPiecesP2";
-      this.txtPiecesP2.ReadOnly = true;
-      this.txtPiecesP2.Size = new System.Drawing.Size(48, 13);
-      this.txtPiecesP2.TabIndex = 14;
-      this.txtPiecesP2.Text = "0";
+      this.txtRemainingP2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+      this.txtRemainingP2.Location = new System.Drawing.Point(72, 188);
+      this.txtRemainingP2.Name = "txtRemainingP2";
+      this.txtRemainingP2.ReadOnly = true;
+      this.txtRemainingP2.Size = new System.Drawing.Size(48, 13);
+      this.txtRemainingP2.TabIndex = 14;
+      this.txtRemainingP2.Text = "0";
       // 
       // lblJumpsP2
       // 
@@ -279,14 +308,14 @@ namespace Checkers
       this.lblJumpsP2.Text = "Jumps:";
       this.lblJumpsP2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
-      // lblPiecesP2
+      // lblRemainingP2
       // 
-      this.lblPiecesP2.Location = new System.Drawing.Point(0, 188);
-      this.lblPiecesP2.Name = "lblPiecesP2";
-      this.lblPiecesP2.Size = new System.Drawing.Size(68, 16);
-      this.lblPiecesP2.TabIndex = 3;
-      this.lblPiecesP2.Text = "Pieces:";
-      this.lblPiecesP2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+      this.lblRemainingP2.Location = new System.Drawing.Point(0, 188);
+      this.lblRemainingP2.Name = "lblRemainingP2";
+      this.lblRemainingP2.Size = new System.Drawing.Size(68, 16);
+      this.lblRemainingP2.TabIndex = 3;
+      this.lblRemainingP2.Text = "Remaining:";
+      this.lblRemainingP2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
       // txtJumpsP2
       // 
@@ -338,6 +367,13 @@ namespace Checkers
       this.menuGameNew.Shortcut = System.Windows.Forms.Shortcut.F2;
       this.menuGameNew.Text = "&New Game...";
       this.menuGameNew.Click += new System.EventHandler(this.menuGameNew_Click);
+      // 
+      // menuGameEnd
+      // 
+      this.menuGameEnd.Enabled = false;
+      this.menuGameEnd.Index = 1;
+      this.menuGameEnd.Text = "&End Game";
+      this.menuGameEnd.Click += new System.EventHandler(this.menuGameEnd_Click);
       // 
       // menuGameLine01
       // 
@@ -475,11 +511,11 @@ namespace Checkers
       // 
       this.CheckersUI.Location = new System.Drawing.Point(4, 4);
       this.CheckersUI.Name = "CheckersUI";
-      this.CheckersUI.OptionalJumping = false;
       this.CheckersUI.Size = new System.Drawing.Size(270, 270);
       this.CheckersUI.TabIndex = 0;
       this.CheckersUI.GameStopped += new System.EventHandler(this.CheckersUI_GameStopped);
       this.CheckersUI.GameStarted += new System.EventHandler(this.CheckersUI_GameStarted);
+      this.CheckersUI.WinnerDeclared += new System.EventHandler(this.CheckersUI_WinnerDeclared);
       this.CheckersUI.TurnChanged += new System.EventHandler(this.CheckersUI_TurnChanged);
       // 
       // imlTurn
@@ -489,12 +525,9 @@ namespace Checkers
       this.imlTurn.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imlTurn.ImageStream")));
       this.imlTurn.TransparentColor = System.Drawing.Color.Transparent;
       // 
-      // menuGameEnd
+      // tmrTimePassed
       // 
-      this.menuGameEnd.Enabled = false;
-      this.menuGameEnd.Index = 1;
-      this.menuGameEnd.Text = "&End Game";
-      this.menuGameEnd.Click += new System.EventHandler(this.menuGameEnd_Click);
+      this.tmrTimePassed.Tick += new System.EventHandler(this.tmrTimePassed_Tick);
       // 
       // frmMain
       // 
@@ -539,7 +572,12 @@ namespace Checkers
     
     
     private void frmMain_Load (object sender, System.EventArgs e)
-    { Size = new Size(MinimumSize.Width + 130, MinimumSize.Height); }
+    {
+      Size = new Size(MinimumSize.Width + 130, MinimumSize.Height);
+      // !!!!! Load settings
+      settings = CheckersSettings.Load();
+      UpdateBoard();
+    }
     private void frmMain_Closing (object sender, System.ComponentModel.CancelEventArgs e)
     { if (!DoCloseGame()) e.Cancel = true; }
     
@@ -566,7 +604,13 @@ namespace Checkers
       this.Height = (( menuViewNetPanel.Checked )?( this.MinimumSize.Height + 80 ):( this.MinimumSize.Height ));
     }
     private void menuViewPreferences_Click (object sender, System.EventArgs e)
-    { MessageBox.Show(this, "!!!!! Settings !!!!!"); }
+    {
+      frmPreferences form = new frmPreferences();
+      form.Settings = settings;
+      if (form.ShowDialog(this) == DialogResult.Cancel) return;
+      settings = form.Settings;
+      UpdateBoard();
+    }
     
     private void menuHelpAbout_Click (object sender, System.EventArgs e)
     { (new frmAbout()).ShowDialog(this); }
@@ -577,11 +621,16 @@ namespace Checkers
     { DoStopped(); }
     private void CheckersUI_TurnChanged(object sender, System.EventArgs e)
     { DoNextTurn(); }
+    private void CheckersUI_WinnerDeclared (object sender, System.EventArgs e)
+    { DoWinnerDeclared(); }
+    
+    private void tmrTimePassed_Tick (object sender, System.EventArgs e)
+    { DoUpdateTimePassed(); }
     
     
     private void DoNewGame ()
     {
-      if (CheckersUI.IsPlaying)
+      if ((CheckersUI.IsPlaying) || (CheckersUI.Winner != 0))
       {
         if (!DoCloseGame()) return;
         // Stop current game (with no winner)
@@ -590,18 +639,61 @@ namespace Checkers
       
       // Get new game type
       frmNewGame newGame = new frmNewGame();
+      // Set defaults
+      newGame.GameType = gameType;
+      newGame.Player1Name = lblNameP1.Text;
+      newGame.Player2Name = lblNameP2.Text;
+      
+      // Show dialog
       if (newGame.ShowDialog(this) == DialogResult.Cancel) return;
-      int difficulty = newGame.Difficulty;  // !!!!!
-      CheckersUI.FirstMove = newGame.FirstMove;
+      
+      // Set new game parameters
+      gameType = newGame.GameType;
+      
+      // Set Game Panel properties
+      lblNameP1.Text = newGame.Player1Name; lblNameP2.Text = newGame.Player2Name;
+      picPawnP1.Image = newGame.ImageSet[0]; picPawnP2.Image = newGame.ImageSet[2];
+      
+      // Set UI properties
+      switch (gameType)
+      {
+        case GameType.SinglePlayer:
+          CheckersUI.Player1Active = true;
+          CheckersUI.Player2Active = false;
+        switch (newGame.Difficulty)
+        {
+          case 0: agent = new CheckersRandomAgent(); break;
+          case 1: agent = new CheckersMostJumpsAgent(); break;
+          default: return;
+        }
+          break;
+        case GameType.Multiplayer:
+          CheckersUI.Player1Active = true;
+          CheckersUI.Player2Active = true;
+          break;
+        case GameType.NetGame:
+          CheckersUI.Player1Active = true;
+          CheckersUI.Player2Active = false;
+          break;
+        default: return;
+      }
       CheckersUI.CustomPawn1 = newGame.ImageSet[0]; CheckersUI.CustomKing1 = newGame.ImageSet[1];
       CheckersUI.CustomPawn2 = newGame.ImageSet[2]; CheckersUI.CustomKing2 = newGame.ImageSet[3];
       
+      // Create the game !!!!! Start with newGame.Game ??
+      CheckersGame game = new CheckersGame();
+      game.FirstMove = newGame.FirstMove;
+      game.OptionalJumping = newGame.OptionalJumping;
+      // !!!!! game.OptionalJumping
+      
       // Start a new checkers game
-      CheckersUI.Play();
+      CheckersUI.Play(game);
     }
     
     private void DoStarted ()
     {
+      playTime = DateTime.Now;
+      tmrTimePassed.Start(); DoUpdateTimePassed();
       panGameInfo.Visible = true;
       menuGameEnd.Enabled = true;
       DoNextTurn();
@@ -610,26 +702,42 @@ namespace Checkers
     {
       panGameInfo.Visible = false;
       menuGameEnd.Enabled = false;
+      tmrTimePassed.Stop(); txtTimePassed.Text = "0:00";
     }
     private void DoNextTurn ()
     {
-      DoShowTurn(CheckersUI.Turn);
+      DoShowTurn(CheckersUI.Game.Turn);
+      if ((gameType == GameType.SinglePlayer) && (CheckersUI.Game.Turn == 2))
+        CheckersUI.MovePiece(agent);        // !!!!! Move after time interval
+      UpdatePlayerInfo();
     }
     private void DoWinnerDeclared ()
     {
-      picTurn.Visible = false;    // !!!!! Winner logo
+      UpdatePlayerInfo();
+      tmrTimePassed.Stop(); DoUpdateTimePassed();
+      DoShowWinner(CheckersUI.Winner);
     }
     
     private bool DoCloseGame ()
     {
-      if (!CheckersUI.IsPlaying) return true;
+      if ((!CheckersUI.IsPlaying) && (CheckersUI.Winner == 0)) return true;
       // !!!!! Ask for 'stalemate' in multiplayer mode
-      if (MessageBox.Show(this, "Quit current game?", "Checkers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-        return false;
+      if (CheckersUI.IsPlaying)
+      {
+        // Confirm the quit
+        if (MessageBox.Show(this, "Quit current game?", "Checkers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+          return false;
+      }
+      picTurn.Visible = false;
       CheckersUI.Stop();
       return true;
     }
     
+    private void DoUpdateTimePassed ()
+    {
+      TimeSpan time = DateTime.Now.Subtract(playTime);
+      txtTimePassed.Text = ((int)time.TotalMinutes).ToString().PadLeft(2, '0') + ":" + time.Seconds.ToString().PadLeft(2, '0');
+    }
     private void DoShowTurn (int player)
     {
       picTurn.Visible = false;
@@ -644,11 +752,53 @@ namespace Checkers
       }
       else if (player == 2)
       {
-        picTurn.Image = imlTurn.Images[1];
+        picTurn.Image = imlTurn.Images[(( gameType == GameType.Multiplayer )?( 0 ):( 1 ))];
         picTurn.Top = picPawnP2.Top + 1;
         picTurn.Visible = true;
         lblNameP2.BackColor = Color.FromKnownColor(KnownColor.Highlight); lblNameP2.ForeColor = Color.FromKnownColor(KnownColor.HighlightText);
       }
+    }
+    private void DoShowWinner (int player)
+    {
+      picTurn.Visible = false;
+      lblNameP1.BackColor = Color.FromKnownColor(KnownColor.Control); lblNameP1.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
+      lblNameP2.BackColor = Color.FromKnownColor(KnownColor.Control); lblNameP2.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
+      if (player == 1)
+      {
+        picTurn.Image = imlTurn.Images[2];
+        picTurn.Top = picPawnP1.Top + 1;
+        picTurn.Visible = true;
+      }
+      else if (player == 2)
+      {
+        picTurn.Image = imlTurn.Images[2];
+        picTurn.Top = picPawnP2.Top + 1;
+        picTurn.Visible = true;
+      }
+    }
+    
+    private void UpdatePlayerInfo ()
+    {
+      // Update player information
+      txtRemainingP1.Text = CheckersUI.Game.GetRemainingCount(1).ToString();
+      txtJumpsP1.Text = CheckersUI.Game.GetJumpedCount(2).ToString();
+      txtRemainingP2.Text = CheckersUI.Game.GetRemainingCount(2).ToString();
+      txtJumpsP2.Text = CheckersUI.Game.GetJumpedCount(1).ToString();
+    }
+    
+    private void UpdateBoard ()
+    {
+      CheckersUI.BackColor = settings.BackColor;
+      CheckersUI.BoardBackColor = settings.BoardBackColor;
+      CheckersUI.BoardForeColor = settings.BoardForeColor;
+      CheckersUI.BoardGridColor = settings.BoardGridColor;
+    }
+    
+    private void PlaySound (CheckersSounds sound)
+    {
+      // Play sound
+      if (settings.MuteSounds) return;
+      sndPlaySound(settings.sounds[(int)sound], IntPtr.Zero, (SoundFlags.SND_FileName | SoundFlags.SND_ASYNC | SoundFlags.SND_NOWAIT));
     }
   }
 }

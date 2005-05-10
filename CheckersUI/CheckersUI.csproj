@@ -117,7 +117,7 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "Images\ToolboxBitmap.png"
+                    RelPath = "ToolboxBitmap.png"
                     BuildAction = "EmbeddedResource"
                 />
             </Include>

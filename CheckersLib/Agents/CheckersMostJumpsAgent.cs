@@ -39,7 +39,8 @@ namespace Uberware.Gaming.Checkers.Agents
         foreach (Point p in points)
         {
           CheckersMove next = move.Fork();
-          possibleMoves.Add(next.Move(p));
+          next.Move(p);
+          possibleMoves.Add(next);
         }
       }
       // Get list of max jumps

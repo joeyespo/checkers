@@ -1,0 +1,26 @@
+Checkers ToDo
+-------------
+ 
+ * Time remaining
+ * Create king PictureBox in 'New Game' for custom king images (initially holds default king icon)
+ * Naming players
+ * Save/load settings
+ - Button to 'show last move'
+ - Window flashing
+ - Sounds
+ 
+ Checkers UI
+ -----------
+ 
+ x With optional jumping, if double-jump is available keep going .. if piece is placed on same spot, end turn
+ - Be sure no 'game' objects can throw NullReferenceException in public functions
+ - Make event-based in case coder uses internal game structure to play
+ - Easier double-jumps (allow mistakes in dragging ??)
+ - Hide 'jumped' in the process of a double-jump
+ - Smooth animations
+ 
+ Checkers Game
+ -------------
+ 
+ * Remember last CheckersPiece that moved: LastMoved
+ x Make game able to play with optional jumping

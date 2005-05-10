@@ -46,6 +46,9 @@ namespace Uberware.Gaming.Checkers
     internal void Moved (Point location)
     { this.location = location; }
     
+    internal void Promoted ()
+    { rank = CheckersRank.King; }
+    
     internal void RemovedFromPlay ()
     {
       location = Point.Empty;

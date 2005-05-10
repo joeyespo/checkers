@@ -21,7 +21,6 @@ namespace Uberware.Gaming.Checkers
       this.game = game;
       this.piece = piece;
       board = (CheckersPiece [,])game.Board.Clone();
-      board[piece.Location.X, piece.Location.Y] = null;
       currentLocation = piece.Location;
       jumped = new ArrayList();
       path = new ArrayList();
@@ -200,6 +199,8 @@ namespace Uberware.Gaming.Checkers
           }
           if ((Math.Abs(currentLocation.X - location.X) == 1) && (Math.Abs(currentLocation.Y - location.Y) == 1))
             cannotMove = true;
+          board[currentLocation.X, currentLocation.Y] = null;
+          board[location.X, location.Y] = piece;
           currentLocation = location;
           path.Add(location);
           return true;
@@ -265,7 +266,7 @@ namespace Uberware.Gaming.Checkers
           foreach (CheckersPiece testPiece in game.EnumPlayerPieces(game.Turn))
           {
             ArrayList dummy;
-            if (EnumJumpMovesCore(testPiece.Location, out dummy).Count == 0) continue;
+            if (EnumJumpMovesCore(testPiece, testPiece.Location, out dummy).Count == 0) continue;
             canSingleMove = false;
             break;
           }
@@ -293,6 +294,8 @@ namespace Uberware.Gaming.Checkers
     }
     
     private ArrayList EnumJumpMovesCore (Point fromLocation, out ArrayList jumped)
+    { return EnumJumpMovesCore(piece, fromLocation, out jumped); }
+    private ArrayList EnumJumpMovesCore (CheckersPiece piece, Point fromLocation, out ArrayList jumped)
     {
       ArrayList moves = new ArrayList();
       jumped = new ArrayList();
