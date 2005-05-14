@@ -17,8 +17,9 @@ namespace Uberware.Gaming.Checkers.Agents
     {
       foreach (CheckersPiece piece in game.EnumMovablePieces())
       {
-        CheckersMove move = new CheckersMove(game, piece);
+        CheckersMove move = game.BeginMove(piece);
         move.EnumMoves();
+        // !!!!!
       }
       // Should never reach here
       return null;

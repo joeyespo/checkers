@@ -9,6 +9,9 @@ namespace Uberware.Gaming.Checkers
     public int Add (CheckersPiece item)
     { return InnerList.Add(item); }
     
+    public void AddRange (CheckersPiece [] items)
+    { foreach (CheckersPiece item in items) Add(item); }
+    
     public void Insert (int index, CheckersPiece item)
     { InnerList.Insert(index, item); }
     
@@ -23,6 +26,14 @@ namespace Uberware.Gaming.Checkers
     
     public void CopyTo (CheckersPiece [] array, int index)
     { InnerList.CopyTo(array, index); }
+    
+    /// <summary>Creates a shallow copy of the CheckersPieceCollection.</summary>
+    public CheckersPieceCollection Clone ()
+    {
+      CheckersPieceCollection clone = new CheckersPieceCollection();
+      clone.AddRange(ToArray());
+      return clone;
+    }
     
     public CheckersPiece this [int index]
     {

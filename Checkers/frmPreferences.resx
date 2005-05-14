@@ -280,6 +280,9 @@
         AAH/AfgBHwb/AeABAwH/BAAJ/wH4AR8B/wQADP8aAAs=
 </value>
   </data>
+  <data name="menuColor.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>354, 17</value>
+  </data>
   <data name="dlgColorDialog.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>107, 17</value>
   </data>

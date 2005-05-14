@@ -7,34 +7,43 @@ namespace Uberware.Gaming.Checkers
   public class CheckersMove
   {
     private CheckersGame game;
+    private CheckersGame initialGame;
     private CheckersPiece piece;
+    private CheckersPiece initialPiece;
     private CheckersPiece [,] board;
     private Point currentLocation;
     private ArrayList jumped;
     private ArrayList path;
+    private bool kinged;
     private bool cannotMove;
     
-    internal CheckersMove (CheckersGame game, CheckersPiece piece)
+    // Will be create indirectly from a CheckersGame object via BeginMove
+    internal CheckersMove (CheckersGame game, CheckersPiece piece, bool makeReadOnlyCopy)
     {
-      if (game == null) throw new ArgumentNullException("game");
-      if (piece == null) throw new ArgumentNullException("piece");
       this.game = game;
       this.piece = piece;
+      initialGame = (( (makeReadOnlyCopy) && (!game.IsReadOnly) )?( CheckersGame.MakeReadOnly(game) ):( game ));
+      initialPiece = initialGame.Pieces[Array.IndexOf(game.Pieces, piece)];
       board = (CheckersPiece [,])game.Board.Clone();
       currentLocation = piece.Location;
       jumped = new ArrayList();
       path = new ArrayList();
       cannotMove = false;
+      kinged = false;
     }
     
+    /// <summary>Creates a Checkers move object from a given path.</summary>
+    /// <param name="game">The Checkers game to create the movement to.</param>
+    /// <param name="piece">The Checkers piece which will be moving.</param>
+    /// <param name="path">The path to move along.</param>
+    /// <returns>The new Checkers move object.</returns>
     internal static CheckersMove FromPath (CheckersGame game, CheckersPiece piece, Point [] path)
     {
-      CheckersMove move = new CheckersMove(game, piece);
+      CheckersMove move = new CheckersMove(game, piece, true);
       foreach (Point p in path)
         if (move.Move(p) == false) return null;
       return move;
     }
-    
     
     #region Public Properties
     
@@ -42,13 +51,25 @@ namespace Uberware.Gaming.Checkers
     public CheckersGame Game
     { get { return game; } }
     
+    /// <summary>Gets the initial Checkers game to which the movement began.</summary>
+    public CheckersGame InitialGame
+    { get { return initialGame; } }
+    
     /// <summary>Gets the Checkers piece to which is being moved.</summary>
     public CheckersPiece Piece
     { get { return piece; } }
     
+    /// <summary>Gets the initial Checkers piece to which was moved.</summary>
+    public CheckersPiece InitialPiece
+    { get { return initialPiece; } }
+    
     /// <summary>Gets the list of Checkers pieces that will be jumped if this path is taken.</summary>
     public CheckersPiece [] Jumped
     { get { return (CheckersPiece [])jumped.ToArray(typeof(CheckersPiece)); } }
+    
+    /// <summary>Gets whether or not the piece has been kinged as a result of the movement taken place.</summary>
+    public bool Kinged
+    { get { return kinged; } }
     
     /// <summary>Gets the current location of the movement.</summary>
     public Point CurrentLocation
@@ -64,7 +85,7 @@ namespace Uberware.Gaming.Checkers
     
     /// <summary>Gets whether or not a move is possible from this point.</summary>
     public bool CanMove
-    { get { return (EnumMoves().Length != 0); } }
+    { get { return (!cannotMove) && (EnumMoves().Length != 0); } }
     
     /// <summary>Gets whether or not a move is required from this point.</summary>
     public bool MustMove
@@ -79,18 +100,17 @@ namespace Uberware.Gaming.Checkers
     public Point [] EnumMoves ()
     {
       if (cannotMove) return new Point [0];
-      CheckersPiece [] jumped;
-      return EnumMovesCore(currentLocation, out jumped);
+      CheckersPiece [] jumpArray;
+      return EnumMovesCore(currentLocation, out jumpArray);
     }
     /// <summary>Enumerates all possible moves from this point.</summary>
     /// <param name="optionalJumping">Overrides the game's OptionalJumping parameter for the enumeration.</param>
-    /// <param name="jumped">Returns the array of Checkers piecse that are jumped, with respect to the moves.</param>
     /// <returns>An array of points which represent valid moves.</returns>
     public Point [] EnumMoves (bool optionalJumping)
     {
       if (cannotMove) { return new Point [0]; }
-      CheckersPiece [] jumped;
-      return EnumMovesCore(currentLocation, out jumped, optionalJumping);
+      CheckersPiece [] jumpArray;
+      return EnumMovesCore(currentLocation, out jumpArray, optionalJumping);
     }
     /// <summary>Enumerates all possible moves from this point.</summary>
     /// <param name="jumped">Returns the array of Checkers piecse that are jumped, with respect to the moves.</param>
@@ -129,10 +149,11 @@ namespace Uberware.Gaming.Checkers
     public Point [] EnumJumpMoves ()
     {
       if (cannotMove) return new Point [0];
-      ArrayList jumped;
-      return (Point [])EnumJumpMovesCore(currentLocation, out jumped).ToArray(typeof(Point));
+      ArrayList jumpArray;
+      return (Point [])EnumJumpMovesCore(currentLocation, out jumpArray).ToArray(typeof(Point));
     }
     /// <summary>Enumerates all possible jump moves from this point.</summary>
+    /// <param name="jumped">Returns the array of Checkers piecse that are jumped, with respect to the moves.</param>
     /// <returns>An array of points which represent valid moves.</returns>
     public Point [] EnumJumpMoves (out CheckersPiece [] jumped)
     {
@@ -150,10 +171,13 @@ namespace Uberware.Gaming.Checkers
     /// <returns>The new Checkers move object.</returns>
     public CheckersMove Fork ()
     {
-      CheckersMove move = new CheckersMove(game, piece);
+      CheckersMove move = new CheckersMove(game, piece, false);
+      move.initialGame = initialGame;
+      move.initialPiece = initialPiece;
       move.board = (CheckersPiece [,])board.Clone();
       move.currentLocation = currentLocation;
       move.jumped = (ArrayList)jumped.Clone();
+      move.kinged = kinged;
       move.path = (ArrayList)path.Clone();
       move.cannotMove = cannotMove;
       return move;
@@ -203,6 +227,9 @@ namespace Uberware.Gaming.Checkers
           board[location.X, location.Y] = piece;
           currentLocation = location;
           path.Add(location);
+          // King a pawn if reached other end of board
+          if ((!MustMove) && (piece.Rank == CheckersRank.Pawn))
+            kinged = (((piece.Player == 1) && (currentLocation.Y == 0)) || ((piece.Player == 2) && (currentLocation.Y == CheckersGame.BoardSize.Height-1)));
           return true;
         }
       }
@@ -220,7 +247,6 @@ namespace Uberware.Gaming.Checkers
     /// <returns>True if specified location is in bounds.</returns>
     public bool InBounds (int x, int y)
     { return game.InBounds(x, y); }
-    
     
     private Point [] EnumMovesCore (Point fromLocation, out CheckersPiece [] jumped)
     { return EnumMovesCore(fromLocation, out jumped, game.OptionalJumping); }

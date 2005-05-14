@@ -17,7 +17,7 @@ namespace Uberware.Gaming.Checkers.Agents
     public override CheckersMove NextMove (CheckersGame game)
     {
       CheckersPiece [] movable = game.EnumMovablePieces();
-      CheckersMove move = new CheckersMove(game, movable[rand.Next(movable.Length)]);
+      CheckersMove move = game.BeginMove(movable[rand.Next(movable.Length)]);
       while (move.MustMove)
       {
         Point [] moves = move.EnumMoves();

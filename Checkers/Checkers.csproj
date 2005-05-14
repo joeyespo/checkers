@@ -83,16 +83,6 @@
                     HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Design.dll"
                 />
                 <Reference
-                    Name = "CheckersUI"
-                    Project = "{66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
-                <Reference
-                    Name = "CheckersLib"
-                    Project = "{EF66778A-5067-49AA-91AC-70D048F482F8}"
-                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
-                />
-                <Reference
                     Name = "MozBar"
                     AssemblyName = "MozBar"
                     HintPath = "MozBar.dll"
@@ -106,6 +96,16 @@
                     Name = "System.Runtime.Serialization.Formatters.Soap"
                     AssemblyName = "System.Runtime.Serialization.Formatters.Soap"
                     HintPath = "..\..\..\..\..\..\..\..\..\WINDOWS\Microsoft.NET\Framework\v1.0.3705\System.Runtime.Serialization.Formatters.Soap.dll"
+                />
+                <Reference
+                    Name = "CheckersUI"
+                    Project = "{66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
+                <Reference
+                    Name = "CheckersLib"
+                    Project = "{EF66778A-5067-49AA-91AC-70D048F482F8}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
             </References>
         </Build>
@@ -161,17 +161,17 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "frmShowGames.cs"
-                    SubType = "Form"
+                    RelPath = "Settings.cs"
+                    SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "frmShowGames.resx"
-                    DependentUpon = "frmShowGames.cs"
-                    BuildAction = "EmbeddedResource"
+                    RelPath = "TcpClient.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Preferences.cs"
+                    RelPath = "TcpClientCollection.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

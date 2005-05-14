@@ -15,6 +15,15 @@ namespace Checkers
     private CheckersSettings settings;
     private System.Windows.Forms.CheckBox chkMuteSounds;
     private System.Windows.Forms.Button btnDefault;
+    private System.Windows.Forms.GroupBox grpGeneral;
+    private System.Windows.Forms.CheckBox chkShowJumpMessage;
+    private System.Windows.Forms.CheckBox chkHighlightSelection;
+    private System.Windows.Forms.CheckBox chkHighlightPossibleMoves;
+    private System.Windows.Forms.CheckBox chkShowTextFeedback;
+    private System.Windows.Forms.MenuItem menuSetDefault;
+    private System.Windows.Forms.ContextMenu menuColor;
+    private System.Windows.Forms.MenuItem menuChangeColor;
+    private System.Windows.Forms.MenuItem menuColorLine01;
     private string [] sounds;
     
     #region API Imports
@@ -119,6 +128,11 @@ namespace Checkers
       this.mozSounds = new Pabo.MozBar.MozItem();
       this.tabPreferences = new System.Windows.Forms.TabControl();
       this.tabGeneral = new System.Windows.Forms.TabPage();
+      this.grpGeneral = new System.Windows.Forms.GroupBox();
+      this.chkShowJumpMessage = new System.Windows.Forms.CheckBox();
+      this.chkHighlightSelection = new System.Windows.Forms.CheckBox();
+      this.chkHighlightPossibleMoves = new System.Windows.Forms.CheckBox();
+      this.chkShowTextFeedback = new System.Windows.Forms.CheckBox();
       this.grpNet = new System.Windows.Forms.GroupBox();
       this.chkFlashWindowOnTurn = new System.Windows.Forms.CheckBox();
       this.chkFlashWindowOnMessage = new System.Windows.Forms.CheckBox();
@@ -126,6 +140,10 @@ namespace Checkers
       this.tabBoard = new System.Windows.Forms.TabPage();
       this.lblBoardBackColor = new System.Windows.Forms.Label();
       this.picBoardBackColor = new System.Windows.Forms.PictureBox();
+      this.menuColor = new System.Windows.Forms.ContextMenu();
+      this.menuChangeColor = new System.Windows.Forms.MenuItem();
+      this.menuColorLine01 = new System.Windows.Forms.MenuItem();
+      this.menuSetDefault = new System.Windows.Forms.MenuItem();
       this.lblBackColor = new System.Windows.Forms.Label();
       this.picBackColor = new System.Windows.Forms.PictureBox();
       this.lblBoardForeColor = new System.Windows.Forms.Label();
@@ -133,6 +151,7 @@ namespace Checkers
       this.picBoardGridColor = new System.Windows.Forms.PictureBox();
       this.lblBoardGridColor = new System.Windows.Forms.Label();
       this.tabSounds = new System.Windows.Forms.TabPage();
+      this.chkMuteSounds = new System.Windows.Forms.CheckBox();
       this.lstSounds = new System.Windows.Forms.ListBox();
       this.lblSounds = new System.Windows.Forms.Label();
       this.txtSoundFile = new System.Windows.Forms.TextBox();
@@ -145,12 +164,12 @@ namespace Checkers
       this.btnOK = new System.Windows.Forms.Button();
       this.dlgColorDialog = new System.Windows.Forms.ColorDialog();
       this.dlgOpenSound = new System.Windows.Forms.OpenFileDialog();
-      this.chkMuteSounds = new System.Windows.Forms.CheckBox();
       this.btnDefault = new System.Windows.Forms.Button();
       ((System.ComponentModel.ISupportInitialize)(this.mozPreferences)).BeginInit();
       this.mozPreferences.SuspendLayout();
       this.tabPreferences.SuspendLayout();
       this.tabGeneral.SuspendLayout();
+      this.grpGeneral.SuspendLayout();
       this.grpNet.SuspendLayout();
       this.tabBoard.SuspendLayout();
       this.tabSounds.SuspendLayout();
@@ -185,7 +204,7 @@ namespace Checkers
       this.mozPreferences.Name = "mozPreferences";
       this.mozPreferences.Padding.Horizontal = 2;
       this.mozPreferences.Padding.Vertical = 2;
-      this.mozPreferences.Size = new System.Drawing.Size(76, 296);
+      this.mozPreferences.Size = new System.Drawing.Size(76, 316);
       this.mozPreferences.Style = Pabo.MozBar.paneStyle.Vertical;
       this.mozPreferences.TabIndex = 0;
       this.mozPreferences.TabStop = false;
@@ -258,20 +277,77 @@ namespace Checkers
       this.tabPreferences.Multiline = true;
       this.tabPreferences.Name = "tabPreferences";
       this.tabPreferences.SelectedIndex = 0;
-      this.tabPreferences.Size = new System.Drawing.Size(386, 316);
+      this.tabPreferences.Size = new System.Drawing.Size(398, 336);
       this.tabPreferences.TabIndex = 2;
       this.tabPreferences.SelectedIndexChanged += new System.EventHandler(this.tabPreferences_SelectedIndexChanged);
       // 
       // tabGeneral
       // 
       this.tabGeneral.Controls.AddRange(new System.Windows.Forms.Control[] {
+                                                                             this.grpGeneral,
                                                                              this.grpNet});
       this.tabGeneral.ImageIndex = 0;
       this.tabGeneral.Location = new System.Drawing.Point(4, 42);
       this.tabGeneral.Name = "tabGeneral";
-      this.tabGeneral.Size = new System.Drawing.Size(378, 270);
+      this.tabGeneral.Size = new System.Drawing.Size(390, 290);
       this.tabGeneral.TabIndex = 0;
       this.tabGeneral.Text = "General";
+      // 
+      // grpGeneral
+      // 
+      this.grpGeneral.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.grpGeneral.Controls.AddRange(new System.Windows.Forms.Control[] {
+                                                                             this.chkShowJumpMessage,
+                                                                             this.chkHighlightSelection,
+                                                                             this.chkHighlightPossibleMoves,
+                                                                             this.chkShowTextFeedback});
+      this.grpGeneral.Location = new System.Drawing.Point(0, 12);
+      this.grpGeneral.Name = "grpGeneral";
+      this.grpGeneral.Size = new System.Drawing.Size(388, 112);
+      this.grpGeneral.TabIndex = 1;
+      this.grpGeneral.TabStop = false;
+      this.grpGeneral.Text = "General";
+      // 
+      // chkShowJumpMessage
+      // 
+      this.chkShowJumpMessage.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.chkShowJumpMessage.Location = new System.Drawing.Point(8, 84);
+      this.chkShowJumpMessage.Name = "chkShowJumpMessage";
+      this.chkShowJumpMessage.Size = new System.Drawing.Size(372, 20);
+      this.chkShowJumpMessage.TabIndex = 0;
+      this.chkShowJumpMessage.Text = "Show detailed message when a jump must be completed";
+      // 
+      // chkHighlightSelection
+      // 
+      this.chkHighlightSelection.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.chkHighlightSelection.Location = new System.Drawing.Point(8, 24);
+      this.chkHighlightSelection.Name = "chkHighlightSelection";
+      this.chkHighlightSelection.Size = new System.Drawing.Size(372, 20);
+      this.chkHighlightSelection.TabIndex = 0;
+      this.chkHighlightSelection.Text = "Highlight selected squares";
+      // 
+      // chkHighlightPossibleMoves
+      // 
+      this.chkHighlightPossibleMoves.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.chkHighlightPossibleMoves.Location = new System.Drawing.Point(8, 44);
+      this.chkHighlightPossibleMoves.Name = "chkHighlightPossibleMoves";
+      this.chkHighlightPossibleMoves.Size = new System.Drawing.Size(372, 20);
+      this.chkHighlightPossibleMoves.TabIndex = 0;
+      this.chkHighlightPossibleMoves.Text = "Highlight possible moves";
+      // 
+      // chkShowTextFeedback
+      // 
+      this.chkShowTextFeedback.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.chkShowTextFeedback.Location = new System.Drawing.Point(8, 64);
+      this.chkShowTextFeedback.Name = "chkShowTextFeedback";
+      this.chkShowTextFeedback.Size = new System.Drawing.Size(372, 20);
+      this.chkShowTextFeedback.TabIndex = 0;
+      this.chkShowTextFeedback.Text = "Show text feedback";
       // 
       // grpNet
       // 
@@ -281,34 +357,40 @@ namespace Checkers
                                                                          this.chkFlashWindowOnTurn,
                                                                          this.chkFlashWindowOnMessage,
                                                                          this.chkShowNetPanelOnMessage});
-      this.grpNet.Location = new System.Drawing.Point(0, 12);
+      this.grpNet.Location = new System.Drawing.Point(0, 136);
       this.grpNet.Name = "grpNet";
-      this.grpNet.Size = new System.Drawing.Size(376, 92);
+      this.grpNet.Size = new System.Drawing.Size(388, 92);
       this.grpNet.TabIndex = 0;
       this.grpNet.TabStop = false;
       this.grpNet.Text = "Net Settings";
       // 
       // chkFlashWindowOnTurn
       // 
+      this.chkFlashWindowOnTurn.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
       this.chkFlashWindowOnTurn.Location = new System.Drawing.Point(8, 24);
       this.chkFlashWindowOnTurn.Name = "chkFlashWindowOnTurn";
-      this.chkFlashWindowOnTurn.Size = new System.Drawing.Size(360, 20);
+      this.chkFlashWindowOnTurn.Size = new System.Drawing.Size(372, 20);
       this.chkFlashWindowOnTurn.TabIndex = 0;
       this.chkFlashWindowOnTurn.Text = "Flash window when your turn";
       // 
       // chkFlashWindowOnMessage
       // 
+      this.chkFlashWindowOnMessage.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
       this.chkFlashWindowOnMessage.Location = new System.Drawing.Point(8, 44);
       this.chkFlashWindowOnMessage.Name = "chkFlashWindowOnMessage";
-      this.chkFlashWindowOnMessage.Size = new System.Drawing.Size(360, 20);
+      this.chkFlashWindowOnMessage.Size = new System.Drawing.Size(372, 20);
       this.chkFlashWindowOnMessage.TabIndex = 1;
       this.chkFlashWindowOnMessage.Text = "Flash window when a message is received";
       // 
       // chkShowNetPanelOnMessage
       // 
+      this.chkShowNetPanelOnMessage.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
       this.chkShowNetPanelOnMessage.Location = new System.Drawing.Point(8, 64);
       this.chkShowNetPanelOnMessage.Name = "chkShowNetPanelOnMessage";
-      this.chkShowNetPanelOnMessage.Size = new System.Drawing.Size(360, 20);
+      this.chkShowNetPanelOnMessage.Size = new System.Drawing.Size(372, 20);
       this.chkShowNetPanelOnMessage.TabIndex = 2;
       this.chkShowNetPanelOnMessage.Text = "Show Net Panel when message is received";
       // 
@@ -326,15 +408,17 @@ namespace Checkers
       this.tabBoard.ImageIndex = 1;
       this.tabBoard.Location = new System.Drawing.Point(4, 42);
       this.tabBoard.Name = "tabBoard";
-      this.tabBoard.Size = new System.Drawing.Size(378, 270);
+      this.tabBoard.Size = new System.Drawing.Size(390, 290);
       this.tabBoard.TabIndex = 1;
       this.tabBoard.Text = "Appearance";
       // 
       // lblBoardBackColor
       // 
+      this.lblBoardBackColor.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
       this.lblBoardBackColor.Location = new System.Drawing.Point(45, 56);
       this.lblBoardBackColor.Name = "lblBoardBackColor";
-      this.lblBoardBackColor.Size = new System.Drawing.Size(324, 16);
+      this.lblBoardBackColor.Size = new System.Drawing.Size(336, 16);
       this.lblBoardBackColor.TabIndex = 9;
       this.lblBoardBackColor.Text = "Board Background Color";
       // 
@@ -342,18 +426,45 @@ namespace Checkers
       // 
       this.picBoardBackColor.BackColor = System.Drawing.Color.White;
       this.picBoardBackColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.picBoardBackColor.ContextMenu = this.menuColor;
       this.picBoardBackColor.Location = new System.Drawing.Point(9, 48);
       this.picBoardBackColor.Name = "picBoardBackColor";
       this.picBoardBackColor.Size = new System.Drawing.Size(32, 32);
       this.picBoardBackColor.TabIndex = 7;
       this.picBoardBackColor.TabStop = false;
-      this.picBoardBackColor.Click += new System.EventHandler(this.picColor_Click);
+      this.picBoardBackColor.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picColor_MouseDown);
+      // 
+      // menuColor
+      // 
+      this.menuColor.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+                                                                              this.menuChangeColor,
+                                                                              this.menuColorLine01,
+                                                                              this.menuSetDefault});
+      // 
+      // menuChangeColor
+      // 
+      this.menuChangeColor.Index = 0;
+      this.menuChangeColor.Text = "&Change Color...";
+      this.menuChangeColor.Click += new System.EventHandler(this.menuChangeColor_Click);
+      // 
+      // menuColorLine01
+      // 
+      this.menuColorLine01.Index = 1;
+      this.menuColorLine01.Text = "-";
+      // 
+      // menuSetDefault
+      // 
+      this.menuSetDefault.Index = 2;
+      this.menuSetDefault.Text = "Set to &Default";
+      this.menuSetDefault.Click += new System.EventHandler(this.menuSetDefault_Click);
       // 
       // lblBackColor
       // 
+      this.lblBackColor.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
       this.lblBackColor.Location = new System.Drawing.Point(45, 20);
       this.lblBackColor.Name = "lblBackColor";
-      this.lblBackColor.Size = new System.Drawing.Size(324, 16);
+      this.lblBackColor.Size = new System.Drawing.Size(336, 16);
       this.lblBackColor.TabIndex = 8;
       this.lblBackColor.Text = "Background Color";
       // 
@@ -361,18 +472,21 @@ namespace Checkers
       // 
       this.picBackColor.BackColor = System.Drawing.Color.White;
       this.picBackColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.picBackColor.ContextMenu = this.menuColor;
       this.picBackColor.Location = new System.Drawing.Point(9, 12);
       this.picBackColor.Name = "picBackColor";
       this.picBackColor.Size = new System.Drawing.Size(32, 32);
       this.picBackColor.TabIndex = 4;
       this.picBackColor.TabStop = false;
-      this.picBackColor.Click += new System.EventHandler(this.picColor_Click);
+      this.picBackColor.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picColor_MouseDown);
       // 
       // lblBoardForeColor
       // 
+      this.lblBoardForeColor.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
       this.lblBoardForeColor.Location = new System.Drawing.Point(45, 92);
       this.lblBoardForeColor.Name = "lblBoardForeColor";
-      this.lblBoardForeColor.Size = new System.Drawing.Size(324, 16);
+      this.lblBoardForeColor.Size = new System.Drawing.Size(336, 16);
       this.lblBoardForeColor.TabIndex = 10;
       this.lblBoardForeColor.Text = "Board Foreground Color";
       // 
@@ -380,29 +494,33 @@ namespace Checkers
       // 
       this.picBoardForeColor.BackColor = System.Drawing.Color.White;
       this.picBoardForeColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.picBoardForeColor.ContextMenu = this.menuColor;
       this.picBoardForeColor.Location = new System.Drawing.Point(9, 84);
       this.picBoardForeColor.Name = "picBoardForeColor";
       this.picBoardForeColor.Size = new System.Drawing.Size(32, 32);
       this.picBoardForeColor.TabIndex = 5;
       this.picBoardForeColor.TabStop = false;
-      this.picBoardForeColor.Click += new System.EventHandler(this.picColor_Click);
+      this.picBoardForeColor.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picColor_MouseDown);
       // 
       // picBoardGridColor
       // 
       this.picBoardGridColor.BackColor = System.Drawing.Color.White;
       this.picBoardGridColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+      this.picBoardGridColor.ContextMenu = this.menuColor;
       this.picBoardGridColor.Location = new System.Drawing.Point(9, 120);
       this.picBoardGridColor.Name = "picBoardGridColor";
       this.picBoardGridColor.Size = new System.Drawing.Size(32, 32);
       this.picBoardGridColor.TabIndex = 6;
       this.picBoardGridColor.TabStop = false;
-      this.picBoardGridColor.Click += new System.EventHandler(this.picColor_Click);
+      this.picBoardGridColor.MouseDown += new System.Windows.Forms.MouseEventHandler(this.picColor_MouseDown);
       // 
       // lblBoardGridColor
       // 
+      this.lblBoardGridColor.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
       this.lblBoardGridColor.Location = new System.Drawing.Point(45, 128);
       this.lblBoardGridColor.Name = "lblBoardGridColor";
-      this.lblBoardGridColor.Size = new System.Drawing.Size(324, 16);
+      this.lblBoardGridColor.Size = new System.Drawing.Size(336, 16);
       this.lblBoardGridColor.TabIndex = 11;
       this.lblBoardGridColor.Text = "Board Foreground Color";
       // 
@@ -419,9 +537,19 @@ namespace Checkers
       this.tabSounds.ImageIndex = 2;
       this.tabSounds.Location = new System.Drawing.Point(4, 42);
       this.tabSounds.Name = "tabSounds";
-      this.tabSounds.Size = new System.Drawing.Size(378, 270);
+      this.tabSounds.Size = new System.Drawing.Size(390, 290);
       this.tabSounds.TabIndex = 2;
       this.tabSounds.Text = "Sounds";
+      // 
+      // chkMuteSounds
+      // 
+      this.chkMuteSounds.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.chkMuteSounds.Location = new System.Drawing.Point(0, 268);
+      this.chkMuteSounds.Name = "chkMuteSounds";
+      this.chkMuteSounds.Size = new System.Drawing.Size(388, 20);
+      this.chkMuteSounds.TabIndex = 6;
+      this.chkMuteSounds.Text = "Mute all Sounds";
       // 
       // lstSounds
       // 
@@ -431,7 +559,7 @@ namespace Checkers
       this.lstSounds.IntegralHeight = false;
       this.lstSounds.Location = new System.Drawing.Point(0, 32);
       this.lstSounds.Name = "lstSounds";
-      this.lstSounds.Size = new System.Drawing.Size(376, 164);
+      this.lstSounds.Size = new System.Drawing.Size(388, 184);
       this.lstSounds.TabIndex = 1;
       this.lstSounds.SelectedIndexChanged += new System.EventHandler(this.lstSounds_SelectedIndexChanged);
       // 
@@ -441,23 +569,26 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.lblSounds.Location = new System.Drawing.Point(0, 12);
       this.lblSounds.Name = "lblSounds";
-      this.lblSounds.Size = new System.Drawing.Size(380, 20);
+      this.lblSounds.Size = new System.Drawing.Size(392, 20);
       this.lblSounds.TabIndex = 0;
       this.lblSounds.Text = "Game Sounds:";
       this.lblSounds.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
       // txtSoundFile
       // 
-      this.txtSoundFile.Location = new System.Drawing.Point(0, 220);
+      this.txtSoundFile.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.txtSoundFile.Location = new System.Drawing.Point(0, 240);
       this.txtSoundFile.Name = "txtSoundFile";
-      this.txtSoundFile.Size = new System.Drawing.Size(328, 20);
+      this.txtSoundFile.Size = new System.Drawing.Size(340, 20);
       this.txtSoundFile.TabIndex = 3;
       this.txtSoundFile.Text = "";
       this.txtSoundFile.TextChanged += new System.EventHandler(this.txtSoundFile_TextChanged);
       // 
       // btnSoundFile
       // 
-      this.btnSoundFile.Location = new System.Drawing.Point(356, 220);
+      this.btnSoundFile.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
+      this.btnSoundFile.Location = new System.Drawing.Point(368, 240);
       this.btnSoundFile.Name = "btnSoundFile";
       this.btnSoundFile.Size = new System.Drawing.Size(20, 20);
       this.btnSoundFile.TabIndex = 5;
@@ -466,7 +597,8 @@ namespace Checkers
       // 
       // btnSoundPreview
       // 
-      this.btnSoundPreview.Location = new System.Drawing.Point(332, 220);
+      this.btnSoundPreview.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
+      this.btnSoundPreview.Location = new System.Drawing.Point(344, 240);
       this.btnSoundPreview.Name = "btnSoundPreview";
       this.btnSoundPreview.Size = new System.Drawing.Size(20, 20);
       this.btnSoundPreview.TabIndex = 4;
@@ -475,11 +607,11 @@ namespace Checkers
       // 
       // lblSoundFile
       // 
-      this.lblSoundFile.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.lblSoundFile.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.lblSoundFile.Location = new System.Drawing.Point(0, 200);
+      this.lblSoundFile.Location = new System.Drawing.Point(0, 220);
       this.lblSoundFile.Name = "lblSoundFile";
-      this.lblSoundFile.Size = new System.Drawing.Size(380, 20);
+      this.lblSoundFile.Size = new System.Drawing.Size(392, 20);
       this.lblSoundFile.TabIndex = 2;
       this.lblSoundFile.Text = "Sound File:";
       this.lblSoundFile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -494,7 +626,7 @@ namespace Checkers
       this.lblTitle.ForeColor = System.Drawing.SystemColors.HighlightText;
       this.lblTitle.Location = new System.Drawing.Point(0, 4);
       this.lblTitle.Name = "lblTitle";
-      this.lblTitle.Size = new System.Drawing.Size(382, 24);
+      this.lblTitle.Size = new System.Drawing.Size(394, 24);
       this.lblTitle.TabIndex = 0;
       this.lblTitle.Text = "General";
       // 
@@ -506,14 +638,14 @@ namespace Checkers
                                                                            this.lblTitle});
       this.panTitle.Location = new System.Drawing.Point(84, 0);
       this.panTitle.Name = "panTitle";
-      this.panTitle.Size = new System.Drawing.Size(384, 28);
+      this.panTitle.Size = new System.Drawing.Size(396, 28);
       this.panTitle.TabIndex = 1;
       // 
       // btnCancel
       // 
       this.btnCancel.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
       this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(378, 308);
+      this.btnCancel.Location = new System.Drawing.Point(390, 328);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Size = new System.Drawing.Size(88, 36);
       this.btnCancel.TabIndex = 4;
@@ -523,7 +655,7 @@ namespace Checkers
       // 
       this.btnOK.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
       this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnOK.Location = new System.Drawing.Point(282, 308);
+      this.btnOK.Location = new System.Drawing.Point(294, 328);
       this.btnOK.Name = "btnOK";
       this.btnOK.Size = new System.Drawing.Size(88, 36);
       this.btnOK.TabIndex = 3;
@@ -541,17 +673,10 @@ namespace Checkers
       this.dlgOpenSound.ReadOnlyChecked = true;
       this.dlgOpenSound.Title = "Browse for Sound";
       // 
-      // chkMuteSounds
-      // 
-      this.chkMuteSounds.Location = new System.Drawing.Point(0, 248);
-      this.chkMuteSounds.Name = "chkMuteSounds";
-      this.chkMuteSounds.Size = new System.Drawing.Size(376, 20);
-      this.chkMuteSounds.TabIndex = 6;
-      this.chkMuteSounds.Text = "Mute all Sounds";
-      // 
       // btnDefault
       // 
-      this.btnDefault.Location = new System.Drawing.Point(176, 308);
+      this.btnDefault.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
+      this.btnDefault.Location = new System.Drawing.Point(188, 328);
       this.btnDefault.Name = "btnDefault";
       this.btnDefault.Size = new System.Drawing.Size(88, 36);
       this.btnDefault.TabIndex = 5;
@@ -563,7 +688,7 @@ namespace Checkers
       this.AcceptButton = this.btnOK;
       this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
       this.CancelButton = this.btnCancel;
-      this.ClientSize = new System.Drawing.Size(474, 351);
+      this.ClientSize = new System.Drawing.Size(486, 371);
       this.Controls.AddRange(new System.Windows.Forms.Control[] {
                                                                   this.btnDefault,
                                                                   this.btnCancel,
@@ -581,6 +706,7 @@ namespace Checkers
       this.mozPreferences.ResumeLayout(false);
       this.tabPreferences.ResumeLayout(false);
       this.tabGeneral.ResumeLayout(false);
+      this.grpGeneral.ResumeLayout(false);
       this.grpNet.ResumeLayout(false);
       this.tabBoard.ResumeLayout(false);
       this.tabSounds.ResumeLayout(false);
@@ -624,6 +750,11 @@ namespace Checkers
       if (result != DialogResult.Cancel)
       {
         settings = new CheckersSettings();
+        // General settings
+        settings.HighlightSelection = chkHighlightSelection.Checked;
+        settings.HighlightPossibleMoves = chkHighlightPossibleMoves.Checked;
+        settings.ShowJumpMessage = chkShowJumpMessage.Checked;
+        settings.ShowTextFeedback = chkShowTextFeedback.Checked;
         // Net settings
         settings.FlashWindowOnTurn = chkFlashWindowOnTurn.Checked;
         settings.FlashWindowOnMessage = chkFlashWindowOnMessage.Checked;
@@ -640,6 +771,41 @@ namespace Checkers
         settings.Save();
       }
       return result;
+    }
+    
+    private void ShowSettings ()
+    {
+      // General settings
+      chkHighlightSelection.Checked = settings.HighlightSelection;
+      chkHighlightPossibleMoves.Checked = settings.HighlightPossibleMoves;
+      chkShowJumpMessage.Checked = settings.ShowJumpMessage;
+      chkShowTextFeedback.Checked = settings.ShowTextFeedback;
+      // Net settings
+      chkFlashWindowOnTurn.Checked = settings.FlashWindowOnTurn;
+      chkFlashWindowOnMessage.Checked = settings.FlashWindowOnMessage;
+      chkShowNetPanelOnMessage.Checked = settings.ShowNetPanelOnMessage;
+      // Board appearance
+      picBackColor.BackColor = settings.BackColor;
+      picBoardBackColor.BackColor = settings.BoardBackColor;
+      picBoardForeColor.BackColor = settings.BoardForeColor;
+      picBoardGridColor.BackColor = settings.BoardGridColor;
+      // Sounds
+      sounds = (string [])settings.sounds.Clone();
+      lstSounds.Items.Clear();
+      foreach (FieldInfo field in typeof(CheckersSounds).GetFields())
+      {
+        if ((!field.IsPublic) || (field.IsSpecialName)) continue;
+        lstSounds.Items.Add(field.Name);
+      }
+      chkMuteSounds.Checked = settings.MuteSounds;
+      if (lstSounds.Items.Count > 0) lstSounds.SelectedIndex = 0;
+    }
+    
+    private void PlaySound (string soundFileName)
+    {
+      string fileName = (( Path.IsPathRooted(soundFileName) )?( soundFileName ):( Path.GetDirectoryName(Application.ExecutablePath) + "\\Sounds\\" + soundFileName ));
+      // Play sound
+      sndPlaySound(fileName, IntPtr.Zero, (SoundFlags.SND_FileName | SoundFlags.SND_ASYNC | SoundFlags.SND_NOWAIT));
     }
     
     private void frmPreferences_Load (object sender, System.EventArgs e)
@@ -662,11 +828,28 @@ namespace Checkers
     private void mozSounds_Click(object sender, System.EventArgs e)
     { tabPreferences.SelectedTab = tabSounds; }
     
-    private void picColor_Click (object sender, System.EventArgs e)
+    private void picColor_MouseDown (object sender, System.Windows.Forms.MouseEventArgs e)
     {
+      if (e.Button != MouseButtons.Left) return;
       dlgColorDialog.Color = ((PictureBox)sender).BackColor;
       if (dlgColorDialog.ShowDialog(this) == DialogResult.Cancel) return;
       ((PictureBox)sender).BackColor = dlgColorDialog.Color;
+    }
+    
+    private void menuChangeColor_Click (object sender, System.EventArgs e)
+    {
+      PictureBox pic = (PictureBox)((MenuItem)sender).GetContextMenu().SourceControl;
+      dlgColorDialog.Color = pic.BackColor;
+      if (dlgColorDialog.ShowDialog(this) == DialogResult.Cancel) return;
+      pic.BackColor = dlgColorDialog.Color;
+    }
+    private void menuSetDefault_Click (object sender, System.EventArgs e)
+    {
+      PictureBox pic = (PictureBox)((MenuItem)sender).GetContextMenu().SourceControl;
+      if (pic == picBackColor) pic.BackColor = (new CheckersSettings().BackColor);
+      else if (pic == picBoardBackColor) pic.BackColor = (new CheckersSettings().BoardBackColor);
+      else if (pic == picBoardForeColor) pic.BackColor = (new CheckersSettings().BoardForeColor);
+      else if (pic == picBoardGridColor) pic.BackColor = (new CheckersSettings().BoardGridColor);
     }
     
     private void lstSounds_SelectedIndexChanged (object sender, System.EventArgs e)
@@ -703,36 +886,6 @@ namespace Checkers
       if (common.ToLower() == soundsPath.ToLower())
         newFileName = newFileName.Substring(common.Length+1);
       txtSoundFile.Text = newFileName;
-    }
-    
-    private void ShowSettings ()
-    {
-      // Net settings
-      chkFlashWindowOnTurn.Checked = settings.FlashWindowOnTurn;
-      chkFlashWindowOnMessage.Checked = settings.FlashWindowOnMessage;
-      chkShowNetPanelOnMessage.Checked = settings.ShowNetPanelOnMessage;
-      // Board appearance
-      picBackColor.BackColor = settings.BackColor;
-      picBoardBackColor.BackColor = settings.BoardBackColor;
-      picBoardForeColor.BackColor = settings.BoardForeColor;
-      picBoardGridColor.BackColor = settings.BoardGridColor;
-      // Sounds
-      sounds = (string [])settings.sounds.Clone();
-      lstSounds.Items.Clear();
-      foreach (FieldInfo field in typeof(CheckersSounds).GetFields())
-      {
-        if ((!field.IsPublic) || (field.IsSpecialName)) continue;
-        lstSounds.Items.Add(field.Name);
-      }
-      chkMuteSounds.Checked = settings.MuteSounds;
-      if (lstSounds.Items.Count > 0) lstSounds.SelectedIndex = 0;
-    }
-    
-    private void PlaySound (string soundFileName)
-    {
-      string fileName = (( Path.IsPathRooted(soundFileName) )?( soundFileName ):( Path.GetDirectoryName(Application.ExecutablePath) + "\\Sounds\\" + soundFileName ));
-      // Play sound
-      sndPlaySound(fileName, IntPtr.Zero, (SoundFlags.SND_FileName | SoundFlags.SND_ASYNC | SoundFlags.SND_NOWAIT));
     }
   }
 }

@@ -16,22 +16,61 @@ namespace Checkers
     [DefaultValue("Begin.wav")]
     Begin = 0,
     
+    [DefaultValue("ForceEnd.wav")]
+    ForceEnd = 1,
+    
+    [DefaultValue("Winner.wav")]
+    Winner = 2,
+    
     [DefaultValue("EndGame.wav")]
-    EndGame = 1,
-    
-    [DefaultValue("Stalemate.wav")]
-    Stalemate = 2,
-    
-    [DefaultValue("Jump.wav")]
-    Jump = 3,
+    EndGame = 3,
     
     [DefaultValue("Select.wav")]
     Select = 4,
+    
+    [DefaultValue("Deselect.wav")]
+    Deselect = 5,
+    
+    [DefaultValue("BadMove.wav")]
+    BadMove = 6,
+    
+    [DefaultValue("Drop.wav")]
+    Drop = 7,
+    
+    [DefaultValue("Jump.wav")]
+    Jump = 8,
+    
+    [DefaultValue("JumpMultiple.wav")]
+    JumpMultiple = 9,
+    
+    [DefaultValue("King.wav")]
+    King = 10,
+    
+    [DefaultValue("Lost.wav")]
+    Lost = 11,
+    
+    [DefaultValue("MsgSend.wav")]
+    SendMessage = 12,
+    
+    [DefaultValue("MsgRecv.wav")]
+    ReceiveMessage = 13,
   }
   
   [Serializable()]
   public class CheckersSettings
   {
+    public static readonly int Port = 6000;
+    
+    // General settings
+    [DefaultValue(true)]
+    public bool HighlightSelection;
+    
+    [DefaultValue(true)]
+    public bool HighlightPossibleMoves;
+    
+    [DefaultValue(true)]
+    public bool ShowJumpMessage;
+    
     // Net settings
     [DefaultValue(true)]
     public bool FlashWindowOnTurn;
@@ -41,6 +80,9 @@ namespace Checkers
     
     [DefaultValue(true)]
     public bool ShowNetPanelOnMessage;
+    
+    [DefaultValue(true)]
+    public bool ShowTextFeedback;
     
     // Board appearance
     [DefaultValue(typeof(Color), "White")]
@@ -86,10 +128,10 @@ namespace Checkers
     
     
     public void Save ()
-    { Save("Checkers.ini"); }
+    { Save(Path.GetDirectoryName(Application.ExecutablePath) + "\\Checkers.ini"); }
     public void Save (string fileName)
     {
-      FileStream fs = File.OpenWrite("Checkers.ini");
+      FileStream fs = File.OpenWrite(fileName);
       try
       { (new SoapFormatter()).Serialize(fs, this); }
       catch (SerializationException e)
@@ -97,17 +139,24 @@ namespace Checkers
       fs.Close();
     }
     public static CheckersSettings Load ()
-    { return FromFile("Checkers.ini"); }
+    { return FromFile(Path.GetDirectoryName(Application.ExecutablePath) + "\\Checkers.ini"); }
     public static CheckersSettings FromFile (string fileName)
     {
-      if (!File.Exists("Checkers.ini")) return new CheckersSettings();
-      FileStream fs = File.OpenRead("Checkers.ini");
       CheckersSettings settings = null;
-      try
-      { settings = (CheckersSettings)(new SoapFormatter()).Deserialize(fs); }
-      catch (SerializationException e)
-      { MessageBox.Show("Could not load settings:\n" + e.Message + "\n\nUsing default settings.", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Exclamation); }
-      fs.Close();
+      if (File.Exists(fileName))
+      {
+        FileStream fs = File.OpenRead(fileName);
+        try
+        { settings = (CheckersSettings)(new SoapFormatter()).Deserialize(fs); }
+        catch (SerializationException e)
+        { MessageBox.Show("Could not load settings:\n" + e.Message + "\n\nUsing default settings.", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Exclamation); }
+        fs.Close();
+      }
+      if ((settings != null) && ((settings.sounds == null) || (settings.sounds.Length != (new CheckersSettings()).sounds.Length)))
+      {
+        MessageBox.Show("Settings are corrupt.\n\nUsing default settings.", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+        settings = null;
+      }
       if (settings == null)
       { settings = new CheckersSettings(); settings.Save(); }
       return settings;

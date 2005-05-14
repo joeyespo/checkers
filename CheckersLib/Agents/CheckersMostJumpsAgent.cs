@@ -20,7 +20,7 @@ namespace Uberware.Gaming.Checkers.Agents
       CheckersPiece [] movables = game.EnumMovablePieces();
       ArrayList possibleMoves = new ArrayList(movables.Length);
       foreach (CheckersPiece movable in movables)
-        possibleMoves.Add(new CheckersMove(game, movable));
+        possibleMoves.Add(game.BeginMove(movable));
       // Get all possible jump combos
       ArrayList finishedMoves = new ArrayList();
       while (possibleMoves.Count > 0)

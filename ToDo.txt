@@ -5,22 +5,41 @@ Checkers ToDo
  * Create king PictureBox in 'New Game' for custom king images (initially holds default king icon)
  * Naming players
  * Save/load settings
- - Button to 'show last move'
- - Window flashing
- - Sounds
+ * Create Checkers.ini file if doesnt exist when first run
+ * Sounds
+ * Button to 'show last move'
+ * Show 'Nice!' and 'Winner!'
+ * Default values for colors
+ * Net gaming
+ * Window flashing
+ * Send/receive message sounds
+ x Option: Delay AI movement
+ x Fix up context menu issue in frmNewGame
+ x In 'frmNewGame' flash window when opponent clicks "I'm Ready"
+ - Checkers agents for higher difficulties
+ - Better network handling in 'frmNewGame' (prevent deadlock; separate client and host windows)
+ - Allow spectators
+ - Allow host to be a spectator (dedicated game server)
  
  Checkers UI
  -----------
  
+ * Make event-based in case coder uses internal game structure to play
+ * Be sure no 'game' objects can throw NullReferenceException in public functions
+ * Allow clickable movements; instead of dragable movements
+ * Hide 'jumped' in the process of a double-jump
+ * Show last move
+ * Show more subtle 'Must jump' message (Option)
+ * Property: 'Text' -- shows text on the board (using ForeColor)
+ * Property: 'TextAlign'
+ * Stalemates (through game)
  x With optional jumping, if double-jump is available keep going .. if piece is placed on same spot, end turn
- - Be sure no 'game' objects can throw NullReferenceException in public functions
- - Make event-based in case coder uses internal game structure to play
- - Easier double-jumps (allow mistakes in dragging ??)
- - Hide 'jumped' in the process of a double-jump
- - Smooth animations
+ - Smooth animations (Option)
  
  Checkers Game
  -------------
  
  * Remember last CheckersPiece that moved: LastMoved
+ * Stalemates
  x Make game able to play with optional jumping
+ - Make less strict (allow user to do illegal moves, manipulate the board/pieces, etc)

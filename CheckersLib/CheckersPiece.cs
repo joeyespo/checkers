@@ -17,14 +17,27 @@ namespace Uberware.Gaming.Checkers
     private Point location;
     private bool inPlay;
     
-    internal CheckersPiece (CheckersGame owner, int player, CheckersRank rank, Point location)
+    /// <summary>Creates a new generic CheckersPiece object that is not currently in play.</summary>
+    /// <param name="player">The player index of the piece.</param>
+    /// <param name="rank">The piece's rank.</param>
+    public CheckersPiece (int player, CheckersRank rank) : this(null, player, rank, Point.Empty, false)
+    {}
+    /// <summary>Creates a new generic CheckersPiece object that is in play.</summary>
+    /// <param name="player">The player index of the piece.</param>
+    /// <param name="rank">The piece's rank.</param>
+    /// <param name="location">The piece's location on the board.</param>
+    public CheckersPiece (int player, CheckersRank rank, Point location) : this(null, player, rank, location, true)
+    {}
+    internal CheckersPiece (CheckersGame owner, int player, CheckersRank rank, Point location, bool inPlay)
     {
-      if (owner == null) throw new ArgumentNullException("owner", "Argument 'owner' must not be null");
-      if (player < 1) throw new ArgumentOutOfRangeException("player", player, "Argument 'player' must be a valid player number (a number greater or equal to 1)");
+      if ((player < 1) || (player > 2)) throw new ArgumentOutOfRangeException("player", player, "Argument 'player' must be a valid player number (a number greater or equal to 1).");
+      if ((location.X < 0) || (location.X >= CheckersGame.BoardSize.Width) || (location.Y < 0) || (location.Y >= CheckersGame.BoardSize.Height))
+        throw new ArgumentOutOfRangeException("location", player, "Argument 'location' must be a valid position on the board.");
       this.owner = owner;
       this.player = player;
       this.rank = rank;
       this.location = location;
+      this.inPlay = inPlay;
     }
     
     public CheckersGame Owner

@@ -17,59 +17,150 @@ namespace Uberware.Gaming.Checkers
     
     private bool optionalJumping;
     
+    private bool isReadOnly;
     private bool isPlaying;
     private int firstMove;
     private int turn;
     private int winner;
     private CheckersPieceCollection pieces;
     private CheckersPiece [,] board;
-    private CheckersPiece lastMoved;
+    private CheckersMove lastMove;
     
     public CheckersGame () : this(false)
     {}
     public CheckersGame (bool optionalJumping)
     {
+      // Game rules
       this.optionalJumping = optionalJumping;
+      
+      // Initialize variables
+      isReadOnly = false;
       pieces = new CheckersPieceCollection();
       board = new CheckersPiece[BoardSize.Width, BoardSize.Height];
       firstMove = 1;
       Stop();
     }
     
+    /// <summary>Creates a Checkers game from supplied game parameters.</summary>
+    /// <param name="optionalJumping">The Optional Jumping rule.</param>
+    /// <param name="board">The Checkers board that makes up the game.</param>
+    /// <param name="turn">Whose turn it is.</param>
+    /// <returns>The Checkers game.</returns>
+    public static CheckersGame Create (bool optionalJumping, CheckersPiece [,] board, int turn)
+    { return Create(optionalJumping, board, turn, 0); }
+    /// <summary>Creates a Checkers game from supplied game parameters.</summary>
+    /// <param name="optionalJumping">The Optional Jumping rule.</param>
+    /// <param name="board">The Checkers board that makes up the game.</param>
+    /// <param name="turn">Whose turn it is.</param>
+    /// <param name="winner">The winner, or 0 if none yet.</param>
+    /// <returns>The Checkers game.</returns>
+    public static CheckersGame Create (bool optionalJumping, CheckersPiece [,] board, int turn, int winner)
+    {
+      if ((board.GetLength(0) != BoardSize.Width) || (board.GetLength(1) != BoardSize.Height))
+        throw new ArgumentOutOfRangeException("board", board, "Board's dimensions must be " + BoardSize.Width + "x" + BoardSize.Height);
+      CheckersGame game = new CheckersGame(optionalJumping);
+      game.board = new CheckersPiece[BoardSize.Width, BoardSize.Height];
+      game.pieces = new CheckersPieceCollection();
+      for (int y = 0; y < BoardSize.Height; y++)
+        for (int x = 0; x < BoardSize.Width; x++)
+        {
+          CheckersPiece piece = board[x, y];
+          if (piece == null) continue;
+          if (piece.Owner != null) throw new ArgumentOutOfRangeException("board", board, "Board contains a Checkers piece that belongs to another Checkers game.");
+          if (!piece.InPlay) throw new ArgumentOutOfRangeException("board", board, "Board contains a Checkers piece that is not in play.");
+          if ((piece.Location.X != x) || (piece.Location.Y != y)) throw new ArgumentOutOfRangeException("board", board, "Board contains a Checkers piece that does not match up with it's board location.");
+          if ((piece.Player != 1) || (piece.Player != 2)) throw new ArgumentOutOfRangeException("board", board, "Board contains a Checkers piece that is not associated with a valid player.");
+          game.pieces.Add(new CheckersPiece(game, piece.Player, piece.Rank, piece.Location, piece.InPlay));
+        }
+      game.isPlaying = true;
+      game.turn = turn;
+      game.winner = winner;
+      return game;
+    }
     
+    /// <summary>Returns a read-only game from the original game.</summary>
+    /// <param name="game">The game to copy and make read-only.</param>
+    /// <returns>The read-only copy.</returns>
+    public static CheckersGame MakeReadOnly (CheckersGame game)
+    {
+      CheckersGame result = game.Fork();
+      result.isReadOnly = true;
+      return result;
+    }
+    
+    #region Public Properties
+    
+    /// <summary>Gets or sets whether or not jumping is optional.</summary>
     public bool OptionalJumping
     {
       get { return optionalJumping; }
       set { if (isPlaying) throw new InvalidOperationException("Cannot change game rules while game is in play."); optionalJumping = value; }
     }
     
+    /// <summary>Gets whether or not the game is currently in play.</summary>
     public bool IsPlaying
     { get { return isPlaying; } }
     
+    /// <summary>Gets whether or not the game is read only.</summary>
+    public bool IsReadOnly
+    { get { return isReadOnly; } }
+    
+    /// <summary>Gets the current player turn.</summary>
     public int Turn
     { get { return turn; } }
     
+    /// <summary>Gets the current player winner.</summary>
     public int Winner
     { get { return winner; } }
     
+    /// <summary>Gets a list of all in play pieces.</summary>
     public CheckersPiece [] Pieces
     { get { return pieces.ToArray(); } }
     
+    /// <summary>Gets the board matrix.</summary>
     public CheckersPiece [,] Board
     { get { return (CheckersPiece [,])board.Clone(); } }
     
+    /// <summary>Gets or sets the player to have the first move.</summary>
     public int FirstMove
     {
       get { return firstMove; }
       set { if ((value < 1) || (value > 2)) throw new ArgumentOutOfRangeException("player", value, "First move must refer to a valid player number."); firstMove = value; }
     }
-    public CheckersPiece LastMoved
-    { get { return lastMoved; } }
     
+    /// <summary>Gets the last moved piece.</summary>
+    public CheckersMove LastMove
+    { get { return lastMove; } }
+    
+    #endregion
+    
+    /// <summary>Creates a duplicate Checkers game object.</summary>
+    /// <returns>The new Checkers move object.</returns>
+    public CheckersGame Fork ()
+    {
+      CheckersGame game = new CheckersGame(optionalJumping);
+      game.isReadOnly = isReadOnly;
+      game.isPlaying = isPlaying;
+      game.firstMove = firstMove;
+      game.turn = turn;
+      game.winner = winner;
+      game.pieces = new CheckersPieceCollection();
+      game.board = new CheckersPiece[BoardSize.Width, BoardSize.Height];
+      foreach (CheckersPiece piece in pieces)
+      {
+        CheckersPiece newPiece = new CheckersPiece(game, piece.Player, piece.Rank, piece.Location, piece.InPlay);
+        game.board[newPiece.Location.X, newPiece.Location.Y] = newPiece;
+        game.pieces.Add(newPiece);
+      }
+      int lastMovePieceIndex = (( lastMove != null )?( pieces.IndexOf(lastMove.Piece) ):( -1 ));
+      game.lastMove = (( lastMovePieceIndex != -1 )?( CheckersMove.FromPath(game, game.pieces[lastMovePieceIndex], lastMove.Path) ):( null ));
+      return game;
+    }
     
     /// <summary>Begins the checkers game.</summary>
     public void Play ()
     {
+      if (isReadOnly) throw new InvalidOperationException("Game is read only.");
       if (isPlaying) throw new InvalidOperationException("Game has already started.");
       Stop();
       isPlaying = true;
@@ -79,7 +170,7 @@ namespace Uberware.Gaming.Checkers
         for (int x = 0; x < BoardSize.Width; x++)
         {
           if ((x % 2) == (y % 2)) continue;
-          CheckersPiece piece = new CheckersPiece(this, 1, CheckersRank.Pawn, new Point(x, y));
+          CheckersPiece piece = new CheckersPiece(this, 1, CheckersRank.Pawn, new Point(x, y), true);
           board[x, y] = piece;
           pieces.Add(piece);
         }
@@ -89,7 +180,7 @@ namespace Uberware.Gaming.Checkers
         for (int x = 0; x < BoardSize.Width; x++)
         {
           if ((x % 2) == (y % 2)) continue;
-          CheckersPiece piece = new CheckersPiece(this, 2, CheckersRank.Pawn, new Point(x, y));
+          CheckersPiece piece = new CheckersPiece(this, 2, CheckersRank.Pawn, new Point(x, y), true);
           board[x, y] = piece;
           pieces.Add(piece);
         }
@@ -97,19 +188,20 @@ namespace Uberware.Gaming.Checkers
       
       // Set player's turn
       turn = firstMove;
-      lastMoved = null;
+      lastMove = null;
       if (GameStarted != null) GameStarted(this, EventArgs.Empty);
     }
     
     /// <summary>Stops a decided game or forces a game-in-progress to stop prematurely with no winner.</summary>
     public void Stop ()
     {
+      if (isReadOnly) throw new InvalidOperationException("Game is read only.");
       isPlaying = false;
       pieces.Clear();
       for (int y = 0; y < BoardSize.Height; y++)
         for (int x = 0; x < BoardSize.Width; x++)
           board[x, y] = null;
-      lastMoved = null;
+      lastMove = null;
       winner = 0;
       turn = 0;
       if (GameStopped != null) GameStopped(this, EventArgs.Empty);
@@ -191,7 +283,7 @@ namespace Uberware.Gaming.Checkers
       ArrayList movable = new ArrayList();
       foreach (CheckersPiece piece in EnumPlayerPieces(turn))
       {
-        CheckersMove move = new CheckersMove(this, piece);
+        CheckersMove move = new CheckersMove(this, piece, false);
         if (move.CanMove) movable.Add(piece);
       }
       return (CheckersPiece [])movable.ToArray(typeof(CheckersPiece));
@@ -205,10 +297,40 @@ namespace Uberware.Gaming.Checkers
       ArrayList movable = new ArrayList();
       foreach (CheckersPiece piece in EnumPlayerPieces(turn))
       {
-        CheckersMove move = new CheckersMove(this, piece);
+        CheckersMove move = new CheckersMove(this, piece, false);
         if (move.EnumMoves(optionalJumping).Length != 0) movable.Add(piece);
       }
       return (CheckersPiece [])movable.ToArray(typeof(CheckersPiece));
+    }
+    
+    /// <summary>Returns whether or not a move is valid.</summary>
+    /// <param name="move">The CheckersMove object to check.</param>
+    /// <returns>True if the move is valid.</returns>
+    public bool IsValidMove (CheckersMove move)
+    {
+      if (move == null) return false;
+      return IsValidMove(move.Piece, move.Path);
+    }
+    /// <summary>Returns whether or not a move is valid.</summary>
+    /// <param name="move">The CheckersMove object to check.</param>
+    /// <returns>True if the move is valid.</returns>
+    public bool IsValidMove (CheckersPiece piece, Point [] path)
+    {
+      if (!isPlaying) throw new InvalidOperationException("Operation requires game to be playing.");
+      return (IsMoveValidCore(piece, path) != null);
+    }
+    private CheckersMove IsMoveValidCore (CheckersPiece piece, Point [] path)
+    {
+      // Failsafe .. be sure piece is valid
+      if (piece == null) throw new ArgumentNullException("piece");
+      if (!pieces.Contains(piece)) throw new ArgumentException("Argument 'piece' must be a piece in play to the current game.");
+      // Be sure piece can be moved
+      if (!CanMovePiece(piece)) throw new ArgumentException("Checkers piece cannot be moved on this turn.", "piece");
+      CheckersMove move = CheckersMove.FromPath(this, piece, path);
+      if (!move.Moved) return null;         // No movement
+      if (move.MustMove) return null;       // A move must yet be made
+      // Success
+      return move;
     }
     
     /// <summary>Moves a Checkers piece on the board.</summary>
@@ -216,6 +338,7 @@ namespace Uberware.Gaming.Checkers
     /// <returns>True if the piece was moved successfully.</returns>
     public bool MovePiece (CheckersMove move)
     {
+      if (isReadOnly) throw new InvalidOperationException("Game is read only.");
       if (move == null) return false;
       return MovePiece(move.Piece, move.Path);
     }
@@ -225,15 +348,10 @@ namespace Uberware.Gaming.Checkers
     /// <returns>True if the piece was moved successfully.</returns>
     public bool MovePiece (CheckersPiece piece, Point [] path)
     {
+      if (isReadOnly) throw new InvalidOperationException("Game is read only.");
       if (!isPlaying) throw new InvalidOperationException("Operation requires game to be playing.");
-      // Failsafe .. be sure piece is valid
-      if (piece == null) throw new ArgumentNullException("piece");
-      if (!pieces.Contains(piece)) throw new ArgumentException("Argument 'piece' must be a piece in play to the current game.");
-      // Be sure piece can be moved
-      if (!CanMovePiece(piece)) throw new ArgumentException("Checkers piece cannot be moved on this turn.", "piece");
-      CheckersMove move = CheckersMove.FromPath(this, piece, path);
-      if (!move.Moved) return false;        // No movement
-      if (move.MustMove) return false;      // A move must yet be made
+      // Check for valid move
+      CheckersMove move = IsMoveValidCore(piece, path);
       // Remove jumped pieces
       foreach (CheckersPiece jumped in move.Jumped)
       {
@@ -244,13 +362,10 @@ namespace Uberware.Gaming.Checkers
       board[piece.Location.X, piece.Location.Y] = null;
       board[move.CurrentLocation.X, move.CurrentLocation.Y] = piece;
       piece.Moved(move.CurrentLocation);
-      lastMoved = piece;
       // King a pawn if reached other end of board
-      if (piece.Rank == CheckersRank.Pawn)
-      {
-        if (((piece.Player == 1) && (piece.Location.Y == 0)) || ((piece.Player == 2) && (piece.Location.Y == BoardSize.Height-1)))
-          piece.Promoted();
-      }
+      if (move.Kinged) piece.Promoted();
+      // Remember last move
+      lastMove = move;
       // Update player's turn
       int prevTurn = turn;
       if (++turn > PlayerCount) turn = 1;
@@ -262,6 +377,9 @@ namespace Uberware.Gaming.Checkers
       return true;
     }
     
+    /// <summary>Begins a move by creating a CheckersMove object to assist in generating a valid movement.</summary>
+    /// <param name="piece">The Checkers piece to be moved.</param>
+    /// <returns>The CheckersMove object.</returns>
     public CheckersMove BeginMove (CheckersPiece piece)
     {
       if ((!isPlaying) && (winner == 0)) throw new InvalidOperationException("Operation requires game to be playing.");
@@ -270,13 +388,20 @@ namespace Uberware.Gaming.Checkers
       if (!pieces.Contains(piece)) throw new ArgumentException("Argument 'piece' must be a piece in play to the current game.");
       // Be sure piece can be moved
       if (!CanMovePiece(piece)) throw new ArgumentException("Checkers piece cannot be moved on this turn.", "piece");
-      return new CheckersMove(this, piece);
+      return new CheckersMove(this, piece, true);
     }
     
+    
+    public void DeclareStalemate ()
+    {
+      if ((!isPlaying) && (winner == 0)) throw new InvalidOperationException("Operation requires game to be playing.");
+      DeclareWinner(3);
+    }
     
     // Declares the winner
     private void DeclareWinner (int winner)
     {
+      if (isReadOnly) throw new InvalidOperationException("Game is read only.");
       this.winner = winner;
       isPlaying = false;
       turn = 0;

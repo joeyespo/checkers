@@ -1,20 +1,38 @@
 using System;
+using System.IO;
 using System.Drawing;
+using System.Collections;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using Uberware.Gaming.Checkers;
 using Uberware.Gaming.Checkers.Agents;
+using System.Net;
+using System.Net.Sockets;
 
 namespace Checkers
 {
   public class frmMain : System.Windows.Forms.Form
   {
-    private GameType gameType = GameType.None;
+    private CheckersGameType gameType = CheckersGameType.None;
     private CheckersAgent agent = null;
     private CheckersSettings settings;
     private DateTime playTime;
+    private System.Windows.Forms.Label lblRemoteIP;
+    private System.Windows.Forms.LinkLabel lnkRemoteIP;
+    private TcpClient remotePlayer = null;
+    
+    enum ClientMessage : byte
+    {
+      Closed = 0,
+      ChatMessage = 1,
+      AbortGame = 2,
+      MakeMove = 3,
+    }
     
     #region API Imports
+    
+    [DllImport("user32", EntryPoint="FlashWindow", SetLastError=true, CharSet=CharSet.Auto, ExactSpelling=false, CallingConvention=CallingConvention.Winapi)]
+    public static extern int FlashWindow ( IntPtr hWnd, int bInvert );
     
     [DllImport("winmm.dll", EntryPoint="PlaySound", SetLastError=true, CallingConvention=CallingConvention.Winapi)]
     static extern bool sndPlaySound( string pszSound, IntPtr hMod, SoundFlags sf );
@@ -38,7 +56,12 @@ namespace Checkers
     #endregion
     
     #region Class Variables
-    
+
+    private System.Windows.Forms.Timer tmrConnection;
+    private System.Windows.Forms.Timer tmrTextDisplay;
+    private System.Windows.Forms.MenuItem menuViewLastMoved;
+    private System.Windows.Forms.MenuItem menuViewLine02;
+    private System.Windows.Forms.Timer tmrFlashWindow;
     private System.Windows.Forms.Panel panGame;
     private System.Windows.Forms.MainMenu menuMain;
     private System.Windows.Forms.Panel panOnline;
@@ -132,11 +155,15 @@ namespace Checkers
       this.menuViewGamePanel = new System.Windows.Forms.MenuItem();
       this.menuViewNetPanel = new System.Windows.Forms.MenuItem();
       this.menuViewLine01 = new System.Windows.Forms.MenuItem();
+      this.menuViewLastMoved = new System.Windows.Forms.MenuItem();
+      this.menuViewLine02 = new System.Windows.Forms.MenuItem();
       this.menuViewPreferences = new System.Windows.Forms.MenuItem();
       this.menuHelp = new System.Windows.Forms.MenuItem();
       this.menuHelpAbout = new System.Windows.Forms.MenuItem();
       this.panOnline = new System.Windows.Forms.Panel();
       this.panNet = new System.Windows.Forms.Panel();
+      this.lnkRemoteIP = new System.Windows.Forms.LinkLabel();
+      this.lblRemoteIP = new System.Windows.Forms.Label();
       this.splChat = new System.Windows.Forms.Splitter();
       this.panChat = new System.Windows.Forms.Panel();
       this.txtSend = new System.Windows.Forms.TextBox();
@@ -145,9 +172,13 @@ namespace Checkers
       this.CheckersUI = new Uberware.Gaming.Checkers.UI.CheckersUI();
       this.imlTurn = new System.Windows.Forms.ImageList(this.components);
       this.tmrTimePassed = new System.Windows.Forms.Timer(this.components);
+      this.tmrFlashWindow = new System.Windows.Forms.Timer(this.components);
+      this.tmrTextDisplay = new System.Windows.Forms.Timer(this.components);
+      this.tmrConnection = new System.Windows.Forms.Timer(this.components);
       this.panGame.SuspendLayout();
       this.panGameInfo.SuspendLayout();
       this.panOnline.SuspendLayout();
+      this.panNet.SuspendLayout();
       this.panChat.SuspendLayout();
       this.SuspendLayout();
       // 
@@ -160,7 +191,7 @@ namespace Checkers
                                                                           this.lblGameType});
       this.panGame.Location = new System.Drawing.Point(280, 4);
       this.panGame.Name = "panGame";
-      this.panGame.Size = new System.Drawing.Size(120, 272);
+      this.panGame.Size = new System.Drawing.Size(144, 272);
       this.panGame.TabIndex = 3;
       // 
       // panGameInfo
@@ -186,7 +217,7 @@ namespace Checkers
                                                                               this.lblTimePassed});
       this.panGameInfo.Location = new System.Drawing.Point(0, 16);
       this.panGameInfo.Name = "panGameInfo";
-      this.panGameInfo.Size = new System.Drawing.Size(120, 256);
+      this.panGameInfo.Size = new System.Drawing.Size(144, 256);
       this.panGameInfo.TabIndex = 5;
       this.panGameInfo.Visible = false;
       // 
@@ -196,7 +227,7 @@ namespace Checkers
       this.txtTimePassed.Location = new System.Drawing.Point(72, 0);
       this.txtTimePassed.Name = "txtTimePassed";
       this.txtTimePassed.ReadOnly = true;
-      this.txtTimePassed.Size = new System.Drawing.Size(48, 13);
+      this.txtTimePassed.Size = new System.Drawing.Size(52, 13);
       this.txtTimePassed.TabIndex = 2;
       this.txtTimePassed.Text = "0:00";
       this.txtTimePassed.WordWrap = false;
@@ -217,7 +248,7 @@ namespace Checkers
       this.txtJumpsP1.Location = new System.Drawing.Point(72, 100);
       this.txtJumpsP1.Name = "txtJumpsP1";
       this.txtJumpsP1.ReadOnly = true;
-      this.txtJumpsP1.Size = new System.Drawing.Size(48, 13);
+      this.txtJumpsP1.Size = new System.Drawing.Size(52, 13);
       this.txtJumpsP1.TabIndex = 12;
       this.txtJumpsP1.Text = "0";
       // 
@@ -237,7 +268,7 @@ namespace Checkers
       this.lblNameP1.Font = new System.Drawing.Font("Tahoma", 8.25F, (System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic), System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
       this.lblNameP1.Location = new System.Drawing.Point(0, 68);
       this.lblNameP1.Name = "lblNameP1";
-      this.lblNameP1.Size = new System.Drawing.Size(120, 16);
+      this.lblNameP1.Size = new System.Drawing.Size(124, 16);
       this.lblNameP1.TabIndex = 7;
       this.lblNameP1.Text = "Player";
       // 
@@ -265,7 +296,7 @@ namespace Checkers
       this.txtRemainingP1.Location = new System.Drawing.Point(72, 84);
       this.txtRemainingP1.Name = "txtRemainingP1";
       this.txtRemainingP1.ReadOnly = true;
-      this.txtRemainingP1.Size = new System.Drawing.Size(48, 13);
+      this.txtRemainingP1.Size = new System.Drawing.Size(52, 13);
       this.txtRemainingP1.TabIndex = 13;
       this.txtRemainingP1.Text = "0";
       // 
@@ -285,7 +316,7 @@ namespace Checkers
       this.lblNameP2.Font = new System.Drawing.Font("Tahoma", 8.25F, (System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic), System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
       this.lblNameP2.Location = new System.Drawing.Point(0, 172);
       this.lblNameP2.Name = "lblNameP2";
-      this.lblNameP2.Size = new System.Drawing.Size(120, 16);
+      this.lblNameP2.Size = new System.Drawing.Size(124, 16);
       this.lblNameP2.TabIndex = 6;
       this.lblNameP2.Text = "Opponent";
       // 
@@ -295,7 +326,7 @@ namespace Checkers
       this.txtRemainingP2.Location = new System.Drawing.Point(72, 188);
       this.txtRemainingP2.Name = "txtRemainingP2";
       this.txtRemainingP2.ReadOnly = true;
-      this.txtRemainingP2.Size = new System.Drawing.Size(48, 13);
+      this.txtRemainingP2.Size = new System.Drawing.Size(52, 13);
       this.txtRemainingP2.TabIndex = 14;
       this.txtRemainingP2.Text = "0";
       // 
@@ -323,7 +354,7 @@ namespace Checkers
       this.txtJumpsP2.Location = new System.Drawing.Point(72, 204);
       this.txtJumpsP2.Name = "txtJumpsP2";
       this.txtJumpsP2.ReadOnly = true;
-      this.txtJumpsP2.Size = new System.Drawing.Size(48, 13);
+      this.txtJumpsP2.Size = new System.Drawing.Size(52, 13);
       this.txtJumpsP2.TabIndex = 11;
       this.txtJumpsP2.Text = "0";
       // 
@@ -340,7 +371,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.lblGameType.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
       this.lblGameType.Name = "lblGameType";
-      this.lblGameType.Size = new System.Drawing.Size(120, 16);
+      this.lblGameType.Size = new System.Drawing.Size(144, 16);
       this.lblGameType.TabIndex = 4;
       this.lblGameType.Text = "Game Panel";
       // 
@@ -393,6 +424,8 @@ namespace Checkers
                                                                              this.menuViewGamePanel,
                                                                              this.menuViewNetPanel,
                                                                              this.menuViewLine01,
+                                                                             this.menuViewLastMoved,
+                                                                             this.menuViewLine02,
                                                                              this.menuViewPreferences});
       this.menuView.Text = "&View";
       this.menuView.Popup += new System.EventHandler(this.menuView_Popup);
@@ -417,9 +450,21 @@ namespace Checkers
       this.menuViewLine01.Index = 2;
       this.menuViewLine01.Text = "-";
       // 
+      // menuViewLastMoved
+      // 
+      this.menuViewLastMoved.Index = 3;
+      this.menuViewLastMoved.Shortcut = System.Windows.Forms.Shortcut.F5;
+      this.menuViewLastMoved.Text = "&Last Moved";
+      this.menuViewLastMoved.Click += new System.EventHandler(this.menuViewLastMoved_Click);
+      // 
+      // menuViewLine02
+      // 
+      this.menuViewLine02.Index = 4;
+      this.menuViewLine02.Text = "-";
+      // 
       // menuViewPreferences
       // 
-      this.menuViewPreferences.Index = 3;
+      this.menuViewPreferences.Index = 5;
       this.menuViewPreferences.Text = "&Preferences...";
       this.menuViewPreferences.Click += new System.EventHandler(this.menuViewPreferences_Click);
       // 
@@ -447,22 +492,47 @@ namespace Checkers
                                                                             this.panChat});
       this.panOnline.Location = new System.Drawing.Point(4, 280);
       this.panOnline.Name = "panOnline";
-      this.panOnline.Size = new System.Drawing.Size(396, 64);
+      this.panOnline.Size = new System.Drawing.Size(420, 80);
       this.panOnline.TabIndex = 4;
       // 
       // panNet
       // 
+      this.panNet.Controls.AddRange(new System.Windows.Forms.Control[] {
+                                                                         this.lnkRemoteIP,
+                                                                         this.lblRemoteIP});
       this.panNet.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panNet.Location = new System.Drawing.Point(276, 0);
       this.panNet.Name = "panNet";
-      this.panNet.Size = new System.Drawing.Size(120, 64);
+      this.panNet.Size = new System.Drawing.Size(144, 80);
       this.panNet.TabIndex = 2;
+      // 
+      // lnkRemoteIP
+      // 
+      this.lnkRemoteIP.ActiveLinkColor = System.Drawing.Color.Blue;
+      this.lnkRemoteIP.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.lnkRemoteIP.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+      this.lnkRemoteIP.LinkColor = System.Drawing.SystemColors.ControlText;
+      this.lnkRemoteIP.Location = new System.Drawing.Point(0, 16);
+      this.lnkRemoteIP.Name = "lnkRemoteIP";
+      this.lnkRemoteIP.Size = new System.Drawing.Size(144, 16);
+      this.lnkRemoteIP.TabIndex = 1;
+      this.lnkRemoteIP.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkRemoteIP_LinkClicked);
+      // 
+      // lblRemoteIP
+      // 
+      this.lblRemoteIP.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.lblRemoteIP.Name = "lblRemoteIP";
+      this.lblRemoteIP.Size = new System.Drawing.Size(144, 16);
+      this.lblRemoteIP.TabIndex = 0;
+      this.lblRemoteIP.Text = "Opponent IP:";
       // 
       // splChat
       // 
       this.splChat.Location = new System.Drawing.Point(270, 0);
       this.splChat.Name = "splChat";
-      this.splChat.Size = new System.Drawing.Size(6, 64);
+      this.splChat.Size = new System.Drawing.Size(6, 80);
       this.splChat.TabIndex = 1;
       this.splChat.TabStop = false;
       // 
@@ -474,27 +544,30 @@ namespace Checkers
                                                                           this.txtChat});
       this.panChat.Dock = System.Windows.Forms.DockStyle.Left;
       this.panChat.Name = "panChat";
-      this.panChat.Size = new System.Drawing.Size(270, 64);
+      this.panChat.Size = new System.Drawing.Size(270, 80);
       this.panChat.TabIndex = 3;
       // 
       // txtSend
       // 
       this.txtSend.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.txtSend.Location = new System.Drawing.Point(0, 44);
+      this.txtSend.Location = new System.Drawing.Point(0, 60);
       this.txtSend.Name = "txtSend";
       this.txtSend.Size = new System.Drawing.Size(226, 20);
       this.txtSend.TabIndex = 4;
       this.txtSend.Text = "";
+      this.txtSend.Leave += new System.EventHandler(this.txtSend_Leave);
+      this.txtSend.Enter += new System.EventHandler(this.txtSend_Enter);
       // 
       // btnSend
       // 
       this.btnSend.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
-      this.btnSend.Location = new System.Drawing.Point(228, 44);
+      this.btnSend.Location = new System.Drawing.Point(228, 60);
       this.btnSend.Name = "btnSend";
       this.btnSend.Size = new System.Drawing.Size(42, 20);
       this.btnSend.TabIndex = 3;
       this.btnSend.Text = "Send";
+      this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
       // 
       // txtChat
       // 
@@ -503,20 +576,28 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.txtChat.Name = "txtChat";
       this.txtChat.ReadOnly = true;
-      this.txtChat.Size = new System.Drawing.Size(270, 42);
+      this.txtChat.Size = new System.Drawing.Size(270, 58);
       this.txtChat.TabIndex = 1;
       this.txtChat.Text = "";
       // 
       // CheckersUI
       // 
+      this.CheckersUI.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+      this.CheckersUI.ForeColor = System.Drawing.Color.Salmon;
       this.CheckersUI.Location = new System.Drawing.Point(4, 4);
       this.CheckersUI.Name = "CheckersUI";
       this.CheckersUI.Size = new System.Drawing.Size(270, 270);
       this.CheckersUI.TabIndex = 0;
+      this.CheckersUI.TextBorderColor = System.Drawing.Color.White;
+      this.CheckersUI.PieceDeselected += new System.EventHandler(this.CheckersUI_PieceDeselected);
+      this.CheckersUI.PieceBadMove += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceBadMove);
+      this.CheckersUI.PieceMovedPartial += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceMovedPartial);
       this.CheckersUI.GameStopped += new System.EventHandler(this.CheckersUI_GameStopped);
       this.CheckersUI.GameStarted += new System.EventHandler(this.CheckersUI_GameStarted);
+      this.CheckersUI.PiecePickedUp += new System.EventHandler(this.CheckersUI_PiecePickedUp);
       this.CheckersUI.WinnerDeclared += new System.EventHandler(this.CheckersUI_WinnerDeclared);
       this.CheckersUI.TurnChanged += new System.EventHandler(this.CheckersUI_TurnChanged);
+      this.CheckersUI.PieceMoved += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceMoved);
       // 
       // imlTurn
       // 
@@ -529,10 +610,25 @@ namespace Checkers
       // 
       this.tmrTimePassed.Tick += new System.EventHandler(this.tmrTimePassed_Tick);
       // 
+      // tmrFlashWindow
+      // 
+      this.tmrFlashWindow.Interval = 1000;
+      this.tmrFlashWindow.Tick += new System.EventHandler(this.tmrFlashWindow_Tick);
+      // 
+      // tmrTextDisplay
+      // 
+      this.tmrTextDisplay.Interval = 2000;
+      this.tmrTextDisplay.Tick += new System.EventHandler(this.tmrTextDisplay_Tick);
+      // 
+      // tmrConnection
+      // 
+      this.tmrConnection.Interval = 10;
+      this.tmrConnection.Tick += new System.EventHandler(this.tmrConnection_Tick);
+      // 
       // frmMain
       // 
       this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-      this.ClientSize = new System.Drawing.Size(404, 349);
+      this.ClientSize = new System.Drawing.Size(428, 365);
       this.Controls.AddRange(new System.Windows.Forms.Control[] {
                                                                   this.CheckersUI,
                                                                   this.panOnline,
@@ -545,9 +641,12 @@ namespace Checkers
       this.Text = "Checkers";
       this.Closing += new System.ComponentModel.CancelEventHandler(this.frmMain_Closing);
       this.Load += new System.EventHandler(this.frmMain_Load);
+      this.Activated += new System.EventHandler(this.frmMain_Activated);
+      this.Deactivate += new System.EventHandler(this.frmMain_Deactivate);
       this.panGame.ResumeLayout(false);
       this.panGameInfo.ResumeLayout(false);
       this.panOnline.ResumeLayout(false);
+      this.panNet.ResumeLayout(false);
       this.panChat.ResumeLayout(false);
       this.ResumeLayout(false);
 
@@ -565,7 +664,35 @@ namespace Checkers
     [STAThread]
     static void Main() 
     {
+      #if !DEBUG
+      Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(ThreadException);
+      #endif
       Application.Run(new frmMain());
+    }
+    
+    private static void ThreadException (object sender, System.Threading.ThreadExceptionEventArgs e)
+    {
+      try
+      {
+        int ext = 0;
+        string logFileName;
+        while (true)
+        {
+          logFileName = "ErrorLog [" + DateTime.Now.ToShortDateString() + "]";
+          logFileName = logFileName.Replace('/', '-').Replace('\\', '-');
+          logFileName += (( ext == 0 )?( "" ):( " (" + ext.ToString() + ")" ));
+          if (!File.Exists(logFileName + ".log")) break;
+          ext++;
+        }
+        StreamWriter fs = File.CreateText(logFileName + ".log");
+        fs.WriteLine(DateTime.Now.ToLongDateString() + " at " + DateTime.Now.ToLongTimeString());
+        fs.WriteLine();
+        fs.WriteLine(e.Exception.ToString());
+        fs.Close();
+      }
+      finally
+      { throw e.Exception; }
+      // !!!!! Show default error handler
     }
     
     #endregion
@@ -574,9 +701,20 @@ namespace Checkers
     private void frmMain_Load (object sender, System.EventArgs e)
     {
       Size = new Size(MinimumSize.Width + 130, MinimumSize.Height);
-      // !!!!! Load settings
+      // Load settings
       settings = CheckersSettings.Load();
       UpdateBoard();
+    }
+    private void frmMain_Activated (object sender, System.EventArgs e)
+    {
+      tmrFlashWindow.Stop();
+      if (gameType == CheckersGameType.NetGame)
+      { txtChat.Select(); txtSend.Select(); }
+    }
+    private void frmMain_Deactivate (object sender, System.EventArgs e)
+    {
+      if ((gameType == CheckersGameType.NetGame) && (CheckersUI.IsPlaying) && (CheckersUI.Game.Turn == 1))
+        DoFlashWindow();
     }
     private void frmMain_Closing (object sender, System.ComponentModel.CancelEventArgs e)
     { if (!DoCloseGame()) e.Cancel = true; }
@@ -596,13 +734,15 @@ namespace Checkers
     private void menuViewGamePanel_Click (object sender, System.EventArgs e)
     {
       menuViewGamePanel.Checked = !menuViewGamePanel.Checked;
-      this.Width = (( menuViewGamePanel.Checked )?( this.MinimumSize.Width + 120 ):( this.MinimumSize.Width ));
+      this.Width = (( menuViewGamePanel.Checked )?( this.MinimumSize.Width + 140 ):( this.MinimumSize.Width ));
     }
     private void menuViewNetPanel_Click (object sender, System.EventArgs e)
     {
       menuViewNetPanel.Checked = !menuViewNetPanel.Checked;
       this.Height = (( menuViewNetPanel.Checked )?( this.MinimumSize.Height + 80 ):( this.MinimumSize.Height ));
     }
+    private void menuViewLastMoved_Click (object sender, System.EventArgs e)
+    { CheckersUI.ShowLastMove(); }
     private void menuViewPreferences_Click (object sender, System.EventArgs e)
     {
       frmPreferences form = new frmPreferences();
@@ -616,16 +756,103 @@ namespace Checkers
     { (new frmAbout()).ShowDialog(this); }
     
     private void CheckersUI_GameStarted (object sender, System.EventArgs e)
-    { DoStarted(); }
+    {
+      DoStarted();
+      PlaySound(CheckersSounds.Begin);
+    }
     private void CheckersUI_GameStopped (object sender, System.EventArgs e)
     { DoStopped(); }
-    private void CheckersUI_TurnChanged(object sender, System.EventArgs e)
+    private void CheckersUI_TurnChanged (object sender, System.EventArgs e)
     { DoNextTurn(); }
     private void CheckersUI_WinnerDeclared (object sender, System.EventArgs e)
-    { DoWinnerDeclared(); }
+    {
+      DoWinnerDeclared();
+      if (((gameType == CheckersGameType.SinglePlayer) || (gameType == CheckersGameType.NetGame)) && (CheckersUI.Winner != 1))
+        PlaySound(CheckersSounds.Lost);
+      else
+        PlaySound(CheckersSounds.Winner);
+    }
+    private void CheckersUI_PiecePickedUp (object sender, System.EventArgs e)
+    { PlaySound(CheckersSounds.Select); }
+    private void CheckersUI_PieceMoved (object sender, Uberware.Gaming.Checkers.UI.MoveEventArgs e)
+    {
+      if (!e.IsWinningMove)
+      {
+        if (e.Move.Kinged) PlaySound(CheckersSounds.King);
+        else if (e.Move.Jumped.Length == 1) PlaySound(CheckersSounds.Jump);
+        else if (e.Move.Jumped.Length > 1) PlaySound(CheckersSounds.JumpMultiple);
+        else PlaySound(CheckersSounds.Drop);
+        if ((settings.ShowTextFeedback) && (e.MovedByPlayer) && (e.Move.Jumped.Length > 1))
+        {
+          if ((e.Move.Piece.Player == 2) && (gameType != CheckersGameType.Multiplayer)) return;
+          CheckersUI.Text = "";
+          if (e.Move.Jumped.Length > 3)
+          {
+            tmrTextDisplay.Interval = 2500;
+            CheckersUI.TextBorderColor = Color.White;
+            CheckersUI.ForeColor = Color.LightSalmon;
+            CheckersUI.Text = "INCREDIBLE !!";
+          }
+          else if (e.Move.Jumped.Length > 2)
+          {
+            tmrTextDisplay.Interval = 2000;
+            CheckersUI.TextBorderColor = Color.White;
+            CheckersUI.ForeColor = Color.RoyalBlue;
+            CheckersUI.Text = "AWESOME !!";
+          }
+          else
+          {
+            tmrTextDisplay.Interval = 1000;
+            CheckersUI.TextBorderColor = Color.Black;
+            CheckersUI.ForeColor = Color.PaleTurquoise;
+            CheckersUI.Text = "NICE !!";
+          }
+          tmrTextDisplay.Start();
+        }
+      }
+      
+      if ((gameType == CheckersGameType.NetGame) && (e.MovedByPlayer) && (remotePlayer != null)) DoMovePieceNet(e.Move);
+    }
+    private void CheckersUI_PieceMovedPartial (object sender, Uberware.Gaming.Checkers.UI.MoveEventArgs e)
+    {
+      if (e.Move.Kinged) PlaySound(CheckersSounds.King);
+      else if (e.Move.Jumped.Length == 1) PlaySound(CheckersSounds.Jump);
+      else if (e.Move.Jumped.Length > 1) PlaySound(CheckersSounds.JumpMultiple);
+      else PlaySound(CheckersSounds.Drop);
+    }
+    private void CheckersUI_PieceBadMove (object sender, Uberware.Gaming.Checkers.UI.MoveEventArgs e)
+    { PlaySound(CheckersSounds.BadMove); }
+    private void CheckersUI_PieceDeselected (object sender, System.EventArgs e)
+    { PlaySound(CheckersSounds.Deselect); }
     
     private void tmrTimePassed_Tick (object sender, System.EventArgs e)
     { DoUpdateTimePassed(); }
+    private void tmrTextDisplay_Tick (object sender, System.EventArgs e)
+    {
+      tmrTextDisplay.Stop();
+      CheckersUI.Text = "";
+    }
+    private void tmrFlashWindow_Tick (object sender, System.EventArgs e)
+    {
+      if (Form.ActiveForm == this) { tmrFlashWindow.Stop(); return; }
+      FlashWindow(this.Handle, 1);
+    }
+    private void tmrConnection_Tick(object sender, System.EventArgs e)
+    {
+      if (gameType != CheckersGameType.NetGame) return;
+      CheckForClientMessage();
+    }
+    
+    private void lnkRemoteIP_LinkClicked (object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
+    { Clipboard.SetDataObject(lnkRemoteIP, true); }
+    
+    private void txtSend_Enter (object sender, System.EventArgs e)
+    { this.AcceptButton = btnSend; }
+    private void txtSend_Leave(object sender, System.EventArgs e)
+    { this.AcceptButton = null; }
+    
+    private void btnSend_Click (object sender, System.EventArgs e)
+    { DoSendMessage(); }
     
     
     private void DoNewGame ()
@@ -657,34 +884,44 @@ namespace Checkers
       // Set UI properties
       switch (gameType)
       {
-        case GameType.SinglePlayer:
+        case CheckersGameType.SinglePlayer:
           CheckersUI.Player1Active = true;
           CheckersUI.Player2Active = false;
-        switch (newGame.Difficulty)
-        {
-          case 0: agent = new CheckersRandomAgent(); break;
-          case 1: agent = new CheckersMostJumpsAgent(); break;
-          default: return;
-        }
+          if (true)
+          {
+            switch (newGame.Difficulty)
+            {
+              case 0: agent = new CheckersMostJumpsAgent(); break;
+              case 1: MessageBox.Show(this, "Intermediate difficulty not yet implemented.", "Checkers"); return;         // !!!!!
+              case 2: MessageBox.Show(this, "Advanced difficulty not yet implemented.", "Checkers"); return;         // !!!!!
+              case 3: MessageBox.Show(this, "Expert difficulty not yet implemented.", "Checkers"); return;         // !!!!!
+              default: return;
+            }
+          }
           break;
-        case GameType.Multiplayer:
+        case CheckersGameType.Multiplayer:
           CheckersUI.Player1Active = true;
           CheckersUI.Player2Active = true;
           break;
-        case GameType.NetGame:
+        case CheckersGameType.NetGame:
+          remotePlayer = newGame.RemotePlayer;
+          if (remotePlayer == null)
+          { MessageBox.Show(this, "Remote user disconnected before the game began", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Exclamation); return; }
           CheckersUI.Player1Active = true;
-          CheckersUI.Player2Active = false;
+          CheckersUI.Player2Active = (remotePlayer == null);
+          if (!menuViewNetPanel.Checked) menuViewNetPanel_Click(menuViewNetPanel, EventArgs.Empty);
+          tmrConnection.Start();
+          lnkRemoteIP.Text = ((IPEndPoint)remotePlayer.Socket.RemoteEndPoint).Address.ToString();
+          AppendMessage("", "Connected to player");
           break;
         default: return;
       }
       CheckersUI.CustomPawn1 = newGame.ImageSet[0]; CheckersUI.CustomKing1 = newGame.ImageSet[1];
       CheckersUI.CustomPawn2 = newGame.ImageSet[2]; CheckersUI.CustomKing2 = newGame.ImageSet[3];
       
-      // Create the game !!!!! Start with newGame.Game ??
+      // Create the new game
       CheckersGame game = new CheckersGame();
       game.FirstMove = newGame.FirstMove;
-      game.OptionalJumping = newGame.OptionalJumping;
-      // !!!!! game.OptionalJumping
       
       // Start a new checkers game
       CheckersUI.Play(game);
@@ -703,13 +940,17 @@ namespace Checkers
       panGameInfo.Visible = false;
       menuGameEnd.Enabled = false;
       tmrTimePassed.Stop(); txtTimePassed.Text = "0:00";
+      CheckersUI.Text = "";
     }
     private void DoNextTurn ()
     {
       DoShowTurn(CheckersUI.Game.Turn);
-      if ((gameType == GameType.SinglePlayer) && (CheckersUI.Game.Turn == 2))
-        CheckersUI.MovePiece(agent);        // !!!!! Move after time interval
       UpdatePlayerInfo();
+      if ((gameType == CheckersGameType.SinglePlayer) && (CheckersUI.Game.Turn == 2))
+      {
+        // Move agent after we leave this event
+        BeginInvoke(new DoMoveAgentDelegate(DoMoveAgent));
+      }
     }
     private void DoWinnerDeclared ()
     {
@@ -719,16 +960,44 @@ namespace Checkers
     }
     
     private bool DoCloseGame ()
+    { return DoCloseGame(false); }
+    private bool DoCloseGame (bool forced)
     {
       if ((!CheckersUI.IsPlaying) && (CheckersUI.Winner == 0)) return true;
-      // !!!!! Ask for 'stalemate' in multiplayer mode
       if (CheckersUI.IsPlaying)
       {
-        // Confirm the quit
-        if (MessageBox.Show(this, "Quit current game?", "Checkers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-          return false;
+        if (!forced)
+        {
+          // Confirm the quit
+          if (MessageBox.Show(this, "Quit current game?", "Checkers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+            return false;
+        }
+        // Forceful end sound
+        PlaySound(CheckersSounds.ForceEnd);
       }
+      else
+      { PlaySound(CheckersSounds.EndGame); }
       picTurn.Visible = false;
+      if (gameType == CheckersGameType.NetGame)
+      {
+        txtChat.Text = ""; txtSend.Text = "";
+        tmrConnection.Stop();
+        lnkRemoteIP.Text = "";
+        if (remotePlayer != null)
+        {
+          try
+          {
+            BinaryWriter bw = new BinaryWriter(new NetworkStream(remotePlayer.Socket, false));
+            bw.Write((byte)ClientMessage.Closed);
+            remotePlayer.Close();
+            bw.Close();
+          }
+          catch (IOException) {}
+          catch (SocketException) {}
+          catch (InvalidOperationException) {}
+          remotePlayer = null;
+        }
+      }
       CheckersUI.Stop();
       return true;
     }
@@ -738,6 +1007,14 @@ namespace Checkers
       TimeSpan time = DateTime.Now.Subtract(playTime);
       txtTimePassed.Text = ((int)time.TotalMinutes).ToString().PadLeft(2, '0') + ":" + time.Seconds.ToString().PadLeft(2, '0');
     }
+    
+    delegate void DoMoveAgentDelegate ();
+    private void DoMoveAgent ()
+    {
+      if ((gameType == CheckersGameType.SinglePlayer) && (CheckersUI.Game.Turn == 2))
+        CheckersUI.MovePiece(agent);
+    }
+    
     private void DoShowTurn (int player)
     {
       picTurn.Visible = false;
@@ -752,7 +1029,7 @@ namespace Checkers
       }
       else if (player == 2)
       {
-        picTurn.Image = imlTurn.Images[(( gameType == GameType.Multiplayer )?( 0 ):( 1 ))];
+        picTurn.Image = imlTurn.Images[(( gameType == CheckersGameType.Multiplayer )?( 0 ):( 1 ))];
         picTurn.Top = picPawnP2.Top + 1;
         picTurn.Visible = true;
         lblNameP2.BackColor = Color.FromKnownColor(KnownColor.Highlight); lblNameP2.ForeColor = Color.FromKnownColor(KnownColor.HighlightText);
@@ -760,6 +1037,10 @@ namespace Checkers
     }
     private void DoShowWinner (int player)
     {
+      tmrTextDisplay.Stop();
+      CheckersUI.Text = "";
+      CheckersUI.TextBorderColor = Color.White;
+      CheckersUI.ForeColor = Color.Gold;
       picTurn.Visible = false;
       lblNameP1.BackColor = Color.FromKnownColor(KnownColor.Control); lblNameP1.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
       lblNameP2.BackColor = Color.FromKnownColor(KnownColor.Control); lblNameP2.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
@@ -768,13 +1049,32 @@ namespace Checkers
         picTurn.Image = imlTurn.Images[2];
         picTurn.Top = picPawnP1.Top + 1;
         picTurn.Visible = true;
+        // Display appropriate message
+        if ((gameType == CheckersGameType.SinglePlayer) || (gameType == CheckersGameType.NetGame))
+        { CheckersUI.Text = "You Win!"; }
+        else
+        { CheckersUI.Text = lblNameP1.Text + "\nWins"; }
       }
       else if (player == 2)
       {
         picTurn.Image = imlTurn.Images[2];
         picTurn.Top = picPawnP2.Top + 1;
         picTurn.Visible = true;
+        if ((gameType == CheckersGameType.SinglePlayer) || (gameType == CheckersGameType.NetGame))
+        {
+          CheckersUI.ForeColor = Color.Coral;
+          CheckersUI.Text = "You Lose!";
+        }
+        else
+        { CheckersUI.Text = lblNameP2.Text + "\nWins"; }
       }
+    }
+    
+    private void DoFlashWindow ()
+    {
+      if (Form.ActiveForm == this) return;
+      FlashWindow(this.Handle, 1);
+      tmrFlashWindow.Start();
     }
     
     private void UpdatePlayerInfo ()
@@ -786,19 +1086,180 @@ namespace Checkers
       txtJumpsP2.Text = CheckersUI.Game.GetJumpedCount(1).ToString();
     }
     
+    private void DoSendMessage ()
+    {
+      if ((gameType != CheckersGameType.NetGame) || (remotePlayer == null))
+      { MessageBox.Show(this, "Not connected to any other players", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+      
+      if (txtSend.Text.Trim() == "") return;
+      
+      try
+      {
+        BinaryWriter bw = new BinaryWriter(new NetworkStream(remotePlayer.Socket, false));
+        bw.Write((byte)ClientMessage.ChatMessage);
+        bw.Write(txtSend.Text.Trim());
+        bw.Close();
+      }
+      catch (IOException) {}
+      catch (SocketException) {}
+      catch (InvalidOperationException) {}
+      
+      AppendMessage(lblNameP1.Text, txtSend.Text);
+      txtSend.Text = ""; txtSend.Select();
+    }
+    
+    private void DoMovePieceNet (CheckersMove move)
+    {
+      try
+      {
+        BinaryWriter bw = new BinaryWriter(new NetworkStream(remotePlayer.Socket, false));
+        bw.Write((byte)ClientMessage.MakeMove);
+        bw.Write(move.InitialPiece.Location.X); bw.Write(move.InitialPiece.Location.Y);
+        bw.Write(move.Path.Length);
+        foreach (Point point in move.Path)
+        { bw.Write(point.X); bw.Write(point.Y); }
+        bw.Close();
+      }
+      catch (IOException)
+      { AppendMessage("", "Connection closed"); CloseNetGame(); remotePlayer = null; }
+      catch (SocketException ex)
+      { AppendMessage("", "Disconnected from opponent: " + ex.Message); CloseNetGame(); remotePlayer = null; }
+      catch (InvalidOperationException ex)
+      { AppendMessage("", "Disconnected from opponent: " + ex.Message); CloseNetGame(); remotePlayer = null; }
+    }
+    
     private void UpdateBoard ()
     {
       CheckersUI.BackColor = settings.BackColor;
       CheckersUI.BoardBackColor = settings.BoardBackColor;
       CheckersUI.BoardForeColor = settings.BoardForeColor;
       CheckersUI.BoardGridColor = settings.BoardGridColor;
+      CheckersUI.HighlightSelection = settings.HighlightSelection;
+      CheckersUI.HighlightPossibleMoves = settings.HighlightPossibleMoves;
+      CheckersUI.ShowJumpMessage = settings.ShowJumpMessage;
     }
     
     private void PlaySound (CheckersSounds sound)
     {
       // Play sound
       if (settings.MuteSounds) return;
-      sndPlaySound(settings.sounds[(int)sound], IntPtr.Zero, (SoundFlags.SND_FileName | SoundFlags.SND_ASYNC | SoundFlags.SND_NOWAIT));
+      string soundFileName = settings.sounds[(int)sound];
+      string fileName = (( Path.IsPathRooted(soundFileName) )?( soundFileName ):( Path.GetDirectoryName(Application.ExecutablePath) + "\\Sounds\\" + soundFileName ));
+      // Play sound
+      sndPlaySound(fileName, IntPtr.Zero, (SoundFlags.SND_FileName | SoundFlags.SND_ASYNC | SoundFlags.SND_NOWAIT));
     }
+    
+    bool inCheckForClientMessage = false;
+    private void CheckForClientMessage ()
+    {
+      if (inCheckForClientMessage) return;
+      inCheckForClientMessage = true;
+      if (remotePlayer == null) return;
+      
+      try
+      {
+        NetworkStream ns = new NetworkStream(remotePlayer.Socket, false);
+        BinaryReader br = new BinaryReader(ns);
+        BinaryWriter bw = new BinaryWriter(ns);
+        while (ns.DataAvailable)
+        {
+          switch ((ClientMessage)br.ReadByte())
+          {
+            case ClientMessage.Closed:
+              throw new IOException();
+            case ClientMessage.ChatMessage:
+              AppendMessage(lblNameP2.Text, br.ReadString());
+              DoFlashWindow();
+              break;
+            case ClientMessage.AbortGame:
+              AppendMessage("", "Game has been aborted by opponent");
+              CloseNetGame();
+              break;
+            case ClientMessage.MakeMove:
+              if (CheckersUI.Game.Turn != 2)
+              {
+                AppendMessage("", "Opponent took turn out of place; game aborted");
+                CloseNetGame();
+                bw.Write((byte)ClientMessage.AbortGame);
+                break;
+              }
+              // Get move
+              Point location = RotateOpponentPiece(br);
+              CheckersPiece piece = CheckersUI.Game.PieceAt(location);
+              int count = br.ReadInt32();
+              Point [] path = new Point [count];
+              for (int i = 0; i < count; i++)
+                path[i] = RotateOpponentPiece(br);
+              // Move the piece an break if successful
+              if (piece != null)
+              {
+                if (CheckersUI.MovePiece(piece, path, true, true))
+                { DoFlashWindow(); break; }
+              }
+              AppendMessage("", "Opponent made a bad move; game aborted");
+              CloseNetGame();
+              bw.Write((byte)ClientMessage.AbortGame);
+              break;
+          }
+        }
+        br.Close(); bw.Close();
+      }
+      catch (IOException)
+      { AppendMessage("", "Connection closed"); CloseNetGame(); remotePlayer = null; }
+      catch (SocketException ex)
+      { AppendMessage("", "Disconnected from opponent: " + ex.Message); CloseNetGame(); remotePlayer = null; }
+      catch (InvalidOperationException ex)
+      { AppendMessage("", "Disconnected from opponent: " + ex.Message); CloseNetGame(); remotePlayer = null; }
+      inCheckForClientMessage = false;
+    }
+    
+    private void CloseNetGame ()
+    {
+      DoFlashWindow();
+      if (CheckersUI.IsPlaying)
+        CheckersUI.Game.DeclareStalemate();
+    }
+    
+    private void AppendMessage (string name, string message)
+    {
+      txtChat.Select(txtChat.TextLength, 0);
+      if (name == "")
+      {
+        txtChat.SelectionColor = Color.Red;
+        txtChat.AppendText("[" + DateTime.Now.ToShortTimeString() + "] ");
+      }
+      else if (name == lblNameP1.Text)
+      {
+        txtChat.SelectionColor = Color.Red;
+        txtChat.AppendText("[" + DateTime.Now.ToShortTimeString() + "] ");
+        txtChat.AppendText(" " + name + ": ");
+        txtChat.SelectionColor = Color.Black;
+        PlaySound(CheckersSounds.SendMessage);
+      }
+      else
+      {
+        txtChat.SelectionColor = Color.Blue;
+        txtChat.AppendText("[" + DateTime.Now.ToShortTimeString() + "] ");
+        txtChat.AppendText(" " + name + ": ");
+        txtChat.SelectionColor = Color.Black;
+        PlaySound(CheckersSounds.ReceiveMessage);
+      }
+      txtChat.AppendText(message);
+      Control activeControl = ActiveControl;
+      txtChat.Select();
+      txtChat.AppendText("\n");
+      txtChat.ScrollToCaret();
+      activeControl.Select();
+    }
+    
+    private Point RotateOpponentPiece (BinaryReader br)
+    {
+      int x = br.ReadInt32();
+      int y = br.ReadInt32();
+      return RotateOpponentPiece(new Point(x, y));
+    }
+    
+    private Point RotateOpponentPiece (Point location)
+    { return new Point(CheckersGame.BoardSize.Width-location.X-1, CheckersGame.BoardSize.Height-location.Y-1); }
   }
 }
