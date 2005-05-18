@@ -681,13 +681,15 @@ namespace Checkers
           logFileName = "ErrorLog [" + DateTime.Now.ToShortDateString() + "]";
           logFileName = logFileName.Replace('/', '-').Replace('\\', '-');
           logFileName += (( ext == 0 )?( "" ):( " (" + ext.ToString() + ")" ));
-          if (!File.Exists(logFileName + ".log")) break;
+          if (!File.Exists(Path.GetDirectoryName(Application.ExecutablePath) + "\\" + logFileName + ".log")) break;
           ext++;
         }
-        StreamWriter fs = File.CreateText(logFileName + ".log");
+        logFileName = Path.GetDirectoryName(Application.ExecutablePath) + "\\" + logFileName + ".log";
+        StreamWriter fs = File.CreateText(logFileName);
+        fs.WriteLine(Application.ProductName + " " + Application.ProductVersion);
         fs.WriteLine(DateTime.Now.ToLongDateString() + " at " + DateTime.Now.ToLongTimeString());
         fs.WriteLine();
-        fs.WriteLine(e.Exception.ToString());
+        fs.WriteLine(e.ToString());
         fs.Close();
       }
       finally
@@ -714,7 +716,7 @@ namespace Checkers
     private void frmMain_Deactivate (object sender, System.EventArgs e)
     {
       if ((gameType == CheckersGameType.NetGame) && (CheckersUI.IsPlaying) && (CheckersUI.Game.Turn == 1))
-        DoFlashWindow();
+        if (settings.FlashWindowOnTurn) DoFlashWindow();
     }
     private void frmMain_Closing (object sender, System.ComponentModel.CancelEventArgs e)
     { if (!DoCloseGame()) e.Cancel = true; }
@@ -1169,7 +1171,7 @@ namespace Checkers
               throw new IOException();
             case ClientMessage.ChatMessage:
               AppendMessage(lblNameP2.Text, br.ReadString());
-              DoFlashWindow();
+              if (settings.FlashWindowOnGameEvents) DoFlashWindow();
               break;
             case ClientMessage.AbortGame:
               AppendMessage("", "Game has been aborted by opponent");
@@ -1194,7 +1196,7 @@ namespace Checkers
               if (piece != null)
               {
                 if (CheckersUI.MovePiece(piece, path, true, true))
-                { DoFlashWindow(); break; }
+                { if (settings.FlashWindowOnTurn) DoFlashWindow(); break; }
               }
               AppendMessage("", "Opponent made a bad move; game aborted");
               CloseNetGame();
@@ -1215,7 +1217,7 @@ namespace Checkers
     
     private void CloseNetGame ()
     {
-      DoFlashWindow();
+      if (settings.FlashWindowOnGameEvents) DoFlashWindow();
       if (CheckersUI.IsPlaying)
         CheckersUI.Game.DeclareStalemate();
     }

@@ -73,6 +73,9 @@ namespace Checkers
     
     // Net settings
     [DefaultValue(true)]
+    public bool FlashWindowOnGameEvents;
+    
+    [DefaultValue(true)]
     public bool FlashWindowOnTurn;
     
     [DefaultValue(true)]

@@ -9,10 +9,11 @@ Checkers ToDo
  * Sounds
  * Button to 'show last move'
  * Show 'Nice!' and 'Winner!'
- * Default values for colors
+ * Have a 'default' button for each color
  * Net gaming
  * Window flashing
  * Send/receive message sounds
+ * Make all settings work
  x Option: Delay AI movement
  x Fix up context menu issue in frmNewGame
  x In 'frmNewGame' flash window when opponent clicks "I'm Ready"

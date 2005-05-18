@@ -964,7 +964,7 @@ namespace Uberware.Gaming.Checkers.UI
           if ((x % 2) == (y % 2)) continue;
           // Get whether or not square is a 'valid move' square
           bool isDarkenedSquare = false, isFocussedSquare = false, isValidMoveSquare = false;
-          isFocussedSquare = ((highlightSelection) && (focussedSquare.X == x) && (focussedSquare.Y == y));
+          isFocussedSquare = (((highlightSelection) || (state == CheckersUIState.ShowMove)) && (focussedSquare.X == x) && (focussedSquare.Y == y));
           if (highlightPossibleMoves) foreach (Point p in selectedSquares) if ((p.X == x) && (p.Y == y)) { isValidMoveSquare = true; break; }
           if ((blinkCount % 2) == 0) foreach (Point p in darkenedSquares) if ((p.X == x) && (p.Y == y)) { isDarkenedSquare = true; break; }
           // Draw the square

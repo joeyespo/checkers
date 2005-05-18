@@ -24,6 +24,8 @@ namespace Checkers
     private System.Windows.Forms.ContextMenu menuColor;
     private System.Windows.Forms.MenuItem menuChangeColor;
     private System.Windows.Forms.MenuItem menuColorLine01;
+    private System.Windows.Forms.CheckBox chkFlashWindowOnGameEvents;
+    private System.Windows.Forms.Label lblColorCaption;
     private string [] sounds;
     
     #region API Imports
@@ -137,7 +139,9 @@ namespace Checkers
       this.chkFlashWindowOnTurn = new System.Windows.Forms.CheckBox();
       this.chkFlashWindowOnMessage = new System.Windows.Forms.CheckBox();
       this.chkShowNetPanelOnMessage = new System.Windows.Forms.CheckBox();
+      this.chkFlashWindowOnGameEvents = new System.Windows.Forms.CheckBox();
       this.tabBoard = new System.Windows.Forms.TabPage();
+      this.lblColorCaption = new System.Windows.Forms.Label();
       this.lblBoardBackColor = new System.Windows.Forms.Label();
       this.picBoardBackColor = new System.Windows.Forms.PictureBox();
       this.menuColor = new System.Windows.Forms.ContextMenu();
@@ -316,7 +320,7 @@ namespace Checkers
       this.chkShowJumpMessage.Location = new System.Drawing.Point(8, 84);
       this.chkShowJumpMessage.Name = "chkShowJumpMessage";
       this.chkShowJumpMessage.Size = new System.Drawing.Size(372, 20);
-      this.chkShowJumpMessage.TabIndex = 0;
+      this.chkShowJumpMessage.TabIndex = 3;
       this.chkShowJumpMessage.Text = "Show detailed message when a jump must be completed";
       // 
       // chkHighlightSelection
@@ -336,7 +340,7 @@ namespace Checkers
       this.chkHighlightPossibleMoves.Location = new System.Drawing.Point(8, 44);
       this.chkHighlightPossibleMoves.Name = "chkHighlightPossibleMoves";
       this.chkHighlightPossibleMoves.Size = new System.Drawing.Size(372, 20);
-      this.chkHighlightPossibleMoves.TabIndex = 0;
+      this.chkHighlightPossibleMoves.TabIndex = 1;
       this.chkHighlightPossibleMoves.Text = "Highlight possible moves";
       // 
       // chkShowTextFeedback
@@ -346,7 +350,7 @@ namespace Checkers
       this.chkShowTextFeedback.Location = new System.Drawing.Point(8, 64);
       this.chkShowTextFeedback.Name = "chkShowTextFeedback";
       this.chkShowTextFeedback.Size = new System.Drawing.Size(372, 20);
-      this.chkShowTextFeedback.TabIndex = 0;
+      this.chkShowTextFeedback.TabIndex = 2;
       this.chkShowTextFeedback.Text = "Show text feedback";
       // 
       // grpNet
@@ -356,10 +360,11 @@ namespace Checkers
       this.grpNet.Controls.AddRange(new System.Windows.Forms.Control[] {
                                                                          this.chkFlashWindowOnTurn,
                                                                          this.chkFlashWindowOnMessage,
-                                                                         this.chkShowNetPanelOnMessage});
+                                                                         this.chkShowNetPanelOnMessage,
+                                                                         this.chkFlashWindowOnGameEvents});
       this.grpNet.Location = new System.Drawing.Point(0, 136);
       this.grpNet.Name = "grpNet";
-      this.grpNet.Size = new System.Drawing.Size(388, 92);
+      this.grpNet.Size = new System.Drawing.Size(388, 112);
       this.grpNet.TabIndex = 0;
       this.grpNet.TabStop = false;
       this.grpNet.Text = "Net Settings";
@@ -368,35 +373,46 @@ namespace Checkers
       // 
       this.chkFlashWindowOnTurn.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.chkFlashWindowOnTurn.Location = new System.Drawing.Point(8, 24);
+      this.chkFlashWindowOnTurn.Location = new System.Drawing.Point(8, 44);
       this.chkFlashWindowOnTurn.Name = "chkFlashWindowOnTurn";
       this.chkFlashWindowOnTurn.Size = new System.Drawing.Size(372, 20);
-      this.chkFlashWindowOnTurn.TabIndex = 0;
+      this.chkFlashWindowOnTurn.TabIndex = 1;
       this.chkFlashWindowOnTurn.Text = "Flash window when your turn";
       // 
       // chkFlashWindowOnMessage
       // 
       this.chkFlashWindowOnMessage.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.chkFlashWindowOnMessage.Location = new System.Drawing.Point(8, 44);
+      this.chkFlashWindowOnMessage.Location = new System.Drawing.Point(8, 64);
       this.chkFlashWindowOnMessage.Name = "chkFlashWindowOnMessage";
       this.chkFlashWindowOnMessage.Size = new System.Drawing.Size(372, 20);
-      this.chkFlashWindowOnMessage.TabIndex = 1;
+      this.chkFlashWindowOnMessage.TabIndex = 2;
       this.chkFlashWindowOnMessage.Text = "Flash window when a message is received";
       // 
       // chkShowNetPanelOnMessage
       // 
       this.chkShowNetPanelOnMessage.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.chkShowNetPanelOnMessage.Location = new System.Drawing.Point(8, 64);
+      this.chkShowNetPanelOnMessage.Location = new System.Drawing.Point(8, 84);
       this.chkShowNetPanelOnMessage.Name = "chkShowNetPanelOnMessage";
       this.chkShowNetPanelOnMessage.Size = new System.Drawing.Size(372, 20);
-      this.chkShowNetPanelOnMessage.TabIndex = 2;
+      this.chkShowNetPanelOnMessage.TabIndex = 3;
       this.chkShowNetPanelOnMessage.Text = "Show Net Panel when message is received";
+      // 
+      // chkFlashWindowOnGameEvents
+      // 
+      this.chkFlashWindowOnGameEvents.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.chkFlashWindowOnGameEvents.Location = new System.Drawing.Point(8, 24);
+      this.chkFlashWindowOnGameEvents.Name = "chkFlashWindowOnGameEvents";
+      this.chkFlashWindowOnGameEvents.Size = new System.Drawing.Size(372, 20);
+      this.chkFlashWindowOnGameEvents.TabIndex = 0;
+      this.chkFlashWindowOnGameEvents.Text = "Flash window on game events";
       // 
       // tabBoard
       // 
       this.tabBoard.Controls.AddRange(new System.Windows.Forms.Control[] {
+                                                                           this.lblColorCaption,
                                                                            this.lblBoardBackColor,
                                                                            this.picBoardBackColor,
                                                                            this.lblBackColor,
@@ -411,6 +427,16 @@ namespace Checkers
       this.tabBoard.Size = new System.Drawing.Size(390, 290);
       this.tabBoard.TabIndex = 1;
       this.tabBoard.Text = "Appearance";
+      // 
+      // lblColorCaption
+      // 
+      this.lblColorCaption.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.lblColorCaption.Location = new System.Drawing.Point(12, 164);
+      this.lblColorCaption.Name = "lblColorCaption";
+      this.lblColorCaption.Size = new System.Drawing.Size(372, 32);
+      this.lblColorCaption.TabIndex = 12;
+      this.lblColorCaption.Text = "Note: Right-click to reset to default";
       // 
       // lblBoardBackColor
       // 
@@ -756,6 +782,7 @@ namespace Checkers
         settings.ShowJumpMessage = chkShowJumpMessage.Checked;
         settings.ShowTextFeedback = chkShowTextFeedback.Checked;
         // Net settings
+        settings.FlashWindowOnGameEvents = chkFlashWindowOnGameEvents.Checked;
         settings.FlashWindowOnTurn = chkFlashWindowOnTurn.Checked;
         settings.FlashWindowOnMessage = chkFlashWindowOnMessage.Checked;
         settings.ShowNetPanelOnMessage = chkShowNetPanelOnMessage.Checked;
@@ -781,6 +808,7 @@ namespace Checkers
       chkShowJumpMessage.Checked = settings.ShowJumpMessage;
       chkShowTextFeedback.Checked = settings.ShowTextFeedback;
       // Net settings
+      chkFlashWindowOnGameEvents.Checked = settings.FlashWindowOnGameEvents;
       chkFlashWindowOnTurn.Checked = settings.FlashWindowOnTurn;
       chkFlashWindowOnMessage.Checked = settings.FlashWindowOnMessage;
       chkShowNetPanelOnMessage.Checked = settings.ShowNetPanelOnMessage;
@@ -823,9 +851,9 @@ namespace Checkers
     
     private void mozGeneral_Click (object sender, System.EventArgs e)
     { tabPreferences.SelectedTab = tabGeneral; }
-    private void mozBoard_Click(object sender, System.EventArgs e)
+    private void mozBoard_Click (object sender, System.EventArgs e)
     { tabPreferences.SelectedTab = tabBoard; }
-    private void mozSounds_Click(object sender, System.EventArgs e)
+    private void mozSounds_Click (object sender, System.EventArgs e)
     { tabPreferences.SelectedTab = tabSounds; }
     
     private void picColor_MouseDown (object sender, System.Windows.Forms.MouseEventArgs e)
