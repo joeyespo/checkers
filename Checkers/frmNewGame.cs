@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Collections;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
@@ -37,6 +38,7 @@ namespace Checkers
   
   public class frmNewGame : System.Windows.Forms.Form
   {
+    private CheckersSettings settings;
     private PictureBox selectedPicture;
     private CheckersGameType gameType;
     private int firstMove;
@@ -48,7 +50,32 @@ namespace Checkers
     private TcpListener clientListener = null;
     private TcpClientCollection clients = new TcpClientCollection();
     private bool isSelfPlayer = false;
+    private System.Windows.Forms.MenuItem menuChatClear;
+    private System.Windows.Forms.MenuItem menuChatLine02;
     private TcpClient remotePlayer = null;
+    
+    #region API Imports
+    
+    [DllImport("winmm.dll", EntryPoint="PlaySound", SetLastError=true, CallingConvention=CallingConvention.Winapi)]
+    static extern bool sndPlaySound( string pszSound, IntPtr hMod, SoundFlags sf );
+
+    [Flags]
+    public enum SoundFlags : int
+    {
+      SND_SYNC = 0x0000,  /* play synchronously (default) */
+      SND_ASYNC = 0x0001,  /* play asynchronously */
+      SND_NODEFAULT = 0x0002,  /* silence (!default) if sound not found */
+      SND_MEMORY = 0x0004,  /* pszSound points to a memory file */
+      SND_LOOP = 0x0008,  /* loop the sound until next sndPlaySound */
+      SND_NOSTOP = 0x0010,  /* don't stop any currently playing sound */
+      SND_NOWAIT = 0x00002000, /* don't wait if the driver is busy */
+      SND_ALIAS = 0x00010000, /* name is a registry alias */
+      SND_ALIAS_ID = 0x00110000, /* alias is a predefined ID */
+      SND_FileName = 0x00020000, /* name is file name */
+      SND_RESOURCE = 0x00040004  /* name is resource name or atom */
+    }
+    
+    #endregion
     
     #region Class Variables
 
@@ -161,18 +188,23 @@ namespace Checkers
     private System.Windows.Forms.TextBox txtPlayerNameNet;
     private System.Windows.Forms.TextBox txtFirstMoveNet;
     private System.Windows.Forms.CheckBox chkLockImagesNet;
+    private System.Windows.Forms.ContextMenu menuChat;
+    private System.Windows.Forms.MenuItem menuChatCopy;
+    private System.Windows.Forms.MenuItem menuChatSelectAll;
+    private System.Windows.Forms.MenuItem menuChatLine01;
     private System.ComponentModel.IContainer components;
     
     #endregion
     
     #region Class Construction
     
-    public frmNewGame ()
+    public frmNewGame (CheckersSettings settings)
     {
       //
       // Required for Windows Form Designer support
       //
       InitializeComponent();
+      this.settings = settings;
       imageSet = new Image [4];
     }
     
@@ -308,6 +340,12 @@ namespace Checkers
       this.dlgSelectColor = new System.Windows.Forms.ColorDialog();
       this.imlKing = new System.Windows.Forms.ImageList(this.components);
       this.tmrConnection = new System.Windows.Forms.Timer(this.components);
+      this.menuChat = new System.Windows.Forms.ContextMenu();
+      this.menuChatCopy = new System.Windows.Forms.MenuItem();
+      this.menuChatLine01 = new System.Windows.Forms.MenuItem();
+      this.menuChatSelectAll = new System.Windows.Forms.MenuItem();
+      this.menuChatClear = new System.Windows.Forms.MenuItem();
+      this.menuChatLine02 = new System.Windows.Forms.MenuItem();
       this.tabGame.SuspendLayout();
       this.tabGame1P.SuspendLayout();
       this.grpPlayerSettings1P.SuspendLayout();
@@ -928,6 +966,7 @@ namespace Checkers
       this.txtRemoteHostNet.Size = new System.Drawing.Size(296, 20);
       this.txtRemoteHostNet.TabIndex = 1;
       this.txtRemoteHostNet.Text = "";
+      this.txtRemoteHostNet.TextChanged += new System.EventHandler(this.txtRemoteHostNet_TextChanged);
       // 
       // lblRemoteHostNet
       // 
@@ -1148,6 +1187,7 @@ namespace Checkers
       // 
       // txtChat
       // 
+      this.txtChat.ContextMenu = this.menuChat;
       this.txtChat.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
       this.txtChat.Location = new System.Drawing.Point(0, 156);
       this.txtChat.Name = "txtChat";
@@ -1514,6 +1554,44 @@ namespace Checkers
       this.tmrConnection.Interval = 10;
       this.tmrConnection.Tick += new System.EventHandler(this.tmrConnection_Tick);
       // 
+      // menuChat
+      // 
+      this.menuChat.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+                                                                             this.menuChatCopy,
+                                                                             this.menuChatLine01,
+                                                                             this.menuChatClear,
+                                                                             this.menuChatLine02,
+                                                                             this.menuChatSelectAll});
+      this.menuChat.Popup += new System.EventHandler(this.menuChat_Popup);
+      // 
+      // menuChatCopy
+      // 
+      this.menuChatCopy.Index = 0;
+      this.menuChatCopy.Text = "&Copy";
+      this.menuChatCopy.Click += new System.EventHandler(this.menuChatCopy_Click);
+      // 
+      // menuChatLine01
+      // 
+      this.menuChatLine01.Index = 1;
+      this.menuChatLine01.Text = "-";
+      // 
+      // menuChatSelectAll
+      // 
+      this.menuChatSelectAll.Index = 4;
+      this.menuChatSelectAll.Text = "Select &All";
+      this.menuChatSelectAll.Click += new System.EventHandler(this.menuChatSelectAll_Click);
+      // 
+      // menuChatClear
+      // 
+      this.menuChatClear.Index = 2;
+      this.menuChatClear.Text = "&Clear Window";
+      this.menuChatClear.Click += new System.EventHandler(this.menuChatClear_Click);
+      // 
+      // menuChatLine02
+      // 
+      this.menuChatLine02.Index = 3;
+      this.menuChatLine02.Text = "-";
+      // 
       // frmNewGame
       // 
       this.AcceptButton = this.btnOK;
@@ -1676,8 +1754,15 @@ namespace Checkers
       if (dlgOpenImage.ShowDialog(this) == DialogResult.Cancel) return;
       string pawnFileName = dlgOpenImage.FileName;
       // Create piece images
-      Image pawn = new Bitmap(Image.FromFile(pawnFileName), 32, 32);
-      Image king = new Bitmap(Image.FromFile(pawnFileName), 32, 32);
+      Bitmap pawn = new Bitmap(Image.FromFile(pawnFileName));
+      Bitmap king = new Bitmap(Image.FromFile(pawnFileName));
+      // Set transparencies (if not transparent)
+      pawn.MakeTransparent();
+      king.MakeTransparent();
+      // Resize image set
+      pawn = new Bitmap(pawn, 32, 32);
+      king = new Bitmap(king, 32, 32);
+      // Draw king icon on the king
       DrawKingIcon(king);
       // Set custom pawn.king images
       pawnPic.Image = pawn; pawnPic.Tag = null;
@@ -1690,7 +1775,11 @@ namespace Checkers
       if (dlgOpenImage.ShowDialog(this) == DialogResult.Cancel) return;
       string kingFileName = dlgOpenImage.FileName;
       // Create piece images
-      Image king = new Bitmap(Image.FromFile(kingFileName), 32, 32);
+      Bitmap king = new Bitmap(Image.FromFile(kingFileName));
+      // Set transparencies (if not transparent)
+      king.MakeTransparent();
+      // Resize image set
+      king = new Bitmap(king, 32, 32);
       // Set custom pawn.king images
       kingPic.Image = king;
     }
@@ -1777,7 +1866,6 @@ namespace Checkers
     private Bitmap CreatePieceImage (Color color, bool isKing)
     {
       Bitmap pieceImage = new Bitmap(32, 32);
-      pieceImage.MakeTransparent();
       Graphics g = Graphics.FromImage(pieceImage);
       Brush fillBrush = new SolidBrush(color);
       Pen ringColor = new Pen(Color.FromArgb( (( color.R+0x28 > 0xFF )?( 0xFF ):( color.R+0x28 )), (( color.G+0x28 > 0xFF )?( 0xFF ):( color.G+0x28 )), (( color.B+0x28 > 0xFF )?( 0xFF ):( color.B+0x28 )) ));
@@ -1837,12 +1925,18 @@ namespace Checkers
         }
         if ((pawnPreset != "") && (kingPreset != ""))
         {
-          Image pawn = null, king = null;
+          Bitmap pawn = null, king = null;
           try
           {
             // Load the preset image set
-            pawn = new Bitmap(Image.FromFile(pawnPreset), 32, 32);
-            king = new Bitmap(Image.FromFile(kingPreset), 32, 32);
+            pawn = new Bitmap(Image.FromFile(pawnPreset));
+            king = new Bitmap(Image.FromFile(kingPreset));
+            // Set transparencies (if not transparent)
+            pawn.MakeTransparent();
+            king.MakeTransparent();
+            // Resize image set
+            pawn = new Bitmap(pawn, 32, 32);
+            king = new Bitmap(king, 32, 32);
           }
           catch (OutOfMemoryException)
           { MessageBox.Show(this, "One or both presets were not supported!", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Error); }
@@ -2181,8 +2275,23 @@ namespace Checkers
     private void frmNewGame_Activated (object sender, System.EventArgs e)
     {
       if ((tabGame.SelectedIndex == 2) && (panNetSettings.Visible))
-      { txtChat.Select(); txtSend.Select(); }
+        RefreshChat();
     }
+    
+    private void menuChat_Popup (object sender, System.EventArgs e)
+    {
+      menuChatClear.Enabled = txtChat.TextLength > 0;
+      menuChatCopy.Enabled = (txtChat.SelectionLength > 0);
+    }
+    private void menuChatClear_Click (object sender, System.EventArgs e)
+    {
+      if (MessageBox.Show(this, "Clear the chat window?", "Checkers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
+      txtChat.Clear();
+    }
+    private void menuChatCopy_Click (object sender, System.EventArgs e)
+    { Clipboard.SetDataObject(txtChat.Text, true); }
+    private void menuChatSelectAll_Click (object sender, System.EventArgs e)
+    { txtChat.SelectAll(); }
     
     private void LoadRecentGames ()
     {
@@ -2250,8 +2359,10 @@ namespace Checkers
     private void lnkIPAddress_LinkClicked (object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
     { Clipboard.SetDataObject(lnkIPAddress.Text, true); }
     
+    private void txtRemoteHostNet_TextChanged (object sender, System.EventArgs e)
+    { panNet_Enter(panNet, EventArgs.Empty); }
     private void panNet_Enter (object sender, System.EventArgs e)
-    { AcceptButton = btnJoinNet; }
+    { AcceptButton = (( txtRemoteHostNet.Text.Trim().Length == 0 )?( btnCreateNet ):( btnJoinNet )); }
     private void panNet_Leave (object sender, System.EventArgs e)
     { AcceptButton = btnOK; }
     private void panNetSettings_Enter (object sender, System.EventArgs e)
@@ -2377,7 +2488,7 @@ namespace Checkers
       panNetSettings.Show();
       panNetSettings.BringToFront();
       panNet.Hide();
-      AppendMessage("", "Entered room");
+      AppendMessage("", "*** Entered room");
       txtSend.Select();
     }
     
@@ -2423,6 +2534,7 @@ namespace Checkers
       }
       
       AppendMessage(txtPlayerNameNet.Text, txtSend.Text);
+      PlaySound(CheckersSounds.SendMessage);
       txtSend.Text = ""; txtSend.Select();
     }
     
@@ -2623,6 +2735,7 @@ namespace Checkers
           string name = br.ReadString();
           string message = br.ReadString();
           AppendMessage(name, message);
+          PlaySound(CheckersSounds.ReceiveMessage);
           break;
         case ClientMessage.BeginGame:
           // Attact to client and close the form
@@ -2704,6 +2817,7 @@ namespace Checkers
           string name = br.ReadString();
           string message = br.ReadString();
           BroadcastMessage(name, message, client);
+          PlaySound(CheckersSounds.ReceiveMessage);
           break;
         case ClientMessage.BeginGame:
           throw new IOException("A wrong message was received");
@@ -2976,6 +3090,25 @@ namespace Checkers
       cmbNetGameType.Select();
       txtChat.Text = ""; txtSend.Text = "";
       lblGameNet.Text = "Net Game";
+    }
+    
+    private void RefreshChat ()
+    {
+      int start = txtSend.SelectionStart;
+      int length = txtSend.SelectionLength;
+      txtChat.Select();
+      txtSend.Select(start, length);
+      txtSend.Select();
+    }
+    
+    private void PlaySound (CheckersSounds sound)
+    {
+      // Play sound
+      if (settings.MuteSounds) return;
+      string soundFileName = settings.sounds[(int)sound];
+      string fileName = (( Path.IsPathRooted(soundFileName) )?( soundFileName ):( Path.GetDirectoryName(Application.ExecutablePath) + "\\Sounds\\" + soundFileName ));
+      // Play sound
+      sndPlaySound(fileName, IntPtr.Zero, (SoundFlags.SND_FileName | SoundFlags.SND_ASYNC | SoundFlags.SND_NOWAIT));
     }
     
     #endregion

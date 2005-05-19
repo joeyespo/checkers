@@ -301,7 +301,7 @@
 </value>
   </data>
   <data name="imlImageSet.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>136, 17</value>
+    <value>238, 17</value>
   </data>
   <data name="imlImageSet.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
@@ -723,19 +723,19 @@
 </value>
   </data>
   <data name="menuImage.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>585, 17</value>
+    <value>687, 17</value>
   </data>
   <data name="mozGameType.Locked" type="System.Boolean, mscorlib, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </data>
   <data name="dlgOpenImage.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>338, 17</value>
+    <value>440, 17</value>
   </data>
   <data name="dlgSelectColor.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>463, 17</value>
+    <value>565, 17</value>
   </data>
   <data name="imlKing.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>250, 17</value>
+    <value>352, 17</value>
   </data>
   <data name="imlKing.ImageStream" mimetype="application/x-microsoft.net.object.binary.base64">
     <value>
@@ -767,7 +767,10 @@
 </value>
   </data>
   <data name="tmrConnection.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>696, 17</value>
+    <value>17, 54</value>
+  </data>
+  <data name="menuChat.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>134, 15</value>
   </data>
   <data name="$this.Name">
     <value>frmNewGame</value>

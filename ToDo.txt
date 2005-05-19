@@ -14,6 +14,9 @@ Checkers ToDo
  * Window flashing
  * Send/receive message sounds
  * Make all settings work
+ * Chat: sounds in new game window
+ * Chat window context menu (std edit menu + "save...")
+ * Chatting .. when a msg is received and the textbox loses/restores focus, it highlights your prev send-message
  x Option: Delay AI movement
  x Fix up context menu issue in frmNewGame
  x In 'frmNewGame' flash window when opponent clicks "I'm Ready"

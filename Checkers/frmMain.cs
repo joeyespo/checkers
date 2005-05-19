@@ -17,8 +17,6 @@ namespace Checkers
     private CheckersAgent agent = null;
     private CheckersSettings settings;
     private DateTime playTime;
-    private System.Windows.Forms.Label lblRemoteIP;
-    private System.Windows.Forms.LinkLabel lnkRemoteIP;
     private TcpClient remotePlayer = null;
     
     enum ClientMessage : byte
@@ -55,8 +53,20 @@ namespace Checkers
     
     #endregion
     
-    #region Class Variables
+    #region Class Controls
 
+    private System.Windows.Forms.Label lblRemoteIP;
+    private System.Windows.Forms.LinkLabel lnkRemoteIP;
+    private System.Windows.Forms.ContextMenu menuChat;
+    private System.Windows.Forms.MenuItem menuChatSave;
+    private System.Windows.Forms.MenuItem menuChatLine01;
+    private System.Windows.Forms.MenuItem menuChatCopy;
+    private System.Windows.Forms.MenuItem menuChatSelectAll;
+    private System.Windows.Forms.MenuItem menuChatLine02;
+    private System.Windows.Forms.SaveFileDialog dlgSaveChat;
+    private System.Windows.Forms.LinkLabel lnkLocalIP;
+    private System.Windows.Forms.Label lblLocalIP;
+    private System.Windows.Forms.MenuItem menuChatClear;
     private System.Windows.Forms.Timer tmrConnection;
     private System.Windows.Forms.Timer tmrTextDisplay;
     private System.Windows.Forms.MenuItem menuViewLastMoved;
@@ -164,17 +174,27 @@ namespace Checkers
       this.panNet = new System.Windows.Forms.Panel();
       this.lnkRemoteIP = new System.Windows.Forms.LinkLabel();
       this.lblRemoteIP = new System.Windows.Forms.Label();
+      this.lnkLocalIP = new System.Windows.Forms.LinkLabel();
+      this.lblLocalIP = new System.Windows.Forms.Label();
       this.splChat = new System.Windows.Forms.Splitter();
       this.panChat = new System.Windows.Forms.Panel();
       this.txtSend = new System.Windows.Forms.TextBox();
       this.btnSend = new System.Windows.Forms.Button();
       this.txtChat = new System.Windows.Forms.RichTextBox();
+      this.menuChat = new System.Windows.Forms.ContextMenu();
+      this.menuChatCopy = new System.Windows.Forms.MenuItem();
+      this.menuChatLine01 = new System.Windows.Forms.MenuItem();
+      this.menuChatSave = new System.Windows.Forms.MenuItem();
+      this.menuChatLine02 = new System.Windows.Forms.MenuItem();
+      this.menuChatSelectAll = new System.Windows.Forms.MenuItem();
       this.CheckersUI = new Uberware.Gaming.Checkers.UI.CheckersUI();
       this.imlTurn = new System.Windows.Forms.ImageList(this.components);
       this.tmrTimePassed = new System.Windows.Forms.Timer(this.components);
       this.tmrFlashWindow = new System.Windows.Forms.Timer(this.components);
       this.tmrTextDisplay = new System.Windows.Forms.Timer(this.components);
       this.tmrConnection = new System.Windows.Forms.Timer(this.components);
+      this.dlgSaveChat = new System.Windows.Forms.SaveFileDialog();
+      this.menuChatClear = new System.Windows.Forms.MenuItem();
       this.panGame.SuspendLayout();
       this.panGameInfo.SuspendLayout();
       this.panOnline.SuspendLayout();
@@ -499,12 +519,15 @@ namespace Checkers
       // 
       this.panNet.Controls.AddRange(new System.Windows.Forms.Control[] {
                                                                          this.lnkRemoteIP,
-                                                                         this.lblRemoteIP});
+                                                                         this.lblRemoteIP,
+                                                                         this.lnkLocalIP,
+                                                                         this.lblLocalIP});
       this.panNet.Dock = System.Windows.Forms.DockStyle.Fill;
       this.panNet.Location = new System.Drawing.Point(276, 0);
       this.panNet.Name = "panNet";
       this.panNet.Size = new System.Drawing.Size(144, 80);
       this.panNet.TabIndex = 2;
+      this.panNet.Visible = false;
       // 
       // lnkRemoteIP
       // 
@@ -513,7 +536,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.lnkRemoteIP.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
       this.lnkRemoteIP.LinkColor = System.Drawing.SystemColors.ControlText;
-      this.lnkRemoteIP.Location = new System.Drawing.Point(0, 16);
+      this.lnkRemoteIP.Location = new System.Drawing.Point(0, 52);
       this.lnkRemoteIP.Name = "lnkRemoteIP";
       this.lnkRemoteIP.Size = new System.Drawing.Size(144, 16);
       this.lnkRemoteIP.TabIndex = 1;
@@ -523,10 +546,33 @@ namespace Checkers
       // 
       this.lblRemoteIP.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
+      this.lblRemoteIP.Location = new System.Drawing.Point(0, 36);
       this.lblRemoteIP.Name = "lblRemoteIP";
       this.lblRemoteIP.Size = new System.Drawing.Size(144, 16);
       this.lblRemoteIP.TabIndex = 0;
       this.lblRemoteIP.Text = "Opponent IP:";
+      // 
+      // lnkLocalIP
+      // 
+      this.lnkLocalIP.ActiveLinkColor = System.Drawing.Color.Blue;
+      this.lnkLocalIP.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.lnkLocalIP.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+      this.lnkLocalIP.LinkColor = System.Drawing.SystemColors.ControlText;
+      this.lnkLocalIP.Location = new System.Drawing.Point(0, 16);
+      this.lnkLocalIP.Name = "lnkLocalIP";
+      this.lnkLocalIP.Size = new System.Drawing.Size(144, 16);
+      this.lnkLocalIP.TabIndex = 1;
+      this.lnkLocalIP.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLocalIP_LinkClicked);
+      // 
+      // lblLocalIP
+      // 
+      this.lblLocalIP.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.lblLocalIP.Name = "lblLocalIP";
+      this.lblLocalIP.Size = new System.Drawing.Size(144, 16);
+      this.lblLocalIP.TabIndex = 0;
+      this.lblLocalIP.Text = "Local IP:";
       // 
       // splChat
       // 
@@ -574,11 +620,51 @@ namespace Checkers
       this.txtChat.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
         | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
+      this.txtChat.ContextMenu = this.menuChat;
       this.txtChat.Name = "txtChat";
       this.txtChat.ReadOnly = true;
       this.txtChat.Size = new System.Drawing.Size(270, 58);
       this.txtChat.TabIndex = 1;
       this.txtChat.Text = "";
+      // 
+      // menuChat
+      // 
+      this.menuChat.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+                                                                             this.menuChatCopy,
+                                                                             this.menuChatLine01,
+                                                                             this.menuChatSave,
+                                                                             this.menuChatClear,
+                                                                             this.menuChatLine02,
+                                                                             this.menuChatSelectAll});
+      this.menuChat.Popup += new System.EventHandler(this.menuChat_Popup);
+      // 
+      // menuChatCopy
+      // 
+      this.menuChatCopy.Index = 0;
+      this.menuChatCopy.Text = "&Copy";
+      this.menuChatCopy.Click += new System.EventHandler(this.menuChatCopy_Click);
+      // 
+      // menuChatLine01
+      // 
+      this.menuChatLine01.Index = 1;
+      this.menuChatLine01.Text = "-";
+      // 
+      // menuChatSave
+      // 
+      this.menuChatSave.Index = 2;
+      this.menuChatSave.Text = "&Save...";
+      this.menuChatSave.Click += new System.EventHandler(this.menuChatSave_Click);
+      // 
+      // menuChatLine02
+      // 
+      this.menuChatLine02.Index = 4;
+      this.menuChatLine02.Text = "-";
+      // 
+      // menuChatSelectAll
+      // 
+      this.menuChatSelectAll.Index = 5;
+      this.menuChatSelectAll.Text = "Select &All";
+      this.menuChatSelectAll.Click += new System.EventHandler(this.menuChatSelectAll_Click);
       // 
       // CheckersUI
       // 
@@ -624,6 +710,20 @@ namespace Checkers
       // 
       this.tmrConnection.Interval = 10;
       this.tmrConnection.Tick += new System.EventHandler(this.tmrConnection_Tick);
+      // 
+      // dlgSaveChat
+      // 
+      this.dlgSaveChat.DefaultExt = "rtf";
+      this.dlgSaveChat.FileName = "Chat";
+      this.dlgSaveChat.Filter = "Text Files (*.txt)|*.txt|Rich Text Files (*.rtf)|*.rtf|All Files (*.*)|*.*";
+      this.dlgSaveChat.FilterIndex = 2;
+      this.dlgSaveChat.Title = "Save Output";
+      // 
+      // menuChatClear
+      // 
+      this.menuChatClear.Index = 3;
+      this.menuChatClear.Text = "&Clear Window";
+      this.menuChatClear.Click += new System.EventHandler(this.menuChatClear_Click);
       // 
       // frmMain
       // 
@@ -710,8 +810,7 @@ namespace Checkers
     private void frmMain_Activated (object sender, System.EventArgs e)
     {
       tmrFlashWindow.Stop();
-      if (gameType == CheckersGameType.NetGame)
-      { txtChat.Select(); txtSend.Select(); }
+      if (gameType == CheckersGameType.NetGame) RefreshChat();
     }
     private void frmMain_Deactivate (object sender, System.EventArgs e)
     {
@@ -727,7 +826,6 @@ namespace Checkers
     { DoCloseGame(); }
     private void menuGameExit_Click (object sender, System.EventArgs e)
     { Close(); }
-    
     private void menuView_Popup (object sender, System.EventArgs e)
     {
       menuViewGamePanel.Checked = (this.Width != this.MinimumSize.Width);
@@ -753,9 +851,28 @@ namespace Checkers
       settings = form.Settings;
       UpdateBoard();
     }
-    
     private void menuHelpAbout_Click (object sender, System.EventArgs e)
     { (new frmAbout()).ShowDialog(this); }
+    
+    private void menuChat_Popup (object sender, System.EventArgs e)
+    {
+      menuChatClear.Enabled = txtChat.TextLength > 0;
+      menuChatCopy.Enabled = txtChat.SelectionLength > 0;
+    }
+    private void menuChatCopy_Click (object sender, System.EventArgs e)
+    { Clipboard.SetDataObject(txtChat.Text, true); }
+    private void menuChatSave_Click (object sender, System.EventArgs e)
+    {
+      if (dlgSaveChat.ShowDialog(this) != DialogResult.OK) return;
+      txtChat.SaveFile(dlgSaveChat.FileName, (( Path.GetExtension(dlgSaveChat.FileName) == ".rtf" )?( RichTextBoxStreamType.RichText ):( RichTextBoxStreamType.PlainText )));
+    }
+    private void menuChatClear_Click (object sender, System.EventArgs e)
+    {
+      if (MessageBox.Show(this, "Clear the chat window?", "Checkers", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No) return;
+      txtChat.Clear();
+    }
+    private void menuChatSelectAll_Click (object sender, System.EventArgs e)
+    { txtChat.SelectAll(); }
     
     private void CheckersUI_GameStarted (object sender, System.EventArgs e)
     {
@@ -845,8 +962,10 @@ namespace Checkers
       CheckForClientMessage();
     }
     
+    private void lnkLocalIP_LinkClicked (object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
+    { Clipboard.SetDataObject(lnkLocalIP.Text, true); }
     private void lnkRemoteIP_LinkClicked (object sender, System.Windows.Forms.LinkLabelLinkClickedEventArgs e)
-    { Clipboard.SetDataObject(lnkRemoteIP, true); }
+    { Clipboard.SetDataObject(lnkRemoteIP.Text, true); }
     
     private void txtSend_Enter (object sender, System.EventArgs e)
     { this.AcceptButton = btnSend; }
@@ -867,7 +986,7 @@ namespace Checkers
       }
       
       // Get new game type
-      frmNewGame newGame = new frmNewGame();
+      frmNewGame newGame = new frmNewGame(settings);
       // Set defaults
       newGame.GameType = gameType;
       newGame.Player1Name = lblNameP1.Text;
@@ -913,6 +1032,8 @@ namespace Checkers
           CheckersUI.Player2Active = (remotePlayer == null);
           if (!menuViewNetPanel.Checked) menuViewNetPanel_Click(menuViewNetPanel, EventArgs.Empty);
           tmrConnection.Start();
+          panNet.Visible = true;
+          lnkLocalIP.Text = Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString();
           lnkRemoteIP.Text = ((IPEndPoint)remotePlayer.Socket.RemoteEndPoint).Address.ToString();
           AppendMessage("", "Connected to player");
           break;
@@ -982,8 +1103,9 @@ namespace Checkers
       picTurn.Visible = false;
       if (gameType == CheckersGameType.NetGame)
       {
-        txtChat.Text = ""; txtSend.Text = "";
         tmrConnection.Stop();
+        panNet.Visible = false;
+        lnkLocalIP.Text = "";
         lnkRemoteIP.Text = "";
         if (remotePlayer != null)
         {
@@ -997,6 +1119,7 @@ namespace Checkers
           catch (IOException) {}
           catch (SocketException) {}
           catch (InvalidOperationException) {}
+          AppendMessage("", "Connection closed");
           remotePlayer = null;
         }
       }
@@ -1141,6 +1264,15 @@ namespace Checkers
       CheckersUI.ShowJumpMessage = settings.ShowJumpMessage;
     }
     
+    private void RefreshChat ()
+    {
+      int start = txtSend.SelectionStart;
+      int length = txtSend.SelectionLength;
+      txtChat.Select();
+      txtSend.Select(start, length);
+      txtSend.Select();
+    }
+    
     private void PlaySound (CheckersSounds sound)
     {
       // Play sound
@@ -1224,7 +1356,8 @@ namespace Checkers
     
     private void AppendMessage (string name, string message)
     {
-      txtChat.Select(txtChat.TextLength, 0);
+      txtChat.SelectionStart = txtChat.TextLength;
+      txtChat.SelectionLength = 0;
       if (name == "")
       {
         txtChat.SelectionColor = Color.Red;
@@ -1247,11 +1380,11 @@ namespace Checkers
         PlaySound(CheckersSounds.ReceiveMessage);
       }
       txtChat.AppendText(message);
-      Control activeControl = ActiveControl;
-      txtChat.Select();
       txtChat.AppendText("\n");
       txtChat.ScrollToCaret();
-      activeControl.Select();
+      Control activeControl = ActiveControl;
+      if (activeControl == txtSend) RefreshChat();
+      else { txtChat.Select(); activeControl.Select(); }
     }
     
     private Point RotateOpponentPiece (BinaryReader br)
