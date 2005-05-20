@@ -56,6 +56,24 @@ namespace Checkers
     
     #region API Imports
     
+    [DllImport("user32", EntryPoint="GetScrollRange", SetLastError=true, CallingConvention=CallingConvention.Winapi)]
+    private static extern int GetScrollRange (IntPtr hWnd, int nBar, ref int lpMinPos, ref int lpMaxPos);
+    
+    [DllImport("user32", EntryPoint="SendMessageA", ExactSpelling=true, SetLastError=true, CallingConvention=CallingConvention.Winapi)]
+    private static extern int SendMessage (IntPtr hWnd, int ByVal, int wParam, Win32Point lParam);
+    
+    [StructLayout(LayoutKind.Sequential)]
+    private class Win32Point
+    {
+      public int x;
+      public int y;
+      public Win32Point ()
+      { x = 0; y = 0; }
+      public Win32Point (int x, int y)
+      { this.x = x; this.y = y; }
+    }
+    private static readonly int EM_SETSCROLLPOS = 0x400 + 222;
+    
     [DllImport("winmm.dll", EntryPoint="PlaySound", SetLastError=true, CallingConvention=CallingConvention.Winapi)]
     static extern bool sndPlaySound( string pszSound, IntPtr hMod, SoundFlags sf );
 
@@ -304,6 +322,12 @@ namespace Checkers
       this.btnSend = new System.Windows.Forms.Button();
       this.txtSend = new System.Windows.Forms.TextBox();
       this.txtChat = new System.Windows.Forms.RichTextBox();
+      this.menuChat = new System.Windows.Forms.ContextMenu();
+      this.menuChatCopy = new System.Windows.Forms.MenuItem();
+      this.menuChatLine01 = new System.Windows.Forms.MenuItem();
+      this.menuChatClear = new System.Windows.Forms.MenuItem();
+      this.menuChatLine02 = new System.Windows.Forms.MenuItem();
+      this.menuChatSelectAll = new System.Windows.Forms.MenuItem();
       this.grpPlayerSettingsNet = new System.Windows.Forms.GroupBox();
       this.panImageSetNet = new System.Windows.Forms.Panel();
       this.picKingNet1 = new System.Windows.Forms.PictureBox();
@@ -340,12 +364,6 @@ namespace Checkers
       this.dlgSelectColor = new System.Windows.Forms.ColorDialog();
       this.imlKing = new System.Windows.Forms.ImageList(this.components);
       this.tmrConnection = new System.Windows.Forms.Timer(this.components);
-      this.menuChat = new System.Windows.Forms.ContextMenu();
-      this.menuChatCopy = new System.Windows.Forms.MenuItem();
-      this.menuChatLine01 = new System.Windows.Forms.MenuItem();
-      this.menuChatSelectAll = new System.Windows.Forms.MenuItem();
-      this.menuChatClear = new System.Windows.Forms.MenuItem();
-      this.menuChatLine02 = new System.Windows.Forms.MenuItem();
       this.tabGame.SuspendLayout();
       this.tabGame1P.SuspendLayout();
       this.grpPlayerSettings1P.SuspendLayout();
@@ -1196,6 +1214,44 @@ namespace Checkers
       this.txtChat.TabIndex = 3;
       this.txtChat.Text = "";
       // 
+      // menuChat
+      // 
+      this.menuChat.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+                                                                             this.menuChatCopy,
+                                                                             this.menuChatLine01,
+                                                                             this.menuChatClear,
+                                                                             this.menuChatLine02,
+                                                                             this.menuChatSelectAll});
+      this.menuChat.Popup += new System.EventHandler(this.menuChat_Popup);
+      // 
+      // menuChatCopy
+      // 
+      this.menuChatCopy.Index = 0;
+      this.menuChatCopy.Text = "&Copy";
+      this.menuChatCopy.Click += new System.EventHandler(this.menuChatCopy_Click);
+      // 
+      // menuChatLine01
+      // 
+      this.menuChatLine01.Index = 1;
+      this.menuChatLine01.Text = "-";
+      // 
+      // menuChatClear
+      // 
+      this.menuChatClear.Index = 2;
+      this.menuChatClear.Text = "&Clear Window";
+      this.menuChatClear.Click += new System.EventHandler(this.menuChatClear_Click);
+      // 
+      // menuChatLine02
+      // 
+      this.menuChatLine02.Index = 3;
+      this.menuChatLine02.Text = "-";
+      // 
+      // menuChatSelectAll
+      // 
+      this.menuChatSelectAll.Index = 4;
+      this.menuChatSelectAll.Text = "Select &All";
+      this.menuChatSelectAll.Click += new System.EventHandler(this.menuChatSelectAll_Click);
+      // 
       // grpPlayerSettingsNet
       // 
       this.grpPlayerSettingsNet.Controls.AddRange(new System.Windows.Forms.Control[] {
@@ -1553,44 +1609,6 @@ namespace Checkers
       // 
       this.tmrConnection.Interval = 10;
       this.tmrConnection.Tick += new System.EventHandler(this.tmrConnection_Tick);
-      // 
-      // menuChat
-      // 
-      this.menuChat.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-                                                                             this.menuChatCopy,
-                                                                             this.menuChatLine01,
-                                                                             this.menuChatClear,
-                                                                             this.menuChatLine02,
-                                                                             this.menuChatSelectAll});
-      this.menuChat.Popup += new System.EventHandler(this.menuChat_Popup);
-      // 
-      // menuChatCopy
-      // 
-      this.menuChatCopy.Index = 0;
-      this.menuChatCopy.Text = "&Copy";
-      this.menuChatCopy.Click += new System.EventHandler(this.menuChatCopy_Click);
-      // 
-      // menuChatLine01
-      // 
-      this.menuChatLine01.Index = 1;
-      this.menuChatLine01.Text = "-";
-      // 
-      // menuChatSelectAll
-      // 
-      this.menuChatSelectAll.Index = 4;
-      this.menuChatSelectAll.Text = "Select &All";
-      this.menuChatSelectAll.Click += new System.EventHandler(this.menuChatSelectAll_Click);
-      // 
-      // menuChatClear
-      // 
-      this.menuChatClear.Index = 2;
-      this.menuChatClear.Text = "&Clear Window";
-      this.menuChatClear.Click += new System.EventHandler(this.menuChatClear_Click);
-      // 
-      // menuChatLine02
-      // 
-      this.menuChatLine02.Index = 3;
-      this.menuChatLine02.Text = "-";
       // 
       // frmNewGame
       // 
@@ -2154,6 +2172,9 @@ namespace Checkers
       cmbDifficulty1P.Select();
     }
     
+    private void frmNewGame_Activated (object sender, System.EventArgs e)
+    { if ((tabGame.SelectedIndex == 2) && (panNetSettings.Visible)) txtSend.Select(); }
+    
     private void frmNewGame_Closing (object sender, System.ComponentModel.CancelEventArgs e)
     {
       if (DialogResult != DialogResult.OK) return;
@@ -2271,12 +2292,6 @@ namespace Checkers
     { tabGame.SelectedTab = tabGame2P; }
     private void mozGameTypeNet_Click (object sender, System.EventArgs e)
     { tabGame.SelectedTab = tabGameNet; }
-    
-    private void frmNewGame_Activated (object sender, System.EventArgs e)
-    {
-      if ((tabGame.SelectedIndex == 2) && (panNetSettings.Visible))
-        RefreshChat();
-    }
     
     private void menuChat_Popup (object sender, System.EventArgs e)
     {
@@ -2919,10 +2934,11 @@ namespace Checkers
       }
       txtChat.AppendText(message);
       Control activeControl = ActiveControl;
-      txtChat.Select();
       txtChat.AppendText("\n");
       txtChat.ScrollToCaret();
-      activeControl.Select();
+      int min = 0, max = 0;
+      GetScrollRange(txtChat.Handle, 1, ref min, ref max);
+      SendMessage(txtChat.Handle, EM_SETSCROLLPOS, 0, new Win32Point(0, max - txtChat.Height));
     }
     
     bool refreshingPlayerInfo = false;
@@ -3090,15 +3106,6 @@ namespace Checkers
       cmbNetGameType.Select();
       txtChat.Text = ""; txtSend.Text = "";
       lblGameNet.Text = "Net Game";
-    }
-    
-    private void RefreshChat ()
-    {
-      int start = txtSend.SelectionStart;
-      int length = txtSend.SelectionLength;
-      txtChat.Select();
-      txtSend.Select(start, length);
-      txtSend.Select();
     }
     
     private void PlaySound (CheckersSounds sound)

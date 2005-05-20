@@ -282,7 +282,7 @@ namespace Checkers
       this.tabPreferences.Name = "tabPreferences";
       this.tabPreferences.SelectedIndex = 0;
       this.tabPreferences.Size = new System.Drawing.Size(398, 336);
-      this.tabPreferences.TabIndex = 2;
+      this.tabPreferences.TabIndex = 1;
       this.tabPreferences.SelectedIndexChanged += new System.EventHandler(this.tabPreferences_SelectedIndexChanged);
       // 
       // tabGeneral
@@ -309,7 +309,7 @@ namespace Checkers
       this.grpGeneral.Location = new System.Drawing.Point(0, 12);
       this.grpGeneral.Name = "grpGeneral";
       this.grpGeneral.Size = new System.Drawing.Size(388, 112);
-      this.grpGeneral.TabIndex = 1;
+      this.grpGeneral.TabIndex = 0;
       this.grpGeneral.TabStop = false;
       this.grpGeneral.Text = "General";
       // 
@@ -365,7 +365,7 @@ namespace Checkers
       this.grpNet.Location = new System.Drawing.Point(0, 136);
       this.grpNet.Name = "grpNet";
       this.grpNet.Size = new System.Drawing.Size(388, 112);
-      this.grpNet.TabIndex = 0;
+      this.grpNet.TabIndex = 1;
       this.grpNet.TabStop = false;
       this.grpNet.Text = "Net Settings";
       // 
@@ -435,7 +435,7 @@ namespace Checkers
       this.lblColorCaption.Location = new System.Drawing.Point(12, 164);
       this.lblColorCaption.Name = "lblColorCaption";
       this.lblColorCaption.Size = new System.Drawing.Size(372, 32);
-      this.lblColorCaption.TabIndex = 12;
+      this.lblColorCaption.TabIndex = 4;
       this.lblColorCaption.Text = "Note: Right-click to reset to default";
       // 
       // lblBoardBackColor
@@ -445,7 +445,7 @@ namespace Checkers
       this.lblBoardBackColor.Location = new System.Drawing.Point(45, 56);
       this.lblBoardBackColor.Name = "lblBoardBackColor";
       this.lblBoardBackColor.Size = new System.Drawing.Size(336, 16);
-      this.lblBoardBackColor.TabIndex = 9;
+      this.lblBoardBackColor.TabIndex = 1;
       this.lblBoardBackColor.Text = "Board Background Color";
       // 
       // picBoardBackColor
@@ -491,7 +491,7 @@ namespace Checkers
       this.lblBackColor.Location = new System.Drawing.Point(45, 20);
       this.lblBackColor.Name = "lblBackColor";
       this.lblBackColor.Size = new System.Drawing.Size(336, 16);
-      this.lblBackColor.TabIndex = 8;
+      this.lblBackColor.TabIndex = 0;
       this.lblBackColor.Text = "Background Color";
       // 
       // picBackColor
@@ -513,7 +513,7 @@ namespace Checkers
       this.lblBoardForeColor.Location = new System.Drawing.Point(45, 92);
       this.lblBoardForeColor.Name = "lblBoardForeColor";
       this.lblBoardForeColor.Size = new System.Drawing.Size(336, 16);
-      this.lblBoardForeColor.TabIndex = 10;
+      this.lblBoardForeColor.TabIndex = 2;
       this.lblBoardForeColor.Text = "Board Foreground Color";
       // 
       // picBoardForeColor
@@ -547,7 +547,7 @@ namespace Checkers
       this.lblBoardGridColor.Location = new System.Drawing.Point(45, 128);
       this.lblBoardGridColor.Name = "lblBoardGridColor";
       this.lblBoardGridColor.Size = new System.Drawing.Size(336, 16);
-      this.lblBoardGridColor.TabIndex = 11;
+      this.lblBoardGridColor.TabIndex = 3;
       this.lblBoardGridColor.Text = "Board Foreground Color";
       // 
       // tabSounds
@@ -665,7 +665,7 @@ namespace Checkers
       this.panTitle.Location = new System.Drawing.Point(84, 0);
       this.panTitle.Name = "panTitle";
       this.panTitle.Size = new System.Drawing.Size(396, 28);
-      this.panTitle.TabIndex = 1;
+      this.panTitle.TabIndex = 0;
       // 
       // btnCancel
       // 
@@ -705,7 +705,7 @@ namespace Checkers
       this.btnDefault.Location = new System.Drawing.Point(188, 328);
       this.btnDefault.Name = "btnDefault";
       this.btnDefault.Size = new System.Drawing.Size(88, 36);
-      this.btnDefault.TabIndex = 5;
+      this.btnDefault.TabIndex = 2;
       this.btnDefault.Text = "&Default";
       this.btnDefault.Click += new System.EventHandler(this.btnDefault_Click);
       // 

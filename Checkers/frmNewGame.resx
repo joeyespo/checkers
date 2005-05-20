@@ -291,6 +291,9 @@
         RK5CYII=
 </value>
   </data>
+  <data name="menuChat.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>134, 15</value>
+  </data>
   <data name="picImageSwapNet.Image" type="System.Drawing.Bitmap, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAEEAAAAICAYAAACmoJLhAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
@@ -768,9 +771,6 @@
   </data>
   <data name="tmrConnection.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 54</value>
-  </data>
-  <data name="menuChat.Location" type="System.Drawing.Point, System.Drawing, Version=1.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>134, 15</value>
   </data>
   <data name="$this.Name">
     <value>frmNewGame</value>

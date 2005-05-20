@@ -29,11 +29,29 @@ namespace Checkers
     
     #region API Imports
     
+    [DllImport("user32", EntryPoint="GetScrollRange", SetLastError=true, CallingConvention=CallingConvention.Winapi)]
+    private static extern int GetScrollRange (IntPtr hWnd, int nBar, ref int lpMinPos, ref int lpMaxPos);
+    
+    [DllImport("user32", EntryPoint="SendMessageA", ExactSpelling=true, SetLastError=true, CallingConvention=CallingConvention.Winapi)]
+    private static extern int SendMessage (IntPtr hWnd, int ByVal, int wParam, Win32Point lParam);
+    
+    [StructLayout(LayoutKind.Sequential)]
+    private class Win32Point
+    {
+      public int x;
+      public int y;
+      public Win32Point ()
+      { x = 0; y = 0; }
+      public Win32Point (int x, int y)
+      { this.x = x; this.y = y; }
+    }
+    private static readonly int EM_SETSCROLLPOS = 0x400 + 222;
+    
     [DllImport("user32", EntryPoint="FlashWindow", SetLastError=true, CharSet=CharSet.Auto, ExactSpelling=false, CallingConvention=CallingConvention.Winapi)]
-    public static extern int FlashWindow ( IntPtr hWnd, int bInvert );
+    private static extern int FlashWindow (IntPtr hWnd, int bInvert);
     
     [DllImport("winmm.dll", EntryPoint="PlaySound", SetLastError=true, CallingConvention=CallingConvention.Winapi)]
-    static extern bool sndPlaySound( string pszSound, IntPtr hMod, SoundFlags sf );
+    private static extern bool sndPlaySound (string pszSound, IntPtr hMod, SoundFlags sf);
 
     [Flags]
     public enum SoundFlags : int
@@ -185,6 +203,7 @@ namespace Checkers
       this.menuChatCopy = new System.Windows.Forms.MenuItem();
       this.menuChatLine01 = new System.Windows.Forms.MenuItem();
       this.menuChatSave = new System.Windows.Forms.MenuItem();
+      this.menuChatClear = new System.Windows.Forms.MenuItem();
       this.menuChatLine02 = new System.Windows.Forms.MenuItem();
       this.menuChatSelectAll = new System.Windows.Forms.MenuItem();
       this.CheckersUI = new Uberware.Gaming.Checkers.UI.CheckersUI();
@@ -194,7 +213,6 @@ namespace Checkers
       this.tmrTextDisplay = new System.Windows.Forms.Timer(this.components);
       this.tmrConnection = new System.Windows.Forms.Timer(this.components);
       this.dlgSaveChat = new System.Windows.Forms.SaveFileDialog();
-      this.menuChatClear = new System.Windows.Forms.MenuItem();
       this.panGame.SuspendLayout();
       this.panGameInfo.SuspendLayout();
       this.panOnline.SuspendLayout();
@@ -212,7 +230,7 @@ namespace Checkers
       this.panGame.Location = new System.Drawing.Point(280, 4);
       this.panGame.Name = "panGame";
       this.panGame.Size = new System.Drawing.Size(144, 272);
-      this.panGame.TabIndex = 3;
+      this.panGame.TabIndex = 1;
       // 
       // panGameInfo
       // 
@@ -238,7 +256,7 @@ namespace Checkers
       this.panGameInfo.Location = new System.Drawing.Point(0, 16);
       this.panGameInfo.Name = "panGameInfo";
       this.panGameInfo.Size = new System.Drawing.Size(144, 256);
-      this.panGameInfo.TabIndex = 5;
+      this.panGameInfo.TabIndex = 1;
       this.panGameInfo.Visible = false;
       // 
       // txtTimePassed
@@ -248,7 +266,7 @@ namespace Checkers
       this.txtTimePassed.Name = "txtTimePassed";
       this.txtTimePassed.ReadOnly = true;
       this.txtTimePassed.Size = new System.Drawing.Size(52, 13);
-      this.txtTimePassed.TabIndex = 2;
+      this.txtTimePassed.TabIndex = 1;
       this.txtTimePassed.Text = "0:00";
       this.txtTimePassed.WordWrap = false;
       // 
@@ -269,7 +287,7 @@ namespace Checkers
       this.txtJumpsP1.Name = "txtJumpsP1";
       this.txtJumpsP1.ReadOnly = true;
       this.txtJumpsP1.Size = new System.Drawing.Size(52, 13);
-      this.txtJumpsP1.TabIndex = 12;
+      this.txtJumpsP1.TabIndex = 6;
       this.txtJumpsP1.Text = "0";
       // 
       // picPawnP1
@@ -289,7 +307,7 @@ namespace Checkers
       this.lblNameP1.Location = new System.Drawing.Point(0, 68);
       this.lblNameP1.Name = "lblNameP1";
       this.lblNameP1.Size = new System.Drawing.Size(124, 16);
-      this.lblNameP1.TabIndex = 7;
+      this.lblNameP1.TabIndex = 2;
       this.lblNameP1.Text = "Player";
       // 
       // lblJumpsP1
@@ -297,7 +315,7 @@ namespace Checkers
       this.lblJumpsP1.Location = new System.Drawing.Point(0, 100);
       this.lblJumpsP1.Name = "lblJumpsP1";
       this.lblJumpsP1.Size = new System.Drawing.Size(68, 16);
-      this.lblJumpsP1.TabIndex = 8;
+      this.lblJumpsP1.TabIndex = 5;
       this.lblJumpsP1.Text = "Jumps:";
       this.lblJumpsP1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
@@ -306,7 +324,7 @@ namespace Checkers
       this.lblRemainingP1.Location = new System.Drawing.Point(0, 84);
       this.lblRemainingP1.Name = "lblRemainingP1";
       this.lblRemainingP1.Size = new System.Drawing.Size(68, 16);
-      this.lblRemainingP1.TabIndex = 4;
+      this.lblRemainingP1.TabIndex = 3;
       this.lblRemainingP1.Text = "Remaining:";
       this.lblRemainingP1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
@@ -317,7 +335,7 @@ namespace Checkers
       this.txtRemainingP1.Name = "txtRemainingP1";
       this.txtRemainingP1.ReadOnly = true;
       this.txtRemainingP1.Size = new System.Drawing.Size(52, 13);
-      this.txtRemainingP1.TabIndex = 13;
+      this.txtRemainingP1.TabIndex = 4;
       this.txtRemainingP1.Text = "0";
       // 
       // picPawnP2
@@ -337,7 +355,7 @@ namespace Checkers
       this.lblNameP2.Location = new System.Drawing.Point(0, 172);
       this.lblNameP2.Name = "lblNameP2";
       this.lblNameP2.Size = new System.Drawing.Size(124, 16);
-      this.lblNameP2.TabIndex = 6;
+      this.lblNameP2.TabIndex = 7;
       this.lblNameP2.Text = "Opponent";
       // 
       // txtRemainingP2
@@ -347,7 +365,7 @@ namespace Checkers
       this.txtRemainingP2.Name = "txtRemainingP2";
       this.txtRemainingP2.ReadOnly = true;
       this.txtRemainingP2.Size = new System.Drawing.Size(52, 13);
-      this.txtRemainingP2.TabIndex = 14;
+      this.txtRemainingP2.TabIndex = 9;
       this.txtRemainingP2.Text = "0";
       // 
       // lblJumpsP2
@@ -355,7 +373,7 @@ namespace Checkers
       this.lblJumpsP2.Location = new System.Drawing.Point(0, 204);
       this.lblJumpsP2.Name = "lblJumpsP2";
       this.lblJumpsP2.Size = new System.Drawing.Size(68, 16);
-      this.lblJumpsP2.TabIndex = 5;
+      this.lblJumpsP2.TabIndex = 10;
       this.lblJumpsP2.Text = "Jumps:";
       this.lblJumpsP2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
@@ -364,7 +382,7 @@ namespace Checkers
       this.lblRemainingP2.Location = new System.Drawing.Point(0, 188);
       this.lblRemainingP2.Name = "lblRemainingP2";
       this.lblRemainingP2.Size = new System.Drawing.Size(68, 16);
-      this.lblRemainingP2.TabIndex = 3;
+      this.lblRemainingP2.TabIndex = 8;
       this.lblRemainingP2.Text = "Remaining:";
       this.lblRemainingP2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
@@ -382,7 +400,7 @@ namespace Checkers
       // 
       this.lblTimePassed.Name = "lblTimePassed";
       this.lblTimePassed.Size = new System.Drawing.Size(76, 16);
-      this.lblTimePassed.TabIndex = 3;
+      this.lblTimePassed.TabIndex = 0;
       this.lblTimePassed.Text = "Time Passed:";
       // 
       // lblGameType
@@ -392,7 +410,7 @@ namespace Checkers
       this.lblGameType.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
       this.lblGameType.Name = "lblGameType";
       this.lblGameType.Size = new System.Drawing.Size(144, 16);
-      this.lblGameType.TabIndex = 4;
+      this.lblGameType.TabIndex = 0;
       this.lblGameType.Text = "Game Panel";
       // 
       // menuMain
@@ -513,7 +531,7 @@ namespace Checkers
       this.panOnline.Location = new System.Drawing.Point(4, 280);
       this.panOnline.Name = "panOnline";
       this.panOnline.Size = new System.Drawing.Size(420, 80);
-      this.panOnline.TabIndex = 4;
+      this.panOnline.TabIndex = 2;
       // 
       // panNet
       // 
@@ -539,7 +557,7 @@ namespace Checkers
       this.lnkRemoteIP.Location = new System.Drawing.Point(0, 52);
       this.lnkRemoteIP.Name = "lnkRemoteIP";
       this.lnkRemoteIP.Size = new System.Drawing.Size(144, 16);
-      this.lnkRemoteIP.TabIndex = 1;
+      this.lnkRemoteIP.TabIndex = 3;
       this.lnkRemoteIP.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkRemoteIP_LinkClicked);
       // 
       // lblRemoteIP
@@ -549,7 +567,7 @@ namespace Checkers
       this.lblRemoteIP.Location = new System.Drawing.Point(0, 36);
       this.lblRemoteIP.Name = "lblRemoteIP";
       this.lblRemoteIP.Size = new System.Drawing.Size(144, 16);
-      this.lblRemoteIP.TabIndex = 0;
+      this.lblRemoteIP.TabIndex = 2;
       this.lblRemoteIP.Text = "Opponent IP:";
       // 
       // lnkLocalIP
@@ -591,7 +609,7 @@ namespace Checkers
       this.panChat.Dock = System.Windows.Forms.DockStyle.Left;
       this.panChat.Name = "panChat";
       this.panChat.Size = new System.Drawing.Size(270, 80);
-      this.panChat.TabIndex = 3;
+      this.panChat.TabIndex = 0;
       // 
       // txtSend
       // 
@@ -600,7 +618,7 @@ namespace Checkers
       this.txtSend.Location = new System.Drawing.Point(0, 60);
       this.txtSend.Name = "txtSend";
       this.txtSend.Size = new System.Drawing.Size(226, 20);
-      this.txtSend.TabIndex = 4;
+      this.txtSend.TabIndex = 1;
       this.txtSend.Text = "";
       this.txtSend.Leave += new System.EventHandler(this.txtSend_Leave);
       this.txtSend.Enter += new System.EventHandler(this.txtSend_Enter);
@@ -611,7 +629,7 @@ namespace Checkers
       this.btnSend.Location = new System.Drawing.Point(228, 60);
       this.btnSend.Name = "btnSend";
       this.btnSend.Size = new System.Drawing.Size(42, 20);
-      this.btnSend.TabIndex = 3;
+      this.btnSend.TabIndex = 2;
       this.btnSend.Text = "Send";
       this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
       // 
@@ -624,7 +642,7 @@ namespace Checkers
       this.txtChat.Name = "txtChat";
       this.txtChat.ReadOnly = true;
       this.txtChat.Size = new System.Drawing.Size(270, 58);
-      this.txtChat.TabIndex = 1;
+      this.txtChat.TabIndex = 0;
       this.txtChat.Text = "";
       // 
       // menuChat
@@ -654,6 +672,12 @@ namespace Checkers
       this.menuChatSave.Index = 2;
       this.menuChatSave.Text = "&Save...";
       this.menuChatSave.Click += new System.EventHandler(this.menuChatSave_Click);
+      // 
+      // menuChatClear
+      // 
+      this.menuChatClear.Index = 3;
+      this.menuChatClear.Text = "&Clear Window";
+      this.menuChatClear.Click += new System.EventHandler(this.menuChatClear_Click);
       // 
       // menuChatLine02
       // 
@@ -719,12 +743,6 @@ namespace Checkers
       this.dlgSaveChat.FilterIndex = 2;
       this.dlgSaveChat.Title = "Save Output";
       // 
-      // menuChatClear
-      // 
-      this.menuChatClear.Index = 3;
-      this.menuChatClear.Text = "&Clear Window";
-      this.menuChatClear.Click += new System.EventHandler(this.menuChatClear_Click);
-      // 
       // frmMain
       // 
       this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
@@ -774,13 +792,13 @@ namespace Checkers
     {
       try
       {
-        int ext = 0;
+        int ext = 1;
         string logFileName;
         while (true)
         {
           logFileName = "ErrorLog [" + DateTime.Now.ToShortDateString() + "]";
           logFileName = logFileName.Replace('/', '-').Replace('\\', '-');
-          logFileName += (( ext == 0 )?( "" ):( " (" + ext.ToString() + ")" ));
+          logFileName += (( ext == 1 )?( "" ):( " (" + ext.ToString() + ")" ));
           if (!File.Exists(Path.GetDirectoryName(Application.ExecutablePath) + "\\" + logFileName + ".log")) break;
           ext++;
         }
@@ -794,7 +812,6 @@ namespace Checkers
       }
       finally
       { throw e.Exception; }
-      // !!!!! Show default error handler
     }
     
     #endregion
@@ -810,7 +827,7 @@ namespace Checkers
     private void frmMain_Activated (object sender, System.EventArgs e)
     {
       tmrFlashWindow.Stop();
-      if (gameType == CheckersGameType.NetGame) RefreshChat();
+      if (gameType == CheckersGameType.NetGame) txtSend.Select();
     }
     private void frmMain_Deactivate (object sender, System.EventArgs e)
     {
@@ -1264,15 +1281,6 @@ namespace Checkers
       CheckersUI.ShowJumpMessage = settings.ShowJumpMessage;
     }
     
-    private void RefreshChat ()
-    {
-      int start = txtSend.SelectionStart;
-      int length = txtSend.SelectionLength;
-      txtChat.Select();
-      txtSend.Select(start, length);
-      txtSend.Select();
-    }
-    
     private void PlaySound (CheckersSounds sound)
     {
       // Play sound
@@ -1381,10 +1389,11 @@ namespace Checkers
       }
       txtChat.AppendText(message);
       txtChat.AppendText("\n");
+      txtChat.Select(txtChat.TextLength, 0);
       txtChat.ScrollToCaret();
-      Control activeControl = ActiveControl;
-      if (activeControl == txtSend) RefreshChat();
-      else { txtChat.Select(); activeControl.Select(); }
+      int min = 0, max = 0;
+      GetScrollRange(txtChat.Handle, 1, ref min, ref max);
+      SendMessage(txtChat.Handle, EM_SETSCROLLPOS, 0, new Win32Point(0, max - txtChat.Height));
     }
     
     private Point RotateOpponentPiece (BinaryReader br)
