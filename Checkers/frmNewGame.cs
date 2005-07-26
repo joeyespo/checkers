@@ -52,6 +52,7 @@ namespace Checkers
     private bool isSelfPlayer = false;
     private System.Windows.Forms.MenuItem menuChatClear;
     private System.Windows.Forms.MenuItem menuChatLine02;
+    private System.Windows.Forms.MenuItem menuImagePresetsBuiltIn;
     private TcpClient remotePlayer = null;
     
     #region API Imports
@@ -140,10 +141,6 @@ namespace Checkers
     private System.Windows.Forms.ImageList imlImageSet;
     private System.Windows.Forms.Label lblImage1P1;
     private System.Windows.Forms.ContextMenu menuImage;
-    private Pabo.MozBar.MozPane mozGameType;
-    private Pabo.MozBar.MozItem mozGameType1P;
-    private Pabo.MozBar.MozItem mozGameType2P;
-    private Pabo.MozBar.MozItem mozGameTypeNet;
     private System.Windows.Forms.MenuItem menuImageBrowse;
     private System.Windows.Forms.MenuItem menuImageChooseColor;
     private System.Windows.Forms.OpenFileDialog dlgOpenImage;
@@ -188,7 +185,6 @@ namespace Checkers
     private System.Windows.Forms.MenuItem menuImagePresetWhite;
     private System.Windows.Forms.MenuItem menuImagePresetGold;
     private System.Windows.Forms.MenuItem menuImagePresetLine;
-    private System.Windows.Forms.MenuItem menuItem1;
     private System.Windows.Forms.MenuItem menuImagePresetsNone;
     private System.Windows.Forms.Button btnBackNet;
     private System.Windows.Forms.Label lblGamesNet;
@@ -347,7 +343,7 @@ namespace Checkers
       this.menuImageDefault = new System.Windows.Forms.MenuItem();
       this.menuImageLine = new System.Windows.Forms.MenuItem();
       this.menuImagePreset = new System.Windows.Forms.MenuItem();
-      this.menuItem1 = new System.Windows.Forms.MenuItem();
+      this.menuImagePresetsBuiltIn = new System.Windows.Forms.MenuItem();
       this.menuImagePresetRed = new System.Windows.Forms.MenuItem();
       this.menuImagePresetBlack = new System.Windows.Forms.MenuItem();
       this.menuImagePresetWhite = new System.Windows.Forms.MenuItem();
@@ -356,10 +352,6 @@ namespace Checkers
       this.menuImagePresetsNone = new System.Windows.Forms.MenuItem();
       this.menuImageBrowse = new System.Windows.Forms.MenuItem();
       this.menuImageChooseColor = new System.Windows.Forms.MenuItem();
-      this.mozGameType = new Pabo.MozBar.MozPane();
-      this.mozGameType1P = new Pabo.MozBar.MozItem();
-      this.mozGameType2P = new Pabo.MozBar.MozItem();
-      this.mozGameTypeNet = new Pabo.MozBar.MozItem();
       this.dlgOpenImage = new System.Windows.Forms.OpenFileDialog();
       this.dlgSelectColor = new System.Windows.Forms.ColorDialog();
       this.imlKing = new System.Windows.Forms.ImageList(this.components);
@@ -381,8 +373,6 @@ namespace Checkers
       this.panNetSettings.SuspendLayout();
       this.grpPlayerSettingsNet.SuspendLayout();
       this.panImageSetNet.SuspendLayout();
-      ((System.ComponentModel.ISupportInitialize)(this.mozGameType)).BeginInit();
-      this.mozGameType.SuspendLayout();
       this.SuspendLayout();
       // 
       // imlGameType
@@ -1451,20 +1441,20 @@ namespace Checkers
       // 
       this.menuImagePreset.Index = 2;
       this.menuImagePreset.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-                                                                                    this.menuItem1,
+                                                                                    this.menuImagePresetsBuiltIn,
                                                                                     this.menuImagePresetLine,
                                                                                     this.menuImagePresetsNone});
       this.menuImagePreset.Text = "&Preset Image";
       // 
-      // menuItem1
+      // menuImagePresetsBuiltIn
       // 
-      this.menuItem1.Index = 0;
-      this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-                                                                              this.menuImagePresetRed,
-                                                                              this.menuImagePresetBlack,
-                                                                              this.menuImagePresetWhite,
-                                                                              this.menuImagePresetGold});
-      this.menuItem1.Text = "&Built-in";
+      this.menuImagePresetsBuiltIn.Index = 0;
+      this.menuImagePresetsBuiltIn.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+                                                                                            this.menuImagePresetRed,
+                                                                                            this.menuImagePresetBlack,
+                                                                                            this.menuImagePresetWhite,
+                                                                                            this.menuImagePresetGold});
+      this.menuImagePresetsBuiltIn.Text = "&Built-in";
       // 
       // menuImagePresetRed
       // 
@@ -1513,80 +1503,6 @@ namespace Checkers
       this.menuImageChooseColor.Text = "&Choose Color...";
       this.menuImageChooseColor.Click += new System.EventHandler(this.menuImageChooseColor_Click);
       // 
-      // mozGameType
-      // 
-      this.mozGameType.BackColor = System.Drawing.SystemColors.Control;
-      this.mozGameType.BorderColor = System.Drawing.Color.Black;
-      this.mozGameType.BorderStyle = System.Windows.Forms.ButtonBorderStyle.None;
-      this.mozGameType.ImageList = this.imlGameType;
-      this.mozGameType.ItemBorderStyles.Focus = System.Windows.Forms.ButtonBorderStyle.Solid;
-      this.mozGameType.ItemBorderStyles.Normal = System.Windows.Forms.ButtonBorderStyle.None;
-      this.mozGameType.ItemBorderStyles.Selected = System.Windows.Forms.ButtonBorderStyle.Solid;
-      this.mozGameType.ItemColors.Background = System.Drawing.SystemColors.Control;
-      this.mozGameType.ItemColors.Border = System.Drawing.Color.Black;
-      this.mozGameType.ItemColors.Divider = System.Drawing.Color.Black;
-      this.mozGameType.ItemColors.FocusBackground = System.Drawing.SystemColors.Control;
-      this.mozGameType.ItemColors.FocusBorder = System.Drawing.SystemColors.ControlDarkDark;
-      this.mozGameType.ItemColors.SelectedBackground = System.Drawing.SystemColors.ControlLightLight;
-      this.mozGameType.ItemColors.SelectedBorder = System.Drawing.SystemColors.ControlDark;
-      this.mozGameType.ItemColors.Text = System.Drawing.Color.Black;
-      this.mozGameType.Items.AddRange(new Pabo.MozBar.MozItem[] {
-                                                                  this.mozGameType1P,
-                                                                  this.mozGameType2P,
-                                                                  this.mozGameTypeNet});
-      this.mozGameType.Location = new System.Drawing.Point(4, 6);
-      this.mozGameType.MaxSelectedItems = 1;
-      this.mozGameType.Name = "mozGameType";
-      this.mozGameType.Padding.Horizontal = 4;
-      this.mozGameType.Padding.Vertical = 2;
-      this.mozGameType.Size = new System.Drawing.Size(598, 44);
-      this.mozGameType.Style = Pabo.MozBar.paneStyle.Horizontal;
-      this.mozGameType.TabIndex = 0;
-      this.mozGameType.TabStop = false;
-      this.mozGameType.Toggle = false;
-      // 
-      // mozGameType1P
-      // 
-      this.mozGameType1P.Images.Focus = -1;
-      this.mozGameType1P.Images.Normal = 0;
-      this.mozGameType1P.Images.Selected = -1;
-      this.mozGameType1P.ItemStyle = Pabo.MozBar.itemStyle.Picture;
-      this.mozGameType1P.Location = new System.Drawing.Point(4, 2);
-      this.mozGameType1P.Name = "mozGameType1P";
-      this.mozGameType1P.Size = new System.Drawing.Size(40, 40);
-      this.mozGameType1P.TabIndex = 0;
-      this.mozGameType1P.TabStop = false;
-      this.mozGameType1P.TextAlign = Pabo.MozBar.textAlign.Bottom;
-      this.mozGameType1P.Click += new System.EventHandler(this.mozGameType1P_Click);
-      // 
-      // mozGameType2P
-      // 
-      this.mozGameType2P.Images.Focus = -1;
-      this.mozGameType2P.Images.Normal = 1;
-      this.mozGameType2P.Images.Selected = -1;
-      this.mozGameType2P.ItemStyle = Pabo.MozBar.itemStyle.Picture;
-      this.mozGameType2P.Location = new System.Drawing.Point(48, 2);
-      this.mozGameType2P.Name = "mozGameType2P";
-      this.mozGameType2P.Size = new System.Drawing.Size(40, 40);
-      this.mozGameType2P.TabIndex = 1;
-      this.mozGameType2P.TabStop = false;
-      this.mozGameType2P.TextAlign = Pabo.MozBar.textAlign.Bottom;
-      this.mozGameType2P.Click += new System.EventHandler(this.mozGameType2P_Click);
-      // 
-      // mozGameTypeNet
-      // 
-      this.mozGameTypeNet.Images.Focus = -1;
-      this.mozGameTypeNet.Images.Normal = 2;
-      this.mozGameTypeNet.Images.Selected = -1;
-      this.mozGameTypeNet.ItemStyle = Pabo.MozBar.itemStyle.Picture;
-      this.mozGameTypeNet.Location = new System.Drawing.Point(92, 2);
-      this.mozGameTypeNet.Name = "mozGameTypeNet";
-      this.mozGameTypeNet.Size = new System.Drawing.Size(40, 40);
-      this.mozGameTypeNet.TabIndex = 2;
-      this.mozGameTypeNet.TabStop = false;
-      this.mozGameTypeNet.TextAlign = Pabo.MozBar.textAlign.Bottom;
-      this.mozGameTypeNet.Click += new System.EventHandler(this.mozGameTypeNet_Click);
-      // 
       // dlgOpenImage
       // 
       this.dlgOpenImage.Filter = "Supported Image Files (*.bmp;*.gif;*.jpg;*.jpeg;*.tiff;*.png)|*.bmp;*.gif;*.jpg;*" +
@@ -1617,7 +1533,6 @@ namespace Checkers
       this.CancelButton = this.btnCancel;
       this.ClientSize = new System.Drawing.Size(606, 387);
       this.Controls.AddRange(new System.Windows.Forms.Control[] {
-                                                                  this.mozGameType,
                                                                   this.btnCancel,
                                                                   this.btnOK,
                                                                   this.tabGame});
@@ -1647,8 +1562,6 @@ namespace Checkers
       this.panNetSettings.ResumeLayout(false);
       this.grpPlayerSettingsNet.ResumeLayout(false);
       this.panImageSetNet.ResumeLayout(false);
-      ((System.ComponentModel.ISupportInitialize)(this.mozGameType)).EndInit();
-      this.mozGameType.ResumeLayout(false);
       this.ResumeLayout(false);
 
     }
@@ -2151,9 +2064,6 @@ namespace Checkers
       // Load presets
       EnumPresetMenuItems();
       
-      // Select initial tab
-      mozGameType.Items[0].SelectItem();
-      
       // Set initial combobox values
       cmbFirstMove1P.SelectedIndex = 0;
       cmbImageSet1P.SelectedIndex = 0;
@@ -2273,7 +2183,6 @@ namespace Checkers
     private void tabGame_SelectedIndexChanged (object sender, System.EventArgs e)
     {
       if (tabGame.SelectedIndex == -1) return;
-      mozGameType.Items[tabGame.SelectedIndex].SelectItem();
       
       CloseNetGame();
       switch (tabGame.SelectedIndex)
@@ -2286,12 +2195,6 @@ namespace Checkers
           break;
       }
     }
-    private void mozGameType1P_Click (object sender, System.EventArgs e)
-    { tabGame.SelectedTab = tabGame1P; }
-    private void mozGameType2P_Click (object sender, System.EventArgs e)
-    { tabGame.SelectedTab = tabGame2P; }
-    private void mozGameTypeNet_Click (object sender, System.EventArgs e)
-    { tabGame.SelectedTab = tabGameNet; }
     
     private void menuChat_Popup (object sender, System.EventArgs e)
     {

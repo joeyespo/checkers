@@ -26,6 +26,8 @@ namespace Checkers
     private System.Windows.Forms.MenuItem menuColorLine01;
     private System.Windows.Forms.CheckBox chkFlashWindowOnGameEvents;
     private System.Windows.Forms.Label lblColorCaption;
+    private System.Windows.Forms.Panel panTitle;
+    private System.Windows.Forms.Label lblTitle;
     private string [] sounds;
     
     #region API Imports
@@ -62,16 +64,10 @@ namespace Checkers
     private System.Windows.Forms.PictureBox picBoardForeColor;
     private System.Windows.Forms.PictureBox picBoardGridColor;
     private System.Windows.Forms.Label lblBoardGridColor;
-    private System.Windows.Forms.Panel panTitle;
-    private System.Windows.Forms.Label lblTitle;
     private System.Windows.Forms.TabControl tabPreferences;
     private System.Windows.Forms.TabPage tabGeneral;
     private System.Windows.Forms.TabPage tabBoard;
     private System.Windows.Forms.TabPage tabSounds;
-    private Pabo.MozBar.MozPane mozPreferences;
-    private Pabo.MozBar.MozItem mozGeneral;
-    private Pabo.MozBar.MozItem mozBoard;
-    private Pabo.MozBar.MozItem mozSounds;
     private System.Windows.Forms.ImageList imlTabs;
     private System.Windows.Forms.Button btnCancel;
     private System.Windows.Forms.Button btnOK;
@@ -123,11 +119,7 @@ namespace Checkers
     {
       this.components = new System.ComponentModel.Container();
       System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmPreferences));
-      this.mozPreferences = new Pabo.MozBar.MozPane();
       this.imlTabs = new System.Windows.Forms.ImageList(this.components);
-      this.mozGeneral = new Pabo.MozBar.MozItem();
-      this.mozBoard = new Pabo.MozBar.MozItem();
-      this.mozSounds = new Pabo.MozBar.MozItem();
       this.tabPreferences = new System.Windows.Forms.TabControl();
       this.tabGeneral = new System.Windows.Forms.TabPage();
       this.grpGeneral = new System.Windows.Forms.GroupBox();
@@ -162,15 +154,13 @@ namespace Checkers
       this.btnSoundFile = new System.Windows.Forms.Button();
       this.btnSoundPreview = new System.Windows.Forms.Button();
       this.lblSoundFile = new System.Windows.Forms.Label();
-      this.lblTitle = new System.Windows.Forms.Label();
-      this.panTitle = new System.Windows.Forms.Panel();
       this.btnCancel = new System.Windows.Forms.Button();
       this.btnOK = new System.Windows.Forms.Button();
       this.dlgColorDialog = new System.Windows.Forms.ColorDialog();
       this.dlgOpenSound = new System.Windows.Forms.OpenFileDialog();
       this.btnDefault = new System.Windows.Forms.Button();
-      ((System.ComponentModel.ISupportInitialize)(this.mozPreferences)).BeginInit();
-      this.mozPreferences.SuspendLayout();
+      this.panTitle = new System.Windows.Forms.Panel();
+      this.lblTitle = new System.Windows.Forms.Label();
       this.tabPreferences.SuspendLayout();
       this.tabGeneral.SuspendLayout();
       this.grpGeneral.SuspendLayout();
@@ -180,91 +170,12 @@ namespace Checkers
       this.panTitle.SuspendLayout();
       this.SuspendLayout();
       // 
-      // mozPreferences
-      // 
-      this.mozPreferences.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-        | System.Windows.Forms.AnchorStyles.Left);
-      this.mozPreferences.BackColor = System.Drawing.Color.White;
-      this.mozPreferences.BorderColor = System.Drawing.Color.FromArgb(((System.Byte)(127)), ((System.Byte)(157)), ((System.Byte)(185)));
-      this.mozPreferences.BorderStyle = System.Windows.Forms.ButtonBorderStyle.Solid;
-      this.mozPreferences.ImageList = this.imlTabs;
-      this.mozPreferences.ItemBorderStyles.Focus = System.Windows.Forms.ButtonBorderStyle.Solid;
-      this.mozPreferences.ItemBorderStyles.Normal = System.Windows.Forms.ButtonBorderStyle.None;
-      this.mozPreferences.ItemBorderStyles.Selected = System.Windows.Forms.ButtonBorderStyle.Solid;
-      this.mozPreferences.ItemColors.Background = System.Drawing.Color.White;
-      this.mozPreferences.ItemColors.Border = System.Drawing.Color.Black;
-      this.mozPreferences.ItemColors.Divider = System.Drawing.Color.FromArgb(((System.Byte)(127)), ((System.Byte)(157)), ((System.Byte)(185)));
-      this.mozPreferences.ItemColors.FocusBackground = System.Drawing.Color.FromArgb(((System.Byte)(224)), ((System.Byte)(232)), ((System.Byte)(246)));
-      this.mozPreferences.ItemColors.FocusBorder = System.Drawing.Color.FromArgb(((System.Byte)(152)), ((System.Byte)(180)), ((System.Byte)(226)));
-      this.mozPreferences.ItemColors.SelectedBackground = System.Drawing.Color.FromArgb(((System.Byte)(193)), ((System.Byte)(210)), ((System.Byte)(238)));
-      this.mozPreferences.ItemColors.SelectedBorder = System.Drawing.Color.FromArgb(((System.Byte)(49)), ((System.Byte)(106)), ((System.Byte)(197)));
-      this.mozPreferences.ItemColors.Text = System.Drawing.Color.Black;
-      this.mozPreferences.Items.AddRange(new Pabo.MozBar.MozItem[] {
-                                                                     this.mozGeneral,
-                                                                     this.mozBoard,
-                                                                     this.mozSounds});
-      this.mozPreferences.Location = new System.Drawing.Point(4, 4);
-      this.mozPreferences.MaxSelectedItems = 1;
-      this.mozPreferences.Name = "mozPreferences";
-      this.mozPreferences.Padding.Horizontal = 2;
-      this.mozPreferences.Padding.Vertical = 2;
-      this.mozPreferences.Size = new System.Drawing.Size(76, 316);
-      this.mozPreferences.Style = Pabo.MozBar.paneStyle.Vertical;
-      this.mozPreferences.TabIndex = 0;
-      this.mozPreferences.TabStop = false;
-      this.mozPreferences.Toggle = false;
-      // 
       // imlTabs
       // 
       this.imlTabs.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
       this.imlTabs.ImageSize = new System.Drawing.Size(32, 32);
       this.imlTabs.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imlTabs.ImageStream")));
       this.imlTabs.TransparentColor = System.Drawing.Color.Transparent;
-      // 
-      // mozGeneral
-      // 
-      this.mozGeneral.Images.Focus = -1;
-      this.mozGeneral.Images.Normal = 0;
-      this.mozGeneral.Images.Selected = -1;
-      this.mozGeneral.ItemStyle = Pabo.MozBar.itemStyle.TextAndPicture;
-      this.mozGeneral.Location = new System.Drawing.Point(2, 2);
-      this.mozGeneral.Name = "mozGeneral";
-      this.mozGeneral.Size = new System.Drawing.Size(72, 57);
-      this.mozGeneral.TabIndex = 0;
-      this.mozGeneral.TabStop = false;
-      this.mozGeneral.Text = "General";
-      this.mozGeneral.TextAlign = Pabo.MozBar.textAlign.Bottom;
-      this.mozGeneral.Click += new System.EventHandler(this.mozGeneral_Click);
-      // 
-      // mozBoard
-      // 
-      this.mozBoard.Images.Focus = -1;
-      this.mozBoard.Images.Normal = 1;
-      this.mozBoard.Images.Selected = -1;
-      this.mozBoard.ItemStyle = Pabo.MozBar.itemStyle.TextAndPicture;
-      this.mozBoard.Location = new System.Drawing.Point(2, 61);
-      this.mozBoard.Name = "mozBoard";
-      this.mozBoard.Size = new System.Drawing.Size(72, 57);
-      this.mozBoard.TabIndex = 1;
-      this.mozBoard.TabStop = false;
-      this.mozBoard.Text = "Appearance";
-      this.mozBoard.TextAlign = Pabo.MozBar.textAlign.Bottom;
-      this.mozBoard.Click += new System.EventHandler(this.mozBoard_Click);
-      // 
-      // mozSounds
-      // 
-      this.mozSounds.Images.Focus = -1;
-      this.mozSounds.Images.Normal = 2;
-      this.mozSounds.Images.Selected = -1;
-      this.mozSounds.ItemStyle = Pabo.MozBar.itemStyle.TextAndPicture;
-      this.mozSounds.Location = new System.Drawing.Point(2, 120);
-      this.mozSounds.Name = "mozSounds";
-      this.mozSounds.Size = new System.Drawing.Size(72, 57);
-      this.mozSounds.TabIndex = 2;
-      this.mozSounds.TabStop = false;
-      this.mozSounds.Text = "Sounds";
-      this.mozSounds.TextAlign = Pabo.MozBar.textAlign.Bottom;
-      this.mozSounds.Click += new System.EventHandler(this.mozSounds_Click);
       // 
       // tabPreferences
       // 
@@ -277,11 +188,11 @@ namespace Checkers
                                                                                  this.tabBoard,
                                                                                  this.tabSounds});
       this.tabPreferences.ImageList = this.imlTabs;
-      this.tabPreferences.Location = new System.Drawing.Point(84, -12);
+      this.tabPreferences.Location = new System.Drawing.Point(8, 8);
       this.tabPreferences.Multiline = true;
       this.tabPreferences.Name = "tabPreferences";
       this.tabPreferences.SelectedIndex = 0;
-      this.tabPreferences.Size = new System.Drawing.Size(398, 336);
+      this.tabPreferences.Size = new System.Drawing.Size(396, 324);
       this.tabPreferences.TabIndex = 1;
       this.tabPreferences.SelectedIndexChanged += new System.EventHandler(this.tabPreferences_SelectedIndexChanged);
       // 
@@ -293,7 +204,7 @@ namespace Checkers
       this.tabGeneral.ImageIndex = 0;
       this.tabGeneral.Location = new System.Drawing.Point(4, 42);
       this.tabGeneral.Name = "tabGeneral";
-      this.tabGeneral.Size = new System.Drawing.Size(390, 290);
+      this.tabGeneral.Size = new System.Drawing.Size(388, 278);
       this.tabGeneral.TabIndex = 0;
       this.tabGeneral.Text = "General";
       // 
@@ -306,9 +217,9 @@ namespace Checkers
                                                                              this.chkHighlightSelection,
                                                                              this.chkHighlightPossibleMoves,
                                                                              this.chkShowTextFeedback});
-      this.grpGeneral.Location = new System.Drawing.Point(0, 12);
+      this.grpGeneral.Location = new System.Drawing.Point(0, 36);
       this.grpGeneral.Name = "grpGeneral";
-      this.grpGeneral.Size = new System.Drawing.Size(388, 112);
+      this.grpGeneral.Size = new System.Drawing.Size(386, 112);
       this.grpGeneral.TabIndex = 0;
       this.grpGeneral.TabStop = false;
       this.grpGeneral.Text = "General";
@@ -319,7 +230,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.chkShowJumpMessage.Location = new System.Drawing.Point(8, 84);
       this.chkShowJumpMessage.Name = "chkShowJumpMessage";
-      this.chkShowJumpMessage.Size = new System.Drawing.Size(372, 20);
+      this.chkShowJumpMessage.Size = new System.Drawing.Size(370, 20);
       this.chkShowJumpMessage.TabIndex = 3;
       this.chkShowJumpMessage.Text = "Show detailed message when a jump must be completed";
       // 
@@ -329,7 +240,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.chkHighlightSelection.Location = new System.Drawing.Point(8, 24);
       this.chkHighlightSelection.Name = "chkHighlightSelection";
-      this.chkHighlightSelection.Size = new System.Drawing.Size(372, 20);
+      this.chkHighlightSelection.Size = new System.Drawing.Size(370, 20);
       this.chkHighlightSelection.TabIndex = 0;
       this.chkHighlightSelection.Text = "Highlight selected squares";
       // 
@@ -339,7 +250,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.chkHighlightPossibleMoves.Location = new System.Drawing.Point(8, 44);
       this.chkHighlightPossibleMoves.Name = "chkHighlightPossibleMoves";
-      this.chkHighlightPossibleMoves.Size = new System.Drawing.Size(372, 20);
+      this.chkHighlightPossibleMoves.Size = new System.Drawing.Size(370, 20);
       this.chkHighlightPossibleMoves.TabIndex = 1;
       this.chkHighlightPossibleMoves.Text = "Highlight possible moves";
       // 
@@ -349,7 +260,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.chkShowTextFeedback.Location = new System.Drawing.Point(8, 64);
       this.chkShowTextFeedback.Name = "chkShowTextFeedback";
-      this.chkShowTextFeedback.Size = new System.Drawing.Size(372, 20);
+      this.chkShowTextFeedback.Size = new System.Drawing.Size(370, 20);
       this.chkShowTextFeedback.TabIndex = 2;
       this.chkShowTextFeedback.Text = "Show text feedback";
       // 
@@ -362,9 +273,9 @@ namespace Checkers
                                                                          this.chkFlashWindowOnMessage,
                                                                          this.chkShowNetPanelOnMessage,
                                                                          this.chkFlashWindowOnGameEvents});
-      this.grpNet.Location = new System.Drawing.Point(0, 136);
+      this.grpNet.Location = new System.Drawing.Point(0, 160);
       this.grpNet.Name = "grpNet";
-      this.grpNet.Size = new System.Drawing.Size(388, 112);
+      this.grpNet.Size = new System.Drawing.Size(386, 112);
       this.grpNet.TabIndex = 1;
       this.grpNet.TabStop = false;
       this.grpNet.Text = "Net Settings";
@@ -375,7 +286,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.chkFlashWindowOnTurn.Location = new System.Drawing.Point(8, 44);
       this.chkFlashWindowOnTurn.Name = "chkFlashWindowOnTurn";
-      this.chkFlashWindowOnTurn.Size = new System.Drawing.Size(372, 20);
+      this.chkFlashWindowOnTurn.Size = new System.Drawing.Size(370, 20);
       this.chkFlashWindowOnTurn.TabIndex = 1;
       this.chkFlashWindowOnTurn.Text = "Flash window when your turn";
       // 
@@ -385,7 +296,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.chkFlashWindowOnMessage.Location = new System.Drawing.Point(8, 64);
       this.chkFlashWindowOnMessage.Name = "chkFlashWindowOnMessage";
-      this.chkFlashWindowOnMessage.Size = new System.Drawing.Size(372, 20);
+      this.chkFlashWindowOnMessage.Size = new System.Drawing.Size(370, 20);
       this.chkFlashWindowOnMessage.TabIndex = 2;
       this.chkFlashWindowOnMessage.Text = "Flash window when a message is received";
       // 
@@ -395,7 +306,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.chkShowNetPanelOnMessage.Location = new System.Drawing.Point(8, 84);
       this.chkShowNetPanelOnMessage.Name = "chkShowNetPanelOnMessage";
-      this.chkShowNetPanelOnMessage.Size = new System.Drawing.Size(372, 20);
+      this.chkShowNetPanelOnMessage.Size = new System.Drawing.Size(370, 20);
       this.chkShowNetPanelOnMessage.TabIndex = 3;
       this.chkShowNetPanelOnMessage.Text = "Show Net Panel when message is received";
       // 
@@ -405,7 +316,7 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Right);
       this.chkFlashWindowOnGameEvents.Location = new System.Drawing.Point(8, 24);
       this.chkFlashWindowOnGameEvents.Name = "chkFlashWindowOnGameEvents";
-      this.chkFlashWindowOnGameEvents.Size = new System.Drawing.Size(372, 20);
+      this.chkFlashWindowOnGameEvents.Size = new System.Drawing.Size(370, 20);
       this.chkFlashWindowOnGameEvents.TabIndex = 0;
       this.chkFlashWindowOnGameEvents.Text = "Flash window on game events";
       // 
@@ -424,7 +335,7 @@ namespace Checkers
       this.tabBoard.ImageIndex = 1;
       this.tabBoard.Location = new System.Drawing.Point(4, 42);
       this.tabBoard.Name = "tabBoard";
-      this.tabBoard.Size = new System.Drawing.Size(390, 290);
+      this.tabBoard.Size = new System.Drawing.Size(388, 278);
       this.tabBoard.TabIndex = 1;
       this.tabBoard.Text = "Appearance";
       // 
@@ -432,9 +343,9 @@ namespace Checkers
       // 
       this.lblColorCaption.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.lblColorCaption.Location = new System.Drawing.Point(12, 164);
+      this.lblColorCaption.Location = new System.Drawing.Point(12, 188);
       this.lblColorCaption.Name = "lblColorCaption";
-      this.lblColorCaption.Size = new System.Drawing.Size(372, 32);
+      this.lblColorCaption.Size = new System.Drawing.Size(370, 32);
       this.lblColorCaption.TabIndex = 4;
       this.lblColorCaption.Text = "Note: Right-click to reset to default";
       // 
@@ -442,9 +353,9 @@ namespace Checkers
       // 
       this.lblBoardBackColor.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.lblBoardBackColor.Location = new System.Drawing.Point(45, 56);
+      this.lblBoardBackColor.Location = new System.Drawing.Point(45, 80);
       this.lblBoardBackColor.Name = "lblBoardBackColor";
-      this.lblBoardBackColor.Size = new System.Drawing.Size(336, 16);
+      this.lblBoardBackColor.Size = new System.Drawing.Size(334, 16);
       this.lblBoardBackColor.TabIndex = 1;
       this.lblBoardBackColor.Text = "Board Background Color";
       // 
@@ -453,7 +364,7 @@ namespace Checkers
       this.picBoardBackColor.BackColor = System.Drawing.Color.White;
       this.picBoardBackColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.picBoardBackColor.ContextMenu = this.menuColor;
-      this.picBoardBackColor.Location = new System.Drawing.Point(9, 48);
+      this.picBoardBackColor.Location = new System.Drawing.Point(9, 72);
       this.picBoardBackColor.Name = "picBoardBackColor";
       this.picBoardBackColor.Size = new System.Drawing.Size(32, 32);
       this.picBoardBackColor.TabIndex = 7;
@@ -488,9 +399,9 @@ namespace Checkers
       // 
       this.lblBackColor.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.lblBackColor.Location = new System.Drawing.Point(45, 20);
+      this.lblBackColor.Location = new System.Drawing.Point(45, 44);
       this.lblBackColor.Name = "lblBackColor";
-      this.lblBackColor.Size = new System.Drawing.Size(336, 16);
+      this.lblBackColor.Size = new System.Drawing.Size(334, 16);
       this.lblBackColor.TabIndex = 0;
       this.lblBackColor.Text = "Background Color";
       // 
@@ -499,7 +410,7 @@ namespace Checkers
       this.picBackColor.BackColor = System.Drawing.Color.White;
       this.picBackColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.picBackColor.ContextMenu = this.menuColor;
-      this.picBackColor.Location = new System.Drawing.Point(9, 12);
+      this.picBackColor.Location = new System.Drawing.Point(9, 36);
       this.picBackColor.Name = "picBackColor";
       this.picBackColor.Size = new System.Drawing.Size(32, 32);
       this.picBackColor.TabIndex = 4;
@@ -510,9 +421,9 @@ namespace Checkers
       // 
       this.lblBoardForeColor.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.lblBoardForeColor.Location = new System.Drawing.Point(45, 92);
+      this.lblBoardForeColor.Location = new System.Drawing.Point(45, 116);
       this.lblBoardForeColor.Name = "lblBoardForeColor";
-      this.lblBoardForeColor.Size = new System.Drawing.Size(336, 16);
+      this.lblBoardForeColor.Size = new System.Drawing.Size(334, 16);
       this.lblBoardForeColor.TabIndex = 2;
       this.lblBoardForeColor.Text = "Board Foreground Color";
       // 
@@ -521,7 +432,7 @@ namespace Checkers
       this.picBoardForeColor.BackColor = System.Drawing.Color.White;
       this.picBoardForeColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.picBoardForeColor.ContextMenu = this.menuColor;
-      this.picBoardForeColor.Location = new System.Drawing.Point(9, 84);
+      this.picBoardForeColor.Location = new System.Drawing.Point(9, 108);
       this.picBoardForeColor.Name = "picBoardForeColor";
       this.picBoardForeColor.Size = new System.Drawing.Size(32, 32);
       this.picBoardForeColor.TabIndex = 5;
@@ -533,7 +444,7 @@ namespace Checkers
       this.picBoardGridColor.BackColor = System.Drawing.Color.White;
       this.picBoardGridColor.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.picBoardGridColor.ContextMenu = this.menuColor;
-      this.picBoardGridColor.Location = new System.Drawing.Point(9, 120);
+      this.picBoardGridColor.Location = new System.Drawing.Point(9, 144);
       this.picBoardGridColor.Name = "picBoardGridColor";
       this.picBoardGridColor.Size = new System.Drawing.Size(32, 32);
       this.picBoardGridColor.TabIndex = 6;
@@ -544,9 +455,9 @@ namespace Checkers
       // 
       this.lblBoardGridColor.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.lblBoardGridColor.Location = new System.Drawing.Point(45, 128);
+      this.lblBoardGridColor.Location = new System.Drawing.Point(45, 152);
       this.lblBoardGridColor.Name = "lblBoardGridColor";
-      this.lblBoardGridColor.Size = new System.Drawing.Size(336, 16);
+      this.lblBoardGridColor.Size = new System.Drawing.Size(334, 16);
       this.lblBoardGridColor.TabIndex = 3;
       this.lblBoardGridColor.Text = "Board Foreground Color";
       // 
@@ -563,7 +474,7 @@ namespace Checkers
       this.tabSounds.ImageIndex = 2;
       this.tabSounds.Location = new System.Drawing.Point(4, 42);
       this.tabSounds.Name = "tabSounds";
-      this.tabSounds.Size = new System.Drawing.Size(390, 290);
+      this.tabSounds.Size = new System.Drawing.Size(388, 278);
       this.tabSounds.TabIndex = 2;
       this.tabSounds.Text = "Sounds";
       // 
@@ -571,9 +482,9 @@ namespace Checkers
       // 
       this.chkMuteSounds.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.chkMuteSounds.Location = new System.Drawing.Point(0, 268);
+      this.chkMuteSounds.Location = new System.Drawing.Point(0, 256);
       this.chkMuteSounds.Name = "chkMuteSounds";
-      this.chkMuteSounds.Size = new System.Drawing.Size(388, 20);
+      this.chkMuteSounds.Size = new System.Drawing.Size(386, 20);
       this.chkMuteSounds.TabIndex = 6;
       this.chkMuteSounds.Text = "Mute all Sounds";
       // 
@@ -583,9 +494,9 @@ namespace Checkers
         | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
       this.lstSounds.IntegralHeight = false;
-      this.lstSounds.Location = new System.Drawing.Point(0, 32);
+      this.lstSounds.Location = new System.Drawing.Point(0, 56);
       this.lstSounds.Name = "lstSounds";
-      this.lstSounds.Size = new System.Drawing.Size(388, 184);
+      this.lstSounds.Size = new System.Drawing.Size(386, 148);
       this.lstSounds.TabIndex = 1;
       this.lstSounds.SelectedIndexChanged += new System.EventHandler(this.lstSounds_SelectedIndexChanged);
       // 
@@ -593,9 +504,9 @@ namespace Checkers
       // 
       this.lblSounds.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.lblSounds.Location = new System.Drawing.Point(0, 12);
+      this.lblSounds.Location = new System.Drawing.Point(0, 36);
       this.lblSounds.Name = "lblSounds";
-      this.lblSounds.Size = new System.Drawing.Size(392, 20);
+      this.lblSounds.Size = new System.Drawing.Size(390, 20);
       this.lblSounds.TabIndex = 0;
       this.lblSounds.Text = "Game Sounds:";
       this.lblSounds.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -604,9 +515,9 @@ namespace Checkers
       // 
       this.txtSoundFile.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.txtSoundFile.Location = new System.Drawing.Point(0, 240);
+      this.txtSoundFile.Location = new System.Drawing.Point(0, 228);
       this.txtSoundFile.Name = "txtSoundFile";
-      this.txtSoundFile.Size = new System.Drawing.Size(340, 20);
+      this.txtSoundFile.Size = new System.Drawing.Size(338, 20);
       this.txtSoundFile.TabIndex = 3;
       this.txtSoundFile.Text = "";
       this.txtSoundFile.TextChanged += new System.EventHandler(this.txtSoundFile_TextChanged);
@@ -614,7 +525,7 @@ namespace Checkers
       // btnSoundFile
       // 
       this.btnSoundFile.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
-      this.btnSoundFile.Location = new System.Drawing.Point(368, 240);
+      this.btnSoundFile.Location = new System.Drawing.Point(366, 228);
       this.btnSoundFile.Name = "btnSoundFile";
       this.btnSoundFile.Size = new System.Drawing.Size(20, 20);
       this.btnSoundFile.TabIndex = 5;
@@ -624,7 +535,7 @@ namespace Checkers
       // btnSoundPreview
       // 
       this.btnSoundPreview.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
-      this.btnSoundPreview.Location = new System.Drawing.Point(344, 240);
+      this.btnSoundPreview.Location = new System.Drawing.Point(342, 228);
       this.btnSoundPreview.Name = "btnSoundPreview";
       this.btnSoundPreview.Size = new System.Drawing.Size(20, 20);
       this.btnSoundPreview.TabIndex = 4;
@@ -635,43 +546,18 @@ namespace Checkers
       // 
       this.lblSoundFile.Anchor = ((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
         | System.Windows.Forms.AnchorStyles.Right);
-      this.lblSoundFile.Location = new System.Drawing.Point(0, 220);
+      this.lblSoundFile.Location = new System.Drawing.Point(0, 208);
       this.lblSoundFile.Name = "lblSoundFile";
-      this.lblSoundFile.Size = new System.Drawing.Size(392, 20);
+      this.lblSoundFile.Size = new System.Drawing.Size(390, 20);
       this.lblSoundFile.TabIndex = 2;
       this.lblSoundFile.Text = "Sound File:";
       this.lblSoundFile.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-      // 
-      // lblTitle
-      // 
-      this.lblTitle.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-        | System.Windows.Forms.AnchorStyles.Right);
-      this.lblTitle.BackColor = System.Drawing.SystemColors.Highlight;
-      this.lblTitle.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-      this.lblTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-      this.lblTitle.ForeColor = System.Drawing.SystemColors.HighlightText;
-      this.lblTitle.Location = new System.Drawing.Point(0, 4);
-      this.lblTitle.Name = "lblTitle";
-      this.lblTitle.Size = new System.Drawing.Size(394, 24);
-      this.lblTitle.TabIndex = 0;
-      this.lblTitle.Text = "General";
-      // 
-      // panTitle
-      // 
-      this.panTitle.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-        | System.Windows.Forms.AnchorStyles.Right);
-      this.panTitle.Controls.AddRange(new System.Windows.Forms.Control[] {
-                                                                           this.lblTitle});
-      this.panTitle.Location = new System.Drawing.Point(84, 0);
-      this.panTitle.Name = "panTitle";
-      this.panTitle.Size = new System.Drawing.Size(396, 28);
-      this.panTitle.TabIndex = 0;
       // 
       // btnCancel
       // 
       this.btnCancel.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
       this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-      this.btnCancel.Location = new System.Drawing.Point(390, 328);
+      this.btnCancel.Location = new System.Drawing.Point(314, 337);
       this.btnCancel.Name = "btnCancel";
       this.btnCancel.Size = new System.Drawing.Size(88, 36);
       this.btnCancel.TabIndex = 4;
@@ -681,7 +567,7 @@ namespace Checkers
       // 
       this.btnOK.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
       this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-      this.btnOK.Location = new System.Drawing.Point(294, 328);
+      this.btnOK.Location = new System.Drawing.Point(218, 337);
       this.btnOK.Name = "btnOK";
       this.btnOK.Size = new System.Drawing.Size(88, 36);
       this.btnOK.TabIndex = 3;
@@ -702,25 +588,49 @@ namespace Checkers
       // btnDefault
       // 
       this.btnDefault.Anchor = (System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right);
-      this.btnDefault.Location = new System.Drawing.Point(188, 328);
+      this.btnDefault.Location = new System.Drawing.Point(112, 337);
       this.btnDefault.Name = "btnDefault";
       this.btnDefault.Size = new System.Drawing.Size(88, 36);
       this.btnDefault.TabIndex = 2;
       this.btnDefault.Text = "&Default";
       this.btnDefault.Click += new System.EventHandler(this.btnDefault_Click);
       // 
+      // panTitle
+      // 
+      this.panTitle.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.panTitle.Controls.AddRange(new System.Windows.Forms.Control[] {
+                                                                           this.lblTitle});
+      this.panTitle.Location = new System.Drawing.Point(7, 48);
+      this.panTitle.Name = "panTitle";
+      this.panTitle.Size = new System.Drawing.Size(396, 28);
+      this.panTitle.TabIndex = 5;
+      // 
+      // lblTitle
+      // 
+      this.lblTitle.Anchor = ((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+        | System.Windows.Forms.AnchorStyles.Right);
+      this.lblTitle.BackColor = System.Drawing.SystemColors.Highlight;
+      this.lblTitle.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+      this.lblTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+      this.lblTitle.ForeColor = System.Drawing.SystemColors.HighlightText;
+      this.lblTitle.Location = new System.Drawing.Point(0, 4);
+      this.lblTitle.Name = "lblTitle";
+      this.lblTitle.Size = new System.Drawing.Size(394, 24);
+      this.lblTitle.TabIndex = 0;
+      this.lblTitle.Text = "General";
+      // 
       // frmPreferences
       // 
       this.AcceptButton = this.btnOK;
       this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
       this.CancelButton = this.btnCancel;
-      this.ClientSize = new System.Drawing.Size(486, 371);
+      this.ClientSize = new System.Drawing.Size(410, 380);
       this.Controls.AddRange(new System.Windows.Forms.Control[] {
+                                                                  this.panTitle,
                                                                   this.btnDefault,
                                                                   this.btnCancel,
                                                                   this.btnOK,
-                                                                  this.mozPreferences,
-                                                                  this.panTitle,
                                                                   this.tabPreferences});
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
       this.Name = "frmPreferences";
@@ -728,8 +638,6 @@ namespace Checkers
       this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
       this.Text = "Checkers Preferences";
       this.Load += new System.EventHandler(this.frmPreferences_Load);
-      ((System.ComponentModel.ISupportInitialize)(this.mozPreferences)).EndInit();
-      this.mozPreferences.ResumeLayout(false);
       this.tabPreferences.ResumeLayout(false);
       this.tabGeneral.ResumeLayout(false);
       this.grpGeneral.ResumeLayout(false);
@@ -747,7 +655,6 @@ namespace Checkers
     {
       if (tabPreferences.SelectedIndex == -1) return;
       lblTitle.Text = tabPreferences.SelectedTab.Text;
-      mozPreferences.Items[tabPreferences.SelectedIndex].SelectItem();
     }
     
     #endregion
@@ -837,10 +744,7 @@ namespace Checkers
     }
     
     private void frmPreferences_Load (object sender, System.EventArgs e)
-    {
-      // Show first tab
-      mozPreferences.Items[0].SelectItem();
-    }
+    {}
     
     private void btnDefault_Click (object sender, System.EventArgs e)
     {
@@ -848,13 +752,6 @@ namespace Checkers
       settings = new CheckersSettings();
       ShowSettings();
     }
-    
-    private void mozGeneral_Click (object sender, System.EventArgs e)
-    { tabPreferences.SelectedTab = tabGeneral; }
-    private void mozBoard_Click (object sender, System.EventArgs e)
-    { tabPreferences.SelectedTab = tabBoard; }
-    private void mozSounds_Click (object sender, System.EventArgs e)
-    { tabPreferences.SelectedTab = tabSounds; }
     
     private void picColor_MouseDown (object sender, System.Windows.Forms.MouseEventArgs e)
     {
