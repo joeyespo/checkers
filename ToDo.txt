@@ -20,6 +20,7 @@ Checkers ToDo
  x Option: Delay AI movement
  x Fix up context menu issue in frmNewGame
  x In 'frmNewGame' flash window when opponent clicks "I'm Ready"
+ - The 'Copy' menu item in the chat window --> copies entire text, make it copy only selected text
  - Checkers agents for higher difficulties
  - Better network handling in 'frmNewGame' (prevent deadlock; separate client and host windows)
  - Allow spectators
