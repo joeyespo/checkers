@@ -42,7 +42,7 @@ namespace Checkers
     private PictureBox selectedPicture;
     private CheckersGameType gameType;
     private int firstMove;
-    private int difficulty;
+    private int agentIndex;
     private Image [] imageSet;
     private string player1Name;
     private string player2Name;
@@ -53,6 +53,8 @@ namespace Checkers
     private System.Windows.Forms.MenuItem menuChatClear;
     private System.Windows.Forms.MenuItem menuChatLine02;
     private System.Windows.Forms.MenuItem menuImagePresetsBuiltIn;
+    private System.Windows.Forms.ComboBox cmbAgent1P;
+    private System.Windows.Forms.Label lblAgent1P;
     private TcpClient remotePlayer = null;
     
     #region API Imports
@@ -108,8 +110,6 @@ namespace Checkers
     private System.Windows.Forms.Label lblGame1P;
     private System.Windows.Forms.Label lblGame2P;
     private System.Windows.Forms.Label lblGameNet;
-    private System.Windows.Forms.Label lblDifficulty1P;
-    private System.Windows.Forms.ComboBox cmbDifficulty1P;
     private System.Windows.Forms.ComboBox cmbFirstMove2P;
     private System.Windows.Forms.Label lblFirstMove2P;
     private System.Windows.Forms.Panel panNetSettings;
@@ -212,7 +212,7 @@ namespace Checkers
     
     #region Class Construction
     
-    public frmNewGame (CheckersSettings settings)
+    public frmNewGame (CheckersSettings settings, string [] agents)
     {
       //
       // Required for Windows Form Designer support
@@ -220,6 +220,9 @@ namespace Checkers
       InitializeComponent();
       this.settings = settings;
       imageSet = new Image [4];
+      // Fill agent list
+      cmbAgent1P.Items.Clear();
+      cmbAgent1P.Items.AddRange(agents);
     }
     
     #region Windows Form Designer generated code
@@ -267,8 +270,8 @@ namespace Checkers
       this.cmbImageSet1P = new System.Windows.Forms.ComboBox();
       this.lblImageSet1P = new System.Windows.Forms.Label();
       this.lblGame1P = new System.Windows.Forms.Label();
-      this.cmbDifficulty1P = new System.Windows.Forms.ComboBox();
-      this.lblDifficulty1P = new System.Windows.Forms.Label();
+      this.cmbAgent1P = new System.Windows.Forms.ComboBox();
+      this.lblAgent1P = new System.Windows.Forms.Label();
       this.tabGame2P = new System.Windows.Forms.TabPage();
       this.grpPlayerSettings2P = new System.Windows.Forms.GroupBox();
       this.txtPlayerName2P1 = new System.Windows.Forms.TextBox();
@@ -430,8 +433,8 @@ namespace Checkers
                                                                             this.grpPlayerSettings1P,
                                                                             this.grpGameSettings1P,
                                                                             this.lblGame1P,
-                                                                            this.cmbDifficulty1P,
-                                                                            this.lblDifficulty1P});
+                                                                            this.cmbAgent1P,
+                                                                            this.lblAgent1P});
       this.tabGame1P.ImageIndex = 0;
       this.tabGame1P.Location = new System.Drawing.Point(4, 42);
       this.tabGame1P.Name = "tabGame1P";
@@ -637,27 +640,22 @@ namespace Checkers
       this.lblGame1P.Text = "Single Player";
       this.lblGame1P.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
-      // cmbDifficulty1P
+      // cmbAgent1P
       // 
-      this.cmbDifficulty1P.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-      this.cmbDifficulty1P.Items.AddRange(new object[] {
-                                                         "Beginner",
-                                                         "Intermediate",
-                                                         "Advanced",
-                                                         "Expert"});
-      this.cmbDifficulty1P.Location = new System.Drawing.Point(280, 132);
-      this.cmbDifficulty1P.Name = "cmbDifficulty1P";
-      this.cmbDifficulty1P.Size = new System.Drawing.Size(252, 21);
-      this.cmbDifficulty1P.TabIndex = 1;
+      this.cmbAgent1P.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.cmbAgent1P.Location = new System.Drawing.Point(280, 132);
+      this.cmbAgent1P.Name = "cmbAgent1P";
+      this.cmbAgent1P.Size = new System.Drawing.Size(252, 21);
+      this.cmbAgent1P.TabIndex = 1;
       // 
-      // lblDifficulty1P
+      // lblAgent1P
       // 
-      this.lblDifficulty1P.Location = new System.Drawing.Point(280, 112);
-      this.lblDifficulty1P.Name = "lblDifficulty1P";
-      this.lblDifficulty1P.Size = new System.Drawing.Size(252, 20);
-      this.lblDifficulty1P.TabIndex = 0;
-      this.lblDifficulty1P.Text = "Difficulty:";
-      this.lblDifficulty1P.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+      this.lblAgent1P.Location = new System.Drawing.Point(280, 112);
+      this.lblAgent1P.Name = "lblAgent1P";
+      this.lblAgent1P.Size = new System.Drawing.Size(252, 20);
+      this.lblAgent1P.TabIndex = 0;
+      this.lblAgent1P.Text = "Difficulty:";
+      this.lblAgent1P.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
       // 
       // tabGame2P
       // 
@@ -1581,8 +1579,8 @@ namespace Checkers
     public int FirstMove
     { get { return firstMove; } }
     
-    public int Difficulty
-    { get { return difficulty; } }
+    public int AgentIndex
+    { get { return agentIndex; } }
     
     public Image [] ImageSet
     { get { return imageSet; } }
@@ -1939,7 +1937,7 @@ namespace Checkers
           case 0:
             gameType = CheckersGameType.SinglePlayer;
             firstMove = (( cmbFirstMove1P.SelectedIndex == 0 )?( 1 ):( 2 ));
-            difficulty = (( cmbDifficulty1P.SelectedIndex == -1 )?( 0 ):( cmbDifficulty1P.SelectedIndex ));
+            agentIndex = (( cmbAgent1P.SelectedIndex == -1 )?( 0 ):( cmbAgent1P.SelectedIndex ));
             player1Name = (( txtPlayerName1P.Text.Trim() != "" )?( txtPlayerName1P.Text.Trim() ):( "Player" ));
             player2Name = "Opponent";
             imageSet[0] = picPawn1P1.Image; imageSet[1] = picKing1P1.Image;
@@ -1948,7 +1946,7 @@ namespace Checkers
           case 1:
             gameType = CheckersGameType.Multiplayer;
             firstMove = (( cmbFirstMove2P.SelectedIndex == 0 )?( 1 ):( 2 ));
-            difficulty = 0;
+            agentIndex = 0;
             player1Name = (( txtPlayerName2P1.Text.Trim() != "" )?( txtPlayerName2P1.Text.Trim() ):( "Player 1" ));
             player2Name = (( txtPlayerName2P2.Text.Trim() != "" )?( txtPlayerName2P2.Text.Trim() ):( "Player 2" ));
             imageSet[0] = picPawn2P1.Image; imageSet[1] = picKing2P1.Image;
@@ -1956,7 +1954,7 @@ namespace Checkers
             break;
           case 2:
             gameType = CheckersGameType.NetGame;
-            difficulty = 0;
+            agentIndex = 0;
             // Client
             if (remotePlayer != null)
             {
@@ -2067,7 +2065,7 @@ namespace Checkers
       // Set initial combobox values
       cmbFirstMove1P.SelectedIndex = 0;
       cmbImageSet1P.SelectedIndex = 0;
-      cmbDifficulty1P.SelectedIndex = 0;
+      cmbAgent1P.SelectedIndex = 0;
       
       cmbFirstMove2P.SelectedIndex = 0;
       cmbImageSet2P.SelectedIndex = 0;
@@ -2079,7 +2077,7 @@ namespace Checkers
       panNet.BringToFront();
       
       // Select initial control
-      cmbDifficulty1P.Select();
+      cmbAgent1P.Select();
     }
     
     private void frmNewGame_Activated (object sender, System.EventArgs e)
@@ -2187,7 +2185,7 @@ namespace Checkers
       CloseNetGame();
       switch (tabGame.SelectedIndex)
       {
-        case 0: cmbDifficulty1P.Select(); break;
+        case 0: cmbAgent1P.Select(); break;
         case 1: txtPlayerName2P1.Select(); break;
         case 2:
           lnkIPAddress.Text = Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString();

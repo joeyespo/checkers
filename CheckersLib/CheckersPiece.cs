@@ -9,6 +9,12 @@ namespace Uberware.Gaming.Checkers
     King = 1,
   }
   
+  public enum CheckersDirection
+  {
+    Up   = 0,
+    Down = 1,
+  }
+  
   public class CheckersPiece
   {
     private CheckersGame owner;
@@ -49,6 +55,13 @@ namespace Uberware.Gaming.Checkers
     public int Player
     { get { return player; } }
     
+    /// <summary>
+    /// The piece's primary direction relative to the point-of-view of the internal board.
+    /// Note: if no direction, will return CheckersDirection.Up, therefore invalid for pieces without a valid player.
+    /// </summary>
+    public CheckersDirection Direction
+    { get { return (( player != 1 )?( CheckersDirection.Down ):( CheckersDirection.Up )); } }
+    
     public CheckersRank Rank
     { get { return rank; } }
     
@@ -66,6 +79,20 @@ namespace Uberware.Gaming.Checkers
     {
       location = Point.Empty;
       inPlay = false;
+    }
+    
+    /// <summary>Creates a duplicate Checkers piece object from an identical (possibly cloned) game.</summary>
+    /// <returns>The new Checkers piece object.</returns>
+    public CheckersPiece Clone (CheckersGame game)
+    {
+      CheckersPiece clonedPiece = game.PieceAt(Location);
+      // Make sure piece exists
+      if (clonedPiece == null) return null;
+      // Make sure piece is equivalent
+      if ((clonedPiece.Player != Player) || (clonedPiece.InPlay != InPlay) || (clonedPiece.Rank != Rank))
+        return null;
+      // Return cloned piece
+      return clonedPiece;
     }
   }
 }

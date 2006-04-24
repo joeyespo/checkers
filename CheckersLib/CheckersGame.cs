@@ -9,6 +9,7 @@ namespace Uberware.Gaming.Checkers
     public static readonly int PiecesPerPlayer = 12;
     public static readonly int PlayerCount = 2;
     public static readonly Size BoardSize = new Size(8, 8);
+    public static readonly Rectangle BoardBounds = new Rectangle(0, 0, BoardSize.Width-1, BoardSize.Height-1);
     
     public event EventHandler GameStarted;
     public event EventHandler GameStopped;
@@ -83,7 +84,7 @@ namespace Uberware.Gaming.Checkers
     /// <returns>The read-only copy.</returns>
     public static CheckersGame MakeReadOnly (CheckersGame game)
     {
-      CheckersGame result = game.Fork();
+      CheckersGame result = game.Clone();
       result.isReadOnly = true;
       return result;
     }
@@ -105,7 +106,7 @@ namespace Uberware.Gaming.Checkers
     public bool IsReadOnly
     { get { return isReadOnly; } }
     
-    /// <summary>Gets the current player turn.</summary>
+    /// <summary>Gets the current player turn. (Note: this is 0 if game is not in play)</summary>
     public int Turn
     { get { return turn; } }
     
@@ -136,7 +137,7 @@ namespace Uberware.Gaming.Checkers
     
     /// <summary>Creates a duplicate Checkers game object.</summary>
     /// <returns>The new Checkers move object.</returns>
-    public CheckersGame Fork ()
+    public CheckersGame Clone ()
     {
       CheckersGame game = new CheckersGame(optionalJumping);
       game.isReadOnly = isReadOnly;
@@ -253,11 +254,68 @@ namespace Uberware.Gaming.Checkers
         if (piece.Player == player) count++;
       return count;
     }
+    /// <summary>Gets the total number of pieces that are remaining in the game.</summary>
+    /// <returns>The total number of pieces that are remaining in the game.</returns>
+    /// <remarks>This is the same value as: Pieces.Length</remarks>
+    public int GetRemainingCount ()
+    { return pieces.Count; }
+    
     /// <summary>Gets the number of player's pieces that have been jumped by the opponent.</summary>
     /// <param name="player">The player index to get the count.</param>
     /// <returns>The number of pieces that have been jumped by the opponent.</returns>
     public int GetJumpedCount (int player)
-    { return (PiecesPerPlayer - GetRemainingCount(player)); }
+    { return PiecesPerPlayer - GetRemainingCount(player); }
+    /// <summary>Gets the total number pieces that have been jumped in the game.</summary>
+    /// <returns>The total number of pieces that have been jumped in the game.</returns>
+    /// <remarks>This is the same value as: 2*PiecesPerPlayer - Pieces.Length</remarks>
+    public int GetJumpedCount ()
+    { return 2*PiecesPerPlayer - pieces.Count; }
+    
+    /// <summary>Gets the number of player's kings.</summary>
+    /// <param name="player">The player index to get the count.</param>
+    /// <returns>The number of king pieces.</returns>
+    public int GetKingCount (int player)
+    {
+      if ((!isPlaying) && (winner == 0)) throw new InvalidOperationException("Operation requires game to be playing.");
+      if ((player < 1) || (player > 2)) throw new ArgumentOutOfRangeException("player", player, "Argument 'player' must refer to a valid player number.");
+      int count = 0;
+      foreach (CheckersPiece piece in pieces)
+        if ((piece.Player == player) && (piece.Rank == CheckersRank.King)) count++;
+      return count;
+    }
+    /// <summary>Gets the total number of kings in the game.</summary>
+    /// <returns>The number of king pieces.</returns>
+    public int GetKingCount ()
+    {
+      if ((!isPlaying) && (winner == 0)) throw new InvalidOperationException("Operation requires game to be playing.");
+      int count = 0;
+      foreach (CheckersPiece piece in pieces)
+        if (piece.Rank == CheckersRank.King) count++;
+      return count;
+    }
+    
+    /// <summary>Gets the number of player's pawns.</summary>
+    /// <param name="player">The player index to get the count.</param>
+    /// <returns>The number of pawn pieces.</returns>
+    public int GetPawnCount (int player)
+    {
+      if ((!isPlaying) && (winner == 0)) throw new InvalidOperationException("Operation requires game to be playing.");
+      if ((player < 1) || (player > 2)) throw new ArgumentOutOfRangeException("player", player, "Argument 'player' must refer to a valid player number.");
+      int count = 0;
+      foreach (CheckersPiece piece in pieces)
+        if ((piece.Player == player) && (piece.Rank == CheckersRank.Pawn)) count++;
+      return count;
+    }
+    /// <summary>Gets the total number of pawns in the game.</summary>
+    /// <returns>The number of pawn pieces.</returns>
+    public int GetPawnCount ()
+    {
+      if ((!isPlaying) && (winner == 0)) throw new InvalidOperationException("Operation requires game to be playing.");
+      int count = 0;
+      foreach (CheckersPiece piece in pieces)
+        if (piece.Rank == CheckersRank.Pawn) count++;
+      return count;
+    }
     
     /// <summary>Returns all pieces belonging to the specified player.</summary>
     /// <param name="player">The player index to get the list of pieces.</param>
@@ -301,6 +359,56 @@ namespace Uberware.Gaming.Checkers
         if (move.EnumMoves(optionalJumping).Length != 0) movable.Add(piece);
       }
       return (CheckersPiece [])movable.ToArray(typeof(CheckersPiece));
+    }
+    
+    /// <summary>Returns a list of legal moves from all pieces this turn.</summary>
+    /// <returns>A list of legal moves.</returns>
+    public CheckersMove [] EnumLegalMoves ()
+    {
+      if ((!isPlaying) && (winner == 0)) throw new InvalidOperationException("Operation requires game to be playing.");
+      Stack incompleteMoves = new Stack();
+      ArrayList moves = new ArrayList();
+      foreach (CheckersPiece piece in EnumMovablePieces())
+        incompleteMoves.Push(BeginMove(piece));
+      while (incompleteMoves.Count > 0)
+      {
+        CheckersMove move = (CheckersMove)incompleteMoves.Pop();
+        foreach (Point location in move.EnumMoves())
+        {
+          CheckersMove nextMove = move.Clone();
+          if (!nextMove.Move(location)) continue;
+          if (nextMove.CanMove)
+            incompleteMoves.Push(nextMove);
+          if (!nextMove.MustMove)
+            moves.Add(nextMove);
+        }
+      }
+      return (CheckersMove [])moves.ToArray(typeof(CheckersMove));
+    }
+    /// <summary>Returns a list of legal moves from all pieces this turn.</summary>
+    /// <param name="optionalJumping">Overrides the game's OptionalJumping parameter for the enumeration.</param>
+    /// <returns>A list of legal moves.</returns>
+    public CheckersMove [] EnumLegalMoves (bool optionalJumping)
+    {
+      if ((!isPlaying) && (winner == 0)) throw new InvalidOperationException("Operation requires game to be playing.");
+      Stack incompleteMoves = new Stack();
+      ArrayList moves = new ArrayList();
+      foreach (CheckersPiece piece in EnumMovablePieces(optionalJumping))
+        incompleteMoves.Push(BeginMove(piece));
+      while (incompleteMoves.Count > 0)
+      {
+        CheckersMove move = (CheckersMove)incompleteMoves.Pop();
+        foreach (Point location in move.EnumMoves(optionalJumping))
+        {
+          CheckersMove nextMove = move.Clone();
+          if (!nextMove.Move(location)) continue;
+          if (nextMove.CanMove)
+            incompleteMoves.Push(nextMove);
+          if (!nextMove.MustMove)
+            moves.Add(nextMove);
+        }
+      }
+      return (CheckersMove [])moves.ToArray(typeof(CheckersMove));
     }
     
     /// <summary>Returns whether or not a move is valid.</summary>
@@ -399,7 +507,7 @@ namespace Uberware.Gaming.Checkers
     }
     
     // Declares the winner
-    private void DeclareWinner (int winner)
+    public void DeclareWinner (int winner)
     {
       if (isReadOnly) throw new InvalidOperationException("Game is read only.");
       this.winner = winner;

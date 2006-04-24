@@ -7,6 +7,9 @@ namespace Uberware.Gaming.Checkers.Agents
   /// <summary>A Checkers agent that selects the next move completely randomly.</summary>
   public class CheckersRandomAgent : CheckersAgent
   {
+    public static string AgentName
+    { get { return "Random Move Agent"; } }
+    
     private Random rand;
     
     public CheckersRandomAgent ()

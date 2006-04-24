@@ -169,7 +169,7 @@ namespace Uberware.Gaming.Checkers
     
     /// <summary>Creates a duplicate Checkers move object, so different paths may be tested from a particular point.</summary>
     /// <returns>The new Checkers move object.</returns>
-    public CheckersMove Fork ()
+    public CheckersMove Clone ()
     {
       CheckersMove move = new CheckersMove(game, piece, false);
       move.initialGame = initialGame;
@@ -182,6 +182,11 @@ namespace Uberware.Gaming.Checkers
       move.cannotMove = cannotMove;
       return move;
     }
+    
+    /// <summary>Creates a duplicate Checkers move object from an identical (possibly cloned) game.</summary>
+    /// <returns>The new Checkers move object.</returns>
+    public CheckersMove Clone (CheckersGame game)
+    { return FromPath(game, piece.Clone(game), Path); }
     
     /// <summary>Returns whether or not the move is valid.</summary>
     /// <param name="location">The location of the next move to take place.</param>
@@ -229,7 +234,7 @@ namespace Uberware.Gaming.Checkers
           path.Add(location);
           // King a pawn if reached other end of board
           if ((!MustMove) && (piece.Rank == CheckersRank.Pawn))
-            kinged = (((piece.Player == 1) && (currentLocation.Y == 0)) || ((piece.Player == 2) && (currentLocation.Y == CheckersGame.BoardSize.Height-1)));
+            kinged = (((piece.Direction == CheckersDirection.Up) && (currentLocation.Y == 0)) || ((piece.Direction == CheckersDirection.Down) && (currentLocation.Y == CheckersGame.BoardSize.Height-1)));
           return true;
         }
       }
@@ -305,12 +310,12 @@ namespace Uberware.Gaming.Checkers
       // Append single-move moves in the enumeration (if able to)
       if (piece.Location == fromLocation)
       {
-        if ((piece.Player == 1) || (piece.Rank == CheckersRank.King))
+        if ((piece.Direction == CheckersDirection.Up) || (piece.Rank == CheckersRank.King))
         {
           if (InBounds(fromLocation.X-1, fromLocation.Y-1) && (board[fromLocation.X-1, fromLocation.Y-1] == null)) { moves.Add(new Point(fromLocation.X-1, fromLocation.Y-1)); }
           if (InBounds(fromLocation.X+1, fromLocation.Y-1) && (board[fromLocation.X+1, fromLocation.Y-1] == null)) { moves.Add(new Point(fromLocation.X+1, fromLocation.Y-1)); }
         }
-        if ((piece.Player == 2) || (piece.Rank == CheckersRank.King))
+        if ((piece.Direction == CheckersDirection.Down) || (piece.Rank == CheckersRank.King))
         {
           if (InBounds(fromLocation.X-1, fromLocation.Y+1) && (board[fromLocation.X-1, fromLocation.Y+1] == null)) { moves.Add(new Point(fromLocation.X-1, fromLocation.Y+1)); }
           if (InBounds(fromLocation.X+1, fromLocation.Y+1) && (board[fromLocation.X+1, fromLocation.Y+1] == null)) { moves.Add(new Point(fromLocation.X+1, fromLocation.Y+1)); }
@@ -326,7 +331,7 @@ namespace Uberware.Gaming.Checkers
       ArrayList moves = new ArrayList();
       jumped = new ArrayList();
       // Append jumps (not of same team)
-      if ((piece.Player == 1) || (piece.Rank == CheckersRank.King))
+      if ((piece.Direction == CheckersDirection.Up) || (piece.Rank == CheckersRank.King))
       {
         if (game.InBounds(fromLocation.X-1, fromLocation.Y-1) && (board[fromLocation.X-1, fromLocation.Y-1] != null) && (board[fromLocation.X-1, fromLocation.Y-1].Player != piece.Player))
           if (InBounds(fromLocation.X-2, fromLocation.Y-2) && (board[fromLocation.X-2, fromLocation.Y-2] == null))
@@ -335,7 +340,7 @@ namespace Uberware.Gaming.Checkers
           if (InBounds(fromLocation.X+2, fromLocation.Y-2) && (board[fromLocation.X+2, fromLocation.Y-2] == null))
           { moves.Add(new Point(fromLocation.X+2, fromLocation.Y-2)); jumped.Add(board[fromLocation.X+1, fromLocation.Y-1]); }
       }
-      if ((piece.Player == 2) || (piece.Rank == CheckersRank.King))
+      if ((piece.Direction == CheckersDirection.Down) || (piece.Rank == CheckersRank.King))
       {
         if (InBounds(fromLocation.X-1, fromLocation.Y+1) && (board[fromLocation.X-1, fromLocation.Y+1] != null) && (board[fromLocation.X-1, fromLocation.Y+1].Player != piece.Player))
           if (InBounds(fromLocation.X-2, fromLocation.Y+2) && (board[fromLocation.X-2, fromLocation.Y+2] == null))

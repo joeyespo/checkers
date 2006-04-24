@@ -112,17 +112,27 @@
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Agents\CheckersBestMatchAgent.cs"
+                    RelPath = "Agents\MinMaxAgent.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Agents\CheckersMostJumpsAgent.cs"
+                    RelPath = "Agents\MinMaxComplexAgent.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />
                 <File
-                    RelPath = "Agents\CheckersRandomAgent.cs"
+                    RelPath = "Agents\MinMaxSimpleAgent.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Agents\MostJumpsAgent.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "Agents\RandomAgent.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
                 />

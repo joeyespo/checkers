@@ -13,10 +13,13 @@ namespace Checkers
 {
   public class frmMain : System.Windows.Forms.Form
   {
+    readonly CheckersAgent [] agents = { new MinMaxSimpleAgent(0), new MinMaxSimpleAgent(1), new MinMaxSimpleAgent(2), new MinMaxSimpleAgent(3), new MinMaxComplexAgent(3) };
+    readonly string [] agentNames = { "Beginner", "Intermediate", "Advanced", "Expert", "Uber (Experimental)" };
     private CheckersGameType gameType = CheckersGameType.None;
     private CheckersAgent agent = null;
     private CheckersSettings settings;
     private DateTime playTime;
+    private System.Windows.Forms.MenuItem menuViewHint;
     private TcpClient remotePlayer = null;
     
     enum ClientMessage : byte
@@ -72,7 +75,8 @@ namespace Checkers
     #endregion
     
     #region Class Controls
-
+    
+    private Uberware.Gaming.Checkers.UI.CheckersUI CheckersUI;
     private System.Windows.Forms.Label lblRemoteIP;
     private System.Windows.Forms.LinkLabel lnkRemoteIP;
     private System.Windows.Forms.ContextMenu menuChat;
@@ -97,7 +101,6 @@ namespace Checkers
     private System.Windows.Forms.MenuItem menuGameNew;
     private System.Windows.Forms.MenuItem menuGameLine01;
     private System.Windows.Forms.MenuItem menuGameExit;
-    private Uberware.Gaming.Checkers.UI.CheckersUI CheckersUI;
     private System.Windows.Forms.MenuItem menuHelp;
     private System.Windows.Forms.MenuItem menuViewGamePanel;
     private System.Windows.Forms.MenuItem menuViewNetPanel;
@@ -143,6 +146,9 @@ namespace Checkers
       // Required for Windows Form Designer support
       //
       InitializeComponent();
+      this.SetStyle(ControlStyles.UserPaint, true);
+      this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+      this.SetStyle(ControlStyles.DoubleBuffer, true);
     }
     
     #region Windows Form Designer generated code
@@ -155,6 +161,7 @@ namespace Checkers
     {
       this.components = new System.ComponentModel.Container();
       System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmMain));
+      this.CheckersUI = new Uberware.Gaming.Checkers.UI.CheckersUI();
       this.panGame = new System.Windows.Forms.Panel();
       this.panGameInfo = new System.Windows.Forms.Panel();
       this.txtTimePassed = new System.Windows.Forms.TextBox();
@@ -183,6 +190,7 @@ namespace Checkers
       this.menuViewGamePanel = new System.Windows.Forms.MenuItem();
       this.menuViewNetPanel = new System.Windows.Forms.MenuItem();
       this.menuViewLine01 = new System.Windows.Forms.MenuItem();
+      this.menuViewHint = new System.Windows.Forms.MenuItem();
       this.menuViewLastMoved = new System.Windows.Forms.MenuItem();
       this.menuViewLine02 = new System.Windows.Forms.MenuItem();
       this.menuViewPreferences = new System.Windows.Forms.MenuItem();
@@ -206,7 +214,6 @@ namespace Checkers
       this.menuChatClear = new System.Windows.Forms.MenuItem();
       this.menuChatLine02 = new System.Windows.Forms.MenuItem();
       this.menuChatSelectAll = new System.Windows.Forms.MenuItem();
-      this.CheckersUI = new Uberware.Gaming.Checkers.UI.CheckersUI();
       this.imlTurn = new System.Windows.Forms.ImageList(this.components);
       this.tmrTimePassed = new System.Windows.Forms.Timer(this.components);
       this.tmrFlashWindow = new System.Windows.Forms.Timer(this.components);
@@ -219,6 +226,24 @@ namespace Checkers
       this.panNet.SuspendLayout();
       this.panChat.SuspendLayout();
       this.SuspendLayout();
+      // 
+      // CheckersUI
+      // 
+      this.CheckersUI.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+      this.CheckersUI.ForeColor = System.Drawing.Color.White;
+      this.CheckersUI.Location = new System.Drawing.Point(4, 4);
+      this.CheckersUI.Name = "CheckersUI";
+      this.CheckersUI.Size = new System.Drawing.Size(270, 270);
+      this.CheckersUI.TabIndex = 1;
+      this.CheckersUI.PieceDeselected += new System.EventHandler(this.CheckersUI_PieceDeselected);
+      this.CheckersUI.PieceBadMove += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceBadMove);
+      this.CheckersUI.PieceMovedPartial += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceMovedPartial);
+      this.CheckersUI.GameStopped += new System.EventHandler(this.CheckersUI_GameStopped);
+      this.CheckersUI.GameStarted += new System.EventHandler(this.CheckersUI_GameStarted);
+      this.CheckersUI.PiecePickedUp += new System.EventHandler(this.CheckersUI_PiecePickedUp);
+      this.CheckersUI.WinnerDeclared += new System.EventHandler(this.CheckersUI_WinnerDeclared);
+      this.CheckersUI.TurnChanged += new System.EventHandler(this.CheckersUI_TurnChanged);
+      this.CheckersUI.PieceMoved += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceMoved);
       // 
       // panGame
       // 
@@ -462,6 +487,7 @@ namespace Checkers
                                                                              this.menuViewGamePanel,
                                                                              this.menuViewNetPanel,
                                                                              this.menuViewLine01,
+                                                                             this.menuViewHint,
                                                                              this.menuViewLastMoved,
                                                                              this.menuViewLine02,
                                                                              this.menuViewPreferences});
@@ -488,21 +514,28 @@ namespace Checkers
       this.menuViewLine01.Index = 2;
       this.menuViewLine01.Text = "-";
       // 
+      // menuViewHint
+      // 
+      this.menuViewHint.Index = 3;
+      this.menuViewHint.Shortcut = System.Windows.Forms.Shortcut.F12;
+      this.menuViewHint.Text = "&Hint";
+      this.menuViewHint.Click += new System.EventHandler(this.menuViewHint_Click);
+      // 
       // menuViewLastMoved
       // 
-      this.menuViewLastMoved.Index = 3;
+      this.menuViewLastMoved.Index = 4;
       this.menuViewLastMoved.Shortcut = System.Windows.Forms.Shortcut.F5;
       this.menuViewLastMoved.Text = "&Last Moved";
       this.menuViewLastMoved.Click += new System.EventHandler(this.menuViewLastMoved_Click);
       // 
       // menuViewLine02
       // 
-      this.menuViewLine02.Index = 4;
+      this.menuViewLine02.Index = 5;
       this.menuViewLine02.Text = "-";
       // 
       // menuViewPreferences
       // 
-      this.menuViewPreferences.Index = 5;
+      this.menuViewPreferences.Index = 6;
       this.menuViewPreferences.Text = "&Preferences...";
       this.menuViewPreferences.Click += new System.EventHandler(this.menuViewPreferences_Click);
       // 
@@ -690,25 +723,6 @@ namespace Checkers
       this.menuChatSelectAll.Text = "Select &All";
       this.menuChatSelectAll.Click += new System.EventHandler(this.menuChatSelectAll_Click);
       // 
-      // CheckersUI
-      // 
-      this.CheckersUI.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-      this.CheckersUI.ForeColor = System.Drawing.Color.Salmon;
-      this.CheckersUI.Location = new System.Drawing.Point(4, 4);
-      this.CheckersUI.Name = "CheckersUI";
-      this.CheckersUI.Size = new System.Drawing.Size(270, 270);
-      this.CheckersUI.TabIndex = 0;
-      this.CheckersUI.TextBorderColor = System.Drawing.Color.White;
-      this.CheckersUI.PieceDeselected += new System.EventHandler(this.CheckersUI_PieceDeselected);
-      this.CheckersUI.PieceBadMove += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceBadMove);
-      this.CheckersUI.PieceMovedPartial += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceMovedPartial);
-      this.CheckersUI.GameStopped += new System.EventHandler(this.CheckersUI_GameStopped);
-      this.CheckersUI.GameStarted += new System.EventHandler(this.CheckersUI_GameStarted);
-      this.CheckersUI.PiecePickedUp += new System.EventHandler(this.CheckersUI_PiecePickedUp);
-      this.CheckersUI.WinnerDeclared += new System.EventHandler(this.CheckersUI_WinnerDeclared);
-      this.CheckersUI.TurnChanged += new System.EventHandler(this.CheckersUI_TurnChanged);
-      this.CheckersUI.PieceMoved += new Uberware.Gaming.Checkers.UI.MoveEventHandler(this.CheckersUI_PieceMoved);
-      // 
       // imlTurn
       // 
       this.imlTurn.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
@@ -748,9 +762,9 @@ namespace Checkers
       this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
       this.ClientSize = new System.Drawing.Size(428, 365);
       this.Controls.AddRange(new System.Windows.Forms.Control[] {
-                                                                  this.CheckersUI,
                                                                   this.panOnline,
-                                                                  this.panGame});
+                                                                  this.panGame,
+                                                                  this.CheckersUI});
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Menu = this.menuMain;
       this.MinimumSize = new System.Drawing.Size(286, 324);
@@ -819,6 +833,10 @@ namespace Checkers
     
     private void frmMain_Load (object sender, System.EventArgs e)
     {
+      // Hack: Get actual minimal size
+      ClientSize = new Size(CheckersUI.Width + 8, CheckersUI.Height + 8);
+      MinimumSize = Size;
+      // Set initial size
       Size = new Size(MinimumSize.Width + 130, MinimumSize.Height);
       // Load settings
       settings = CheckersSettings.Load();
@@ -858,6 +876,8 @@ namespace Checkers
       menuViewNetPanel.Checked = !menuViewNetPanel.Checked;
       this.Height = (( menuViewNetPanel.Checked )?( this.MinimumSize.Height + 80 ):( this.MinimumSize.Height ));
     }
+    private void menuViewHint_Click (object sender, System.EventArgs e)
+    { CheckersUI.ShowHint(); }
     private void menuViewLastMoved_Click (object sender, System.EventArgs e)
     { CheckersUI.ShowLastMove(); }
     private void menuViewPreferences_Click (object sender, System.EventArgs e)
@@ -961,6 +981,9 @@ namespace Checkers
     private void CheckersUI_PieceDeselected (object sender, System.EventArgs e)
     { PlaySound(CheckersSounds.Deselect); }
     
+    private void CheckersAgent_Tick (object sender, AgentTickEventArgs e)
+    { Application.DoEvents(); }
+    
     private void tmrTimePassed_Tick (object sender, System.EventArgs e)
     { DoUpdateTimePassed(); }
     private void tmrTextDisplay_Tick (object sender, System.EventArgs e)
@@ -1003,7 +1026,7 @@ namespace Checkers
       }
       
       // Get new game type
-      frmNewGame newGame = new frmNewGame(settings);
+      frmNewGame newGame = new frmNewGame(settings, agentNames);
       // Set defaults
       newGame.GameType = gameType;
       newGame.Player1Name = lblNameP1.Text;
@@ -1014,6 +1037,7 @@ namespace Checkers
       
       // Set new game parameters
       gameType = newGame.GameType;
+      agent = null;
       
       // Set Game Panel properties
       lblNameP1.Text = newGame.Player1Name; lblNameP2.Text = newGame.Player2Name;
@@ -1025,17 +1049,7 @@ namespace Checkers
         case CheckersGameType.SinglePlayer:
           CheckersUI.Player1Active = true;
           CheckersUI.Player2Active = false;
-          if (true)
-          {
-            switch (newGame.Difficulty)
-            {
-              case 0: agent = new CheckersMostJumpsAgent(); break;
-              case 1: MessageBox.Show(this, "Intermediate difficulty not yet implemented.", "Checkers"); return;         // !!!!!
-              case 2: MessageBox.Show(this, "Advanced difficulty not yet implemented.", "Checkers"); return;         // !!!!!
-              case 3: MessageBox.Show(this, "Expert difficulty not yet implemented.", "Checkers"); return;         // !!!!!
-              default: return;
-            }
-          }
+          agent = agents[newGame.AgentIndex];
           break;
         case CheckersGameType.Multiplayer:
           CheckersUI.Player1Active = true;
@@ -1069,6 +1083,7 @@ namespace Checkers
     
     private void DoStarted ()
     {
+      agent.Tick += new AgentTickEventHandler(CheckersAgent_Tick);
       playTime = DateTime.Now;
       tmrTimePassed.Start(); DoUpdateTimePassed();
       panGameInfo.Visible = true;
@@ -1077,6 +1092,7 @@ namespace Checkers
     }
     private void DoStopped ()
     {
+      agent.Tick -= new AgentTickEventHandler(CheckersAgent_Tick);
       panGameInfo.Visible = false;
       menuGameEnd.Enabled = false;
       tmrTimePassed.Stop(); txtTimePassed.Text = "0:00";
@@ -1153,12 +1169,16 @@ namespace Checkers
     delegate void DoMoveAgentDelegate ();
     private void DoMoveAgent ()
     {
+      // Do events before moving
+      //Refresh();
+      Application.DoEvents();
       if ((gameType == CheckersGameType.SinglePlayer) && (CheckersUI.Game.Turn == 2))
         CheckersUI.MovePiece(agent);
     }
     
     private void DoShowTurn (int player)
     {
+      SuspendLayout();
       picTurn.Visible = false;
       lblNameP1.BackColor = Color.FromKnownColor(KnownColor.Control); lblNameP1.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
       lblNameP2.BackColor = Color.FromKnownColor(KnownColor.Control); lblNameP2.ForeColor = Color.FromKnownColor(KnownColor.ControlText);
@@ -1176,9 +1196,11 @@ namespace Checkers
         picTurn.Visible = true;
         lblNameP2.BackColor = Color.FromKnownColor(KnownColor.Highlight); lblNameP2.ForeColor = Color.FromKnownColor(KnownColor.HighlightText);
       }
+      ResumeLayout();
     }
     private void DoShowWinner (int player)
     {
+      SuspendLayout();
       tmrTextDisplay.Stop();
       CheckersUI.Text = "";
       CheckersUI.TextBorderColor = Color.White;
@@ -1210,6 +1232,7 @@ namespace Checkers
         else
         { CheckersUI.Text = lblNameP2.Text + "\nWins"; }
       }
+      ResumeLayout();
     }
     
     private void DoFlashWindow ()
@@ -1221,11 +1244,13 @@ namespace Checkers
     
     private void UpdatePlayerInfo ()
     {
+      SuspendLayout();
       // Update player information
       txtRemainingP1.Text = CheckersUI.Game.GetRemainingCount(1).ToString();
       txtJumpsP1.Text = CheckersUI.Game.GetJumpedCount(2).ToString();
       txtRemainingP2.Text = CheckersUI.Game.GetRemainingCount(2).ToString();
       txtJumpsP2.Text = CheckersUI.Game.GetJumpedCount(1).ToString();
+      ResumeLayout();
     }
     
     private void DoSendMessage ()

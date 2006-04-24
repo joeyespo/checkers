@@ -58,6 +58,7 @@ namespace Uberware.Gaming.Checkers.UI
     private CheckersMove destPiece = null;
     private int blinkCount = 0;
     private bool moveAfterShow = false;
+    private bool delayAfterShow = false;
     private Point initialDrag = Point.Empty;
     private int initialDragGrace = 0;
     private Bitmap boardImage;
@@ -297,7 +298,7 @@ namespace Uberware.Gaming.Checkers.UI
     
     [Browsable(false)]
     public CheckersMove CurrentMove
-    { get { return (( IsMoving )?( movePiece.Fork() ):( null )); } }
+    { get { return (( IsMoving )?( movePiece.Clone() ):( null )); } }
     
     [Browsable(false)]
     public bool IsMoving
@@ -544,13 +545,14 @@ namespace Uberware.Gaming.Checkers.UI
     // Moves the piece with optional refreshing
     private bool MovePieceCore (CheckersMove move, bool showMove, bool noDelay)
     {
+      if (!IsPlaying) return false;
       // !!!!! Smooth movements
       // Move the piece
       if (showMove)
       {
         if (state != CheckersUIState.Idle) StopMove(false);
         if (!game.IsValidMove(move)) return false;
-        ShowMoveCore(move, noDelay, false, true);
+        ShowMoveCore(move, noDelay, false, true, false);
         return true;
       }
       if (!game.MovePiece(move)) return false;
@@ -700,13 +702,13 @@ namespace Uberware.Gaming.Checkers.UI
           Refresh();
           bool isWinningMove = !IsPlaying;
           if (dropSuccess)
-          { if (PieceMoved != null) PieceMoved(this, new MoveEventArgs(true, isWinningMove, move.Fork())); }
+          { if (PieceMoved != null) PieceMoved(this, new MoveEventArgs(true, isWinningMove, move.Clone())); }
           else if (partialSuccess)
-          { if (PieceMovedPartial != null) PieceMovedPartial(this, new MoveEventArgs(true, false, move.Fork())); }
+          { if (PieceMovedPartial != null) PieceMovedPartial(this, new MoveEventArgs(true, false, move.Clone())); }
           else
           {
             if (location == piece.Location) if (PieceDeselected != null) PieceDeselected(this, EventArgs.Empty);
-            if (location != piece.Location) if (PieceBadMove != null) PieceBadMove(this, new MoveEventArgs(true, false, move.Fork()));
+            if (location != piece.Location) if (PieceBadMove != null) PieceBadMove(this, new MoveEventArgs(true, false, move.Clone()));
           }
           if (invalidJump)
           {
@@ -779,14 +781,14 @@ namespace Uberware.Gaming.Checkers.UI
       }
       
       bool failed = false;
-      if (movePiece.Path.Length < destPiece.Path.Length)
+      if ((movePiece.Path.Length < destPiece.Path.Length))
       {
         tmrShowMove.Interval = 500;
         failed = !movePiece.Move(destPiece.Path[movePiece.Path.Length]);
-        if ((!failed) && (movePiece.Path.Length < destPiece.Path.Length))
+        if (((!failed) && (movePiece.Path.Length < destPiece.Path.Length)) || (delayAfterShow))
         {
           Refresh();
-          if (PieceMovedPartial != null) PieceMovedPartial(this, new MoveEventArgs(false, false, movePiece.Fork()));
+          if (PieceMovedPartial != null) PieceMovedPartial(this, new MoveEventArgs(false, false, movePiece.Clone()));
           return;
         }
       }
@@ -801,12 +803,12 @@ namespace Uberware.Gaming.Checkers.UI
         MovePieceCore(move, false, false);
       else
         Refresh();
-      if (PieceMoved != null) PieceMoved(this, new MoveEventArgs(false, !((IsPlaying) || ((Winner != 0) && (winner))), move.Fork()));
+      if ((PieceMoved != null) && (!delayAfterShow)) PieceMoved(this, new MoveEventArgs(false, !((IsPlaying) || ((Winner != 0) && (winner))), move.Clone()));
       // If move was invalid, show msgbox now that movement has stopped
       if (failed) MessageBox.Show(this, "Could not show piece movement .. path seems to be invalid!\n\nAborting move.", "Checkers", MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
     
-    private void ShowMoveCore (CheckersMove move, bool noDelay, bool blink, bool moveWhenDone)
+    private void ShowMoveCore (CheckersMove move, bool noDelay, bool blink, bool moveWhenDone, bool delayWhenDone)
     {
       if (state != CheckersUIState.Idle) return;
       // Remember movement and begin a new movement to follow the same path
@@ -814,6 +816,7 @@ namespace Uberware.Gaming.Checkers.UI
       movePiece = destPiece.InitialGame.BeginMove(destPiece.InitialPiece);
       state = CheckersUIState.ShowMove;
       moveAfterShow = moveWhenDone;
+      delayAfterShow = delayWhenDone;
       if (blink)
       {
         focussedSquare = movePiece.CurrentLocation;
@@ -923,8 +926,37 @@ namespace Uberware.Gaming.Checkers.UI
     public bool MovePiece (CheckersAgent agent, bool showMove)
     {
       if (!IsPlaying) return false;
-      return MovePieceCore(agent.NextMove(game), showMove, false);
+      // Get time before move
+      float startTime = Uberware.Gaming.Timer.Query();
+      CheckersMove nextMove = null;
+      try
+      {
+        nextMove = agent.NextMove(game);
+      }
+      catch (InvalidOperationException e)
+      {
+        System.Diagnostics.Debug.WriteLine(e.StackTrace);
+        // OK
+      }
+      // Get time after move
+      float endTime = Uberware.Gaming.Timer.Query();
+      // Only delay if time spent in agent is under 300 milliseconds
+      bool delay = (endTime - startTime) < 0.3;
+      if ((nextMove == null) || (!IsPlaying)) return false;
+      return MovePieceCore(nextMove, showMove, !delay);
     }
+    
+    /// <summary>Shows the last move that was made.</summary>
+    /// <param name="agent">The agent to use to decide the move.</param>
+    public void ShowHint (CheckersAgent agent)
+    {
+      if ((!IsPlaying) && (Winner == 0)) return;
+      if (!( ((Game.Turn == 1) && (this.Player1Active)) || (Game.Turn == 2) && (this.Player2Active) )) return;
+      CheckersMove hintMove = agent.NextMove(Game);
+      ShowMoveCore(hintMove, false, true, false, true);
+    }
+    public void ShowHint ()
+    { ShowHint(new Agents.MinMaxSimpleAgent()); }
     
     /// <summary>Shows the last move that was made.</summary>
     public void ShowLastMove ()
@@ -940,7 +972,7 @@ namespace Uberware.Gaming.Checkers.UI
     {
       if ((!IsPlaying) && (Winner == 0)) return;
       if (game.LastMove == null) return;
-      ShowMoveCore(game.LastMove, noDelay, blink, false);
+      ShowMoveCore(game.LastMove, noDelay, blink, false, false);
     }
     
     /// <summary> Refreshes the Checkers baord and the control.</summary>
@@ -1040,6 +1072,5 @@ namespace Uberware.Gaming.Checkers.UI
       penGridColor.Dispose();
       base.Refresh();
     }
-    
   }
 }

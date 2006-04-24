@@ -10,18 +10,25 @@ Checkers ToDo
  * Button to 'show last move'
  * Show 'Nice!' and 'Winner!'
  * Have a 'default' button for each color
- * Net gaming
  * Window flashing
  * Send/receive message sounds
  * Make all settings work
+ * Checkers agents for higher difficulties
+ * Hint Option: use an agent on player's turn to highlight a useful move
+ x Option: Delay AI movement
+ x Fix up context menu issue in frmNewGame
+ - Detach Agents from project .. allow to be plug-in-able
+ - Preference: Remember last game info for a new game
+ 
+ Checkers Netplay
+ -----------------
+ 
+ * Net gaming
  * Chat: sounds in new game window
  * Chat window context menu (std edit menu + "save...")
  * Chatting .. when a msg is received and the textbox loses/restores focus, it highlights your prev send-message
- x Option: Delay AI movement
- x Fix up context menu issue in frmNewGame
  x In 'frmNewGame' flash window when opponent clicks "I'm Ready"
  - The 'Copy' menu item in the chat window --> copies entire text, make it copy only selected text
- - Checkers agents for higher difficulties
  - Better network handling in 'frmNewGame' (prevent deadlock; separate client and host windows)
  - Allow spectators
  - Allow host to be a spectator (dedicated game server)
@@ -47,4 +54,4 @@ Checkers ToDo
  * Remember last CheckersPiece that moved: LastMoved
  * Stalemates
  x Make game able to play with optional jumping
- - Make less strict (allow user to do illegal moves, manipulate the board/pieces, etc)
+ - Make less strict mode (allow user to do illegal moves, manipulate the board/pieces, etc)

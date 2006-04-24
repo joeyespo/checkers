@@ -38,7 +38,7 @@ namespace Uberware.Gaming.Checkers.Agents
         // Enumerate all moves from this point and append them to the possible moves array
         foreach (Point p in points)
         {
-          CheckersMove next = move.Fork();
+          CheckersMove next = move.Clone();
           next.Move(p);
           possibleMoves.Add(next);
         }
