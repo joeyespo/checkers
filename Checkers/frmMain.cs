@@ -1083,7 +1083,7 @@ namespace Checkers
     
     private void DoStarted ()
     {
-      agent.Tick += new AgentTickEventHandler(CheckersAgent_Tick);
+      if (agent != null) agent.Tick += new AgentTickEventHandler(CheckersAgent_Tick);
       playTime = DateTime.Now;
       tmrTimePassed.Start(); DoUpdateTimePassed();
       panGameInfo.Visible = true;
@@ -1092,7 +1092,7 @@ namespace Checkers
     }
     private void DoStopped ()
     {
-      agent.Tick -= new AgentTickEventHandler(CheckersAgent_Tick);
+      if (agent != null) agent.Tick -= new AgentTickEventHandler(CheckersAgent_Tick);
       panGameInfo.Visible = false;
       menuGameEnd.Enabled = false;
       tmrTimePassed.Stop(); txtTimePassed.Text = "0:00";

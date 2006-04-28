@@ -4,16 +4,6 @@ namespace Uberware.Gaming.Checkers.Agents
 {
 	public class MinMaxComplexAgent : MinMaxSimpleAgent
 	{
-    int [,] tableWeight = { { 0,4,0,4,0,4,0,4, },
-                            { 4,0,3,0,3,0,3,0, },
-                            { 0,3,0,2,0,2,0,4, },
-                            { 4,0,2,0,1,0,3,0, },
-                            { 0,3,0,1,0,2,0,4, },
-                            { 4,0,2,0,2,0,3,0, },
-                            { 0,3,0,3,0,3,0,4, },
-                            { 4,0,4,0,4,0,4,0, },
-    };
-    
     public MinMaxComplexAgent (int maxSearchDepth) : base(maxSearchDepth)
 		{}
     public MinMaxComplexAgent () : base()
@@ -37,32 +27,23 @@ namespace Uberware.Gaming.Checkers.Agents
     {
       int strength = 0;
       
-      // Heuristic: stronger if in key position on board, stronger yet if king
+      // Heuristic: Stronger simply because another piece is present
+      strength += 1;
+      
+      // Rank-specific heuristics
       if (piece.Rank == CheckersRank.Pawn)
       {
+        // Heuristic: stronger if in primary position on board
         if (piece.Direction == CheckersDirection.Up)
-        {
-          if (piece.Location.Y == CheckersGame.BoardBounds.Bottom-1)
-            strength += 2;
-          else
-            strength += 1;
-        }
+        { if (piece.Location.Y == CheckersGame.BoardBounds.Bottom) strength += 1; }
         else
-        {
-          if (piece.Location.Y == CheckersGame.BoardBounds.Top+1)
-            strength += 2;
-          else
-            strength += 1;
-        }
+        { if (piece.Location.Y == CheckersGame.BoardBounds.Top) strength += 1; }
       }
       else
       {
-        // King piece more valuable
-        strength += 10;
+        // Heuristic: Stronger if king is on board
+        strength += 19;
       }
-      
-      // Heuristic: Multiply the current strength by the board position
-      strength *= tableWeight[piece.Location.X, piece.Location.Y];
       
       return strength;
     }

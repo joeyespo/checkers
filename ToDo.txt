@@ -19,6 +19,21 @@ Checkers ToDo
  x Fix up context menu issue in frmNewGame
  - Detach Agents from project .. allow to be plug-in-able
  - Preference: Remember last game info for a new game
+ - Easter eggs - pieces, etc
+ - Tournament mode: human vs. pc's or other humans
+ - No help button in tourneys
+ - Game snapshots for later review
+ - Game logging and reviewing (playback)
+ 
+ Checkers Agents
+ ----------------
+ - Make separate entity (plugins)
+ - Use a endgame database
+ - Improve heuristics
+ - Make endgame heuristics aim differently.. deeper search
+ - Use BFS so can evaluate up to a certain time instead of depth (use a min time and depth method)
+ - If best move is found, remember it
+ - Detect definite wins, losses, and stalemates (according to agent's movement)
  
  Checkers Netplay
  -----------------
@@ -32,6 +47,9 @@ Checkers ToDo
  - Better network handling in 'frmNewGame' (prevent deadlock; separate client and host windows)
  - Allow spectators
  - Allow host to be a spectator (dedicated game server)
+ - Separate into own entity.. a game plugin (as an agent?)
+ - Net tournament mode
+ - Get WAN from net
  
  Checkers UI
  -----------
@@ -46,7 +64,7 @@ Checkers ToDo
  * Property: 'TextAlign'
  * Stalemates (through game)
  x With optional jumping, if double-jump is available keep going .. if piece is placed on same spot, end turn
- - Smooth animations (Option)
+ - Preference: Smooth animations (frame-based animation)
  
  Checkers Game
  -------------
@@ -55,3 +73,5 @@ Checkers ToDo
  * Stalemates
  x Make game able to play with optional jumping
  - Make less strict mode (allow user to do illegal moves, manipulate the board/pieces, etc)
+ - Remake to use new data structure model: board as linked list and matrix, moves as linked list
+   Functions include board analyzation and manipulation

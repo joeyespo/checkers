@@ -1,16 +1,41 @@
 using System;
+using System.Collections;
 using Uberware.Gaming.Checkers;
 
 namespace Uberware.Gaming.Checkers.Agents
 {
   public abstract class MinMaxBaseAgent : CheckersAgent
   {
-    int maxSearchDepth;
+    /*
+    class MinMaxMove
+    {
+      //bool isMin;
+      CheckersGame curGame;
+      int depth;
+      int alpha;
+      int beta;
+    }
     
-    public MinMaxBaseAgent (int maxSearchDepth)
-    { this.maxSearchDepth = maxSearchDepth; }
+    Queue minFringe = new Queue(48, 3);
+    */
+    
+    int searchDepth;
+    bool increasingSearchDepth;
+    
+    public MinMaxBaseAgent (int searchDepth, bool increasingSearchDepth)
+    {
+      this.searchDepth = searchDepth;
+      this.increasingSearchDepth = increasingSearchDepth;
+    }
+    public MinMaxBaseAgent (int searchDepth) : this(searchDepth, true)
+    {}
     public MinMaxBaseAgent () : this(2)
     {}
+    
+    public int SearchDepth
+    { get { return searchDepth; } }
+    public bool IncreasingSearchDepth
+    { get { return increasingSearchDepth; } }
     
     public override CheckersMove NextMove (CheckersGame game)
     {
@@ -120,7 +145,16 @@ namespace Uberware.Gaming.Checkers.Agents
       // Test the game-oriented cut-offs
       if ((!curGame.IsPlaying) || (!initGame.IsPlaying)) return true;
       // Test the depth cut-off
-      if ((depth >= 0) && (depth > maxSearchDepth)) return true;
+      int curSearchDepth = searchDepth;
+      if (increasingSearchDepth)
+      {
+        int totalPieces = CheckersGame.PiecesPerPlayer*CheckersGame.PlayerCount;
+        //int removed = (CheckersGame.PiecesPerPlayer*CheckersGame.PlayerCount) - curGame.GetRemainingCount();
+        //int factor = (int)Math.Log(removed, 3);
+        int factor = (int)Math.Log(curGame.GetRemainingCount(), 3), mfactor = (int)Math.Log(totalPieces, 3);
+        curSearchDepth += (mfactor-factor);
+      }
+      if ((depth >= 0) && (depth > curSearchDepth)) return true;
       // Test the extended cut-off
       return CutOff(initGame, curGame, depth);
     }

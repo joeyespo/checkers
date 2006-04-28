@@ -956,7 +956,7 @@ namespace Uberware.Gaming.Checkers.UI
       ShowMoveCore(hintMove, false, true, false, true);
     }
     public void ShowHint ()
-    { ShowHint(new Agents.MinMaxSimpleAgent()); }
+    { ShowHint(new Agents.MinMaxSimpleAgent(2)); }
     
     /// <summary>Shows the last move that was made.</summary>
     public void ShowLastMove ()
