@@ -17,8 +17,12 @@ namespace Uberware.Gaming.Checkers.Agents
       
       // Sum all player's piece heuristic values
       foreach (CheckersPiece piece in curGame.Pieces)
+      {
         if (piece.Player == player)
           strength += CalculatePieceStrength(piece);
+        else
+          strength -= CalculatePieceStrength(piece);
+      }
       
       return strength;
     }
