@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace Checkers
 {
-  public class frmPreferences : System.Windows.Forms.Form
+  public class PreferencesDialog : System.Windows.Forms.Form
   {
     
     private CheckersSettings settings;
@@ -88,7 +88,7 @@ namespace Checkers
     
     #region Class Construction
     
-    public frmPreferences()
+    public PreferencesDialog()
     {
       //
       // Required for Windows Form Designer support
@@ -118,7 +118,7 @@ namespace Checkers
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
-      System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmPreferences));
+      System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(PreferencesDialog));
       this.imlTabs = new System.Windows.Forms.ImageList(this.components);
       this.tabPreferences = new System.Windows.Forms.TabControl();
       this.tabGeneral = new System.Windows.Forms.TabPage();

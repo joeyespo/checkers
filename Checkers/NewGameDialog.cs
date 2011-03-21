@@ -36,7 +36,7 @@ namespace Checkers
     BeginGame = 5,
   }
   
-  public class frmNewGame : System.Windows.Forms.Form
+  public class NewGameDialog : System.Windows.Forms.Form
   {
     private CheckersSettings settings;
     private PictureBox selectedPicture;
@@ -212,7 +212,7 @@ namespace Checkers
     
     #region Class Construction
     
-    public frmNewGame (CheckersSettings settings, string [] agents)
+    public NewGameDialog (CheckersSettings settings, string [] agents)
     {
       //
       // Required for Windows Form Designer support
@@ -247,7 +247,7 @@ namespace Checkers
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
-      System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmNewGame));
+      System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(NewGameDialog));
       this.imlGameType = new System.Windows.Forms.ImageList(this.components);
       this.btnCancel = new System.Windows.Forms.Button();
       this.btnOK = new System.Windows.Forms.Button();

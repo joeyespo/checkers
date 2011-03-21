@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 
 
-public class frmAbout : System.Windows.Forms.Form
+public class AboutDialog : System.Windows.Forms.Form
 {
   
   #region About Information
@@ -41,7 +41,7 @@ public class frmAbout : System.Windows.Forms.Form
   
   #region Class Construction
   
-  public frmAbout()
+  public AboutDialog()
   {
     // Required for Windows Form Designer support
     InitializeComponent();
@@ -66,7 +66,7 @@ public class frmAbout : System.Windows.Forms.Form
   /// </summary>
   private void InitializeComponent()
   {
-    System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmAbout));
+    System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(AboutDialog));
     this.lblVersion = new System.Windows.Forms.Label();
     this.picLogo = new System.Windows.Forms.PictureBox();
     this.panAbout = new System.Windows.Forms.Panel();

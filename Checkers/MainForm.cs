@@ -11,7 +11,7 @@ using System.Net.Sockets;
 
 namespace Checkers
 {
-  public class frmMain : System.Windows.Forms.Form
+  public class MainForm : System.Windows.Forms.Form
   {
     readonly CheckersAgent [] agents = { new MinMaxSimpleAgent(0), new MinMaxSimpleAgent(1), new MinMaxSimpleAgent(2), new MinMaxSimpleAgent(3), new MinMaxComplexAgent(3) };
     readonly string [] agentNames = { "Beginner", "Intermediate", "Advanced", "Expert", "Uber (Experimental)" };
@@ -140,7 +140,7 @@ namespace Checkers
     
     #region Class Construction
     
-    public frmMain()
+    public MainForm()
     {
       //
       // Required for Windows Form Designer support
@@ -160,7 +160,7 @@ namespace Checkers
     private void InitializeComponent()
     {
       this.components = new System.ComponentModel.Container();
-      System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmMain));
+      System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(MainForm));
       this.CheckersUI = new Uberware.Gaming.Checkers.UI.CheckersUI();
       this.panGame = new System.Windows.Forms.Panel();
       this.panGameInfo = new System.Windows.Forms.Panel();
@@ -799,7 +799,7 @@ namespace Checkers
       #if !DEBUG
       Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(ThreadException);
       #endif
-      Application.Run(new frmMain());
+      Application.Run(new MainForm());
     }
     
     private static void ThreadException (object sender, System.Threading.ThreadExceptionEventArgs e)
@@ -882,14 +882,14 @@ namespace Checkers
     { CheckersUI.ShowLastMove(); }
     private void menuViewPreferences_Click (object sender, System.EventArgs e)
     {
-      frmPreferences form = new frmPreferences();
+      PreferencesDialog form = new PreferencesDialog();
       form.Settings = settings;
       if (form.ShowDialog(this) == DialogResult.Cancel) return;
       settings = form.Settings;
       UpdateBoard();
     }
     private void menuHelpAbout_Click (object sender, System.EventArgs e)
-    { (new frmAbout()).ShowDialog(this); }
+    { (new AboutDialog()).ShowDialog(this); }
     
     private void menuChat_Popup (object sender, System.EventArgs e)
     {
@@ -1026,7 +1026,7 @@ namespace Checkers
       }
       
       // Get new game type
-      frmNewGame newGame = new frmNewGame(settings, agentNames);
+      NewGameDialog newGame = new NewGameDialog(settings, agentNames);
       // Set defaults
       newGame.GameType = gameType;
       newGame.Player1Name = lblNameP1.Text;
