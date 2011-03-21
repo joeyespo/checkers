@@ -10,7 +10,7 @@
     </ApplicationIcon>
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
-    <AssemblyName>Uberware.Gaming.Checkers</AssemblyName>
+    <AssemblyName>Checkers.Framework</AssemblyName>
     <AssemblyOriginatorKeyFile>
     </AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
@@ -18,7 +18,7 @@
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
     <DelaySign>false</DelaySign>
     <OutputType>Library</OutputType>
-    <RootNamespace>Uberware.Gaming.Checkers</RootNamespace>
+    <RootNamespace>Checkers.Framework</RootNamespace>
     <StartupObject>
     </StartupObject>
     <FileUpgradeFlags>

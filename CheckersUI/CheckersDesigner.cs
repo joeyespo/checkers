@@ -1,11 +1,16 @@
 using System;
 using System.Windows.Forms.Design;
 
-namespace Uberware.Gaming.Checkers.UI
+namespace Checkers.UI
 {
-  class CheckersDesigner : ControlDesigner
-  {
-    public override SelectionRules SelectionRules
-    { get { return SelectionRules.Visible | SelectionRules.Moveable; } }
-  }
+    class CheckersDesigner : ControlDesigner
+    {
+        public override SelectionRules SelectionRules
+        {
+            get
+            {
+                return SelectionRules.Visible | SelectionRules.Moveable;
+            }
+        }
+    }
 }

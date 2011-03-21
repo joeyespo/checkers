@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTitle("Checkers Gaming Library")]
 [assembly: AssemblyDescription("Everything you need to design your own checkers game.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Uber-ware")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Checkers Gaming Library")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
@@ -26,4 +26,4 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
 
-[assembly: AssemblyVersion("1.0.*")]
+[assembly: AssemblyVersion("2.0")]
