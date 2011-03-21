@@ -45,9 +45,11 @@ View album on [imgur](http://imgur.com/a/Lbf3q).
 Implementation Details
 ----------------------
 
-The solution is partitioned into three projects. As such, These modular
-assemblies can easily be dropped into other projects.
+The project's solution is partitioned into three Visual Studio (2008) solution
+file projects.
   
   1. Checkers.Framework -- A fully functional and modular Checkers game API
   2. Checkers.UI -- A customizable user control based on Checkers.Framework
   3. Checkers -- The application EXE with all the extra bells and whistles
+
+These modular assemblies can easily be dropped into other projects.
