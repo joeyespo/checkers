@@ -6,22 +6,28 @@ the net, which features a fully functional in-game chat. The game is fully
 customizable and you can even select your own piece images.
 
 
-Checkers in Action
-------------------
+Screenshots
+-----------
 
-![Checkers Screenshot 1](http://i.imgur.com/8FY7V.png "The game.")
+![Checkers Screenshot 1](http://i.imgur.com/8FY7V.png)
+The game.
 
-![Checkers Screenshot 2](http://i.imgur.com/9k3qc.png "It starts. Player against computer.")
+![Checkers Screenshot 2](http://i.imgur.com/9k3qc.png)
+It starts. Player against computer.
 
-![Checkers Screenshot 3](http://i.imgur.com/ekLYk.png "Player is winning!")
+![Checkers Screenshot 3](http://i.imgur.com/ekLYk.png)
+Player is winning!
 
-![Checkers Screenshot 4](http://i.imgur.com/ymOqp.png "The New Game dialog with custom pieces.")
+![Checkers Screenshot 4](http://i.imgur.com/ymOqp.png)
+The New Game dialog with custom pieces.
 
-![Checkers Screenshot 5](http://i.imgur.com/6EFCR.png "Setting up a network game on the New Game dialog.")
+![Checkers Screenshot 5](http://i.imgur.com/6EFCR.png)
+Setting up a network game on the New Game dialog.
 
-![Checkers Screenshot 6](http://i.imgur.com/nrPl8.png "Player vs computer with custom pieces!")
+![Checkers Screenshot 6](http://i.imgur.com/nrPl8.png)
+Player vs computer with custom pieces!
 
-View album on [This link](http://imgur.com/a/Lbf3q "imgur").
+View album on [imgur](http://imgur.com/a/Lbf3q).
 
 
 Implementation Details
