@@ -86,7 +86,7 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
-    <ProjectReference Include="..\CheckersLib\CheckersLib.csproj">
+    <ProjectReference Include="..\Checkers.Framework\Checkers.Framework.csproj">
       <Name>CheckersLib</Name>
       <Project>{EF66778A-5067-49AA-91AC-70D048F482F8}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>

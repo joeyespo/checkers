@@ -88,12 +88,12 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
-    <ProjectReference Include="..\CheckersLib\CheckersLib.csproj">
+    <ProjectReference Include="..\Checkers.Framework\Checkers.Framework.csproj">
       <Name>CheckersLib</Name>
       <Project>{EF66778A-5067-49AA-91AC-70D048F482F8}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
     </ProjectReference>
-    <ProjectReference Include="..\CheckersUI\CheckersUI.csproj">
+    <ProjectReference Include="..\Checkers.UI\Checkers.UI.csproj">
       <Name>CheckersUI</Name>
       <Project>{66C6B81B-5C99-4A60-8F4A-A3E46FFB97D4}</Project>
       <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>

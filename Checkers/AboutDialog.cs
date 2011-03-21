@@ -9,12 +9,12 @@ namespace Checkers
     /// <summary>
     /// Represents the about dialog.
     /// </summary>
-    public sealed partial class AboutDialog : Form
+    public sealed partial class frmAbout : Form
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AboutDialog"/> class.
         /// </summary>
-        public AboutDialog()
+        public frmAbout()
         {
             InitializeComponent();
 
@@ -61,7 +61,7 @@ namespace Checkers
             try
             {
                 // Call the Process.Start method to open the default browser with a URL:
-                System.Diagnostics.Process.Start("http://www.uber-ware.com");
+                System.Diagnostics.Process.Start("http://joeyespo.com");
             }
             catch(Win32Exception)
             {

@@ -199,7 +199,7 @@ namespace Checkers
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         private void menuHelpAbout_Click(object sender, System.EventArgs e)
         {
-            (new AboutDialog()).ShowDialog(this);
+            (new frmAbout()).ShowDialog(this);
         }
 
         /// <summary>
